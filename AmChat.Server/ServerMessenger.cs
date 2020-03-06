@@ -133,10 +133,8 @@ namespace AlexeyMelentyevProject_ChatServer
 
         public void SendMessage(MessageToUser message)
         {
-            byte[] data = new byte[TcpClient.ReceiveBufferSize];
-            data = Encoding.Unicode.GetBytes(message.Text);
-
-            Stream.Write(data, 0, data.Length);
+            var command = "/messagefromcontact:" + JsonParser<MessageToUser>.OneObjectToJson(message);
+            SendCommand(command);
         }
     }
 }

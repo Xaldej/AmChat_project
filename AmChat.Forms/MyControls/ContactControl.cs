@@ -29,6 +29,13 @@ namespace AmChat.Forms.MyControls
         private void ContactControl_Click(object sender, EventArgs e)
         {
             ContactChosen(this);
+            BackColor = Color.Silver;
+            ContactLogin_label.Font = new Font(FontFamily.GenericSansSerif, 12, FontStyle.Regular);
+        }
+
+        public void ShowUnreadMessagesNotification()
+        {
+            ContactLogin_label.Font = new Font(FontFamily.GenericSansSerif, 12, FontStyle.Bold);
         }
     }
 }

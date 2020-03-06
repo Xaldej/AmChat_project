@@ -18,9 +18,13 @@ namespace AmChat.Forms
     {   
         private ClientMessengerService MessengerService { get; set; }
 
+        List<ContactControl> ContactsControls { get; set; }
+
         public MainForm()
         {
             InitializeComponent();
+
+            ContactsControls = new List<ContactControl>();
         }
 
         private void AM_Chat_Load(object sender, EventArgs e)
@@ -40,12 +44,26 @@ namespace AmChat.Forms
         private void CreateMessenger(string userLogin)
         {
             MessengerService = new ClientMessengerService(userLogin);
-            MessengerService.MessageIsGotten += ShowGottenMessage;
             MessengerService.ContactsAreUpdated += UpdateContacts;
             MessengerService.ErrorIsGotten += ShowErrorToUser;
+            MessengerService.MessageForCurrentContactIsGotten += ShowGottenMessage;
+            MessengerService.MessageForOtherContactIsGotten += ShowUnreadMessages;
+            MessengerService.MessageFromNewContactIsGotten += AddNewContactWithNewMessage;
 
             var thread = new Thread(MessengerService.Process);
             thread.Start();
+        }
+
+        private void AddNewContactWithNewMessage(MessageToUser obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ShowUnreadMessages(MessageToUser messageToShow)
+        {
+            var contact = ContactsControls.Where(c => c.User.Id == messageToShow.FromUserId).FirstOrDefault();
+
+            contact.ShowUnreadMessagesNotification();
         }
 
         private void ShowErrorToUser(string errorText, bool exitApp)
@@ -68,6 +86,8 @@ namespace AmChat.Forms
                 contactControl.ContactChosen += ChangeContact;
 
                 Contacts_panel.Invoke(new Action(() => Contacts_panel.Controls.Add(contactControl)));
+
+                ContactsControls.Add(contactControl);
             }
         }
 
@@ -82,7 +102,6 @@ namespace AmChat.Forms
             }
 
             Chat_panel.Enabled = true;
-            contactControl.BackColor = Color.Silver;
 
             MessengerService.ChosenUser = contactControl.User;
         }

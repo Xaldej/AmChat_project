@@ -26,11 +26,15 @@ namespace AmChat.ClientServices
 
         public UserInfo ChosenUser { get; set; }
 
-        public Action<string> MessageIsGotten;
+        public Action<string> MessageForCurrentContactIsGotten;
 
         public Action<string, bool> ErrorIsGotten;
 
         public Action<List<UserInfo>> ContactsAreUpdated;
+
+        public Action<MessageToUser> MessageFromNewContactIsGotten;
+
+        public Action<MessageToUser> MessageForOtherContactIsGotten;
 
 
         public ClientMessengerService()
@@ -58,6 +62,9 @@ namespace AmChat.ClientServices
             var correctContactList = new CorrectContactList();
             correctContactList.ContactListIsUpdated += UpdateContacts;
 
+            var messageFromContact = new MessageFromContact();
+            messageFromContact.NewMessageIsGotten += ShowNewMessage;
+
             var serverError = new ServerError();
             serverError.SendError += ShowError;
 
@@ -73,12 +80,40 @@ namespace AmChat.ClientServices
             Commands.Add(correctAddingContact);
             Commands.Add(correctContactList);
             Commands.Add(new CorrectLogin());
+            Commands.Add(messageFromContact);
             Commands.Add(serverError);
 
             Commands.Add(addContact);
             Commands.Add(connect);
             Commands.Add(getContactList);
             Commands.Add(new Login());
+        }
+
+        private void ShowNewMessage(MessageToUser messageToShow)
+        {
+            if (ChosenUser.Id == messageToShow.FromUserId)
+            {
+                MessageForCurrentContactIsGotten(messageToShow.Text);
+
+                //TO DO: save history
+            }
+            else
+            {
+                var userToShowMessage = UserContacts.Where(u => u.Id == messageToShow.FromUserId).FirstOrDefault();
+
+                if(userToShowMessage==null)
+                {
+                    MessageFromNewContactIsGotten(messageToShow);
+
+                    //TO DO: save history
+                }
+                else
+                {
+                    MessageForOtherContactIsGotten(messageToShow);
+
+                    //TO DO: save history
+                }
+            }
         }
 
         public void ListenMessages()
@@ -109,7 +144,7 @@ namespace AmChat.ClientServices
             }
             else
             {
-                MessageIsGotten(message);
+                MessageForCurrentContactIsGotten(message);
             }
         }
 

@@ -45,6 +45,7 @@
     <Compile Include="Commands\FromServer\CorrectAddingContact.cs" />
     <Compile Include="Commands\FromServer\CorrectContactList.cs" />
     <Compile Include="Commands\FromServer\CorrectLogin.cs" />
+    <Compile Include="Commands\FromServer\MessageFromContact.cs" />
     <Compile Include="Commands\FromServer\ServerError.cs" />
     <Compile Include="Commands\ToServer\AddContact.cs" />
     <Compile Include="Commands\ToServer\Connect.cs" />
