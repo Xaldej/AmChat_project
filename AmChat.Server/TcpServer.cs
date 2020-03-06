@@ -1,6 +1,8 @@
 ﻿using AlexeyMelentyevProject_ChatServer;
+using AmChat.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -68,12 +70,27 @@ namespace AmChat.Server
         private void AddClient(TcpClient tcpClient)
         {
             var client = new ServerMessenger(tcpClient, ConnectedClients);
+            client.NewMwssageForCertainUserIsGotten += SendMessageToCertainUser;
             ConnectedClients.Add(client);
 
             var thread = new Thread(new ThreadStart(client.ListenMessages));
             thread.Start();
 
             Console.WriteLine("client is connected");
+        }
+
+        private void SendMessageToCertainUser(MessageToUser messageToSend)
+        {
+            var clientToSend = ConnectedClients.Where(c => c.User.Id == messageToSend.ToUserId).FirstOrDefault();
+
+            if (clientToSend == null)
+            {
+                //TO DO: save to DB
+            }
+            else
+            {
+                clientToSend.SendMessage(messageToSend);
+            }
         }
     }
 }

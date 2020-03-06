@@ -11,13 +11,15 @@ namespace AmChat.Server.Commands.FromClient
 {
     public class SendMessageToUser : Command
     {
+        public Action<MessageToUser> MessageToUserIsGotten;
+
         public override string Name => "SendMessageToUser";
 
         public override void Execute(IMessengerService messenger, string data)
         {
             var messageToUser = JsonParser<MessageToUser>.JsonToOneObjects(data);
 
-            //TO DO
+            MessageToUserIsGotten(messageToUser);
         }
     }
 }

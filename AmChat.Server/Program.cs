@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace AmChat.Server
 {
@@ -11,7 +11,9 @@ namespace AmChat.Server
         static void Main(string[] args)
         {
             var tcpServer = new TcpServer("127.0.0.1", 8888);
-            tcpServer.StartServer();
+
+            var thread = new Thread(tcpServer.StartServer);
+            thread.Start();
         }
     }
 }

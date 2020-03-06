@@ -24,6 +24,8 @@ namespace AlexeyMelentyevProject_ChatServer
 
         public List<Command> Commands { get; }
 
+        public Action<MessageToUser> NewMwssageForCertainUserIsGotten;
+
 
         ServerMessenger()
         {
@@ -39,13 +41,27 @@ namespace AlexeyMelentyevProject_ChatServer
 
             UserContacts = new List<UserInfo>();
 
-            Commands = new List<Command>()
-            {
-                new AddContact(),
-                new GetConactList(),
-                new Login(),
-                new SendMessageToUser(),
-            };
+            Commands = new List<Command>();
+
+            InitializeCommands();
+           
+        }
+
+        private void InitializeCommands()
+        {
+            var sendMessageToUser = new SendMessageToUser();
+            sendMessageToUser.MessageToUserIsGotten += SendMessageToContact;
+
+
+            Commands.Add(new AddContact());
+            Commands.Add(new GetConactList());
+            Commands.Add(new Login());
+            Commands.Add(sendMessageToUser);
+        }
+
+        private void SendMessageToContact(MessageToUser messageToSent)
+        {
+            NewMwssageForCertainUserIsGotten(messageToSent);
         }
 
         public void ListenMessages()
@@ -83,7 +99,7 @@ namespace AlexeyMelentyevProject_ChatServer
                     }
                     else
                     {
-                        SendMessage(message, new Guid());
+                        //SendMessage(message, new Guid());
                     }
                 }
             }
@@ -115,21 +131,12 @@ namespace AlexeyMelentyevProject_ChatServer
             Stream.Write(data, 0, data.Length);
         }
 
-        public void SendMessage(string message, Guid contactId)
+        public void SendMessage(MessageToUser message)
         {
             byte[] data = new byte[TcpClient.ReceiveBufferSize];
-            data = Encoding.Unicode.GetBytes(message);
-
-            var clientToSend = GetClientToSend(contactId);
+            data = Encoding.Unicode.GetBytes(message.Text);
 
             Stream.Write(data, 0, data.Length);
-        }
-
-        private ServerMessenger GetClientToSend(Guid contactId)
-        {
-            //TO DO
-
-            return ConnectedClients.First();
         }
     }
 }
