@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChatHistoryServise.cs" />
     <Compile Include="ClientMessengerService.cs" />
     <Compile Include="Commands\FromServer\CorrectAddingContact.cs" />
     <Compile Include="Commands\FromServer\CorrectContactList.cs" />

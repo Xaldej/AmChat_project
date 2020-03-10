@@ -99,7 +99,7 @@ namespace AlexeyMelentyevProject_ChatServer
                     }
                     else
                     {
-                        //SendMessage(message, new Guid());
+                        SendCommand("/servererror:Unknown command");
                     }
                 }
             }

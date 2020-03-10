@@ -31,7 +31,7 @@
             this.Chat_panel = new System.Windows.Forms.Panel();
             this.InputMessage_textBox = new System.Windows.Forms.TextBox();
             this.Send_button = new System.Windows.Forms.Button();
-            this.ChatHistory_richTextBox = new System.Windows.Forms.RichTextBox();
+            this.Chat_richTextBox = new System.Windows.Forms.RichTextBox();
             this.Contacts_panel = new System.Windows.Forms.Panel();
             this.AddContact_button = new System.Windows.Forms.Button();
             this.Chat_panel.SuspendLayout();
@@ -41,7 +41,7 @@
             // 
             this.Chat_panel.Controls.Add(this.InputMessage_textBox);
             this.Chat_panel.Controls.Add(this.Send_button);
-            this.Chat_panel.Controls.Add(this.ChatHistory_richTextBox);
+            this.Chat_panel.Controls.Add(this.Chat_richTextBox);
             this.Chat_panel.Enabled = false;
             this.Chat_panel.Location = new System.Drawing.Point(2, 1);
             this.Chat_panel.Name = "Chat_panel";
@@ -66,15 +66,15 @@
             this.Send_button.UseVisualStyleBackColor = true;
             this.Send_button.Click += new System.EventHandler(this.Send_button_Click);
             // 
-            // ChatHistory_richTextBox
+            // Chat_richTextBox
             // 
-            this.ChatHistory_richTextBox.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.ChatHistory_richTextBox.Location = new System.Drawing.Point(3, 3);
-            this.ChatHistory_richTextBox.Name = "ChatHistory_richTextBox";
-            this.ChatHistory_richTextBox.ReadOnly = true;
-            this.ChatHistory_richTextBox.Size = new System.Drawing.Size(315, 526);
-            this.ChatHistory_richTextBox.TabIndex = 2;
-            this.ChatHistory_richTextBox.Text = "";
+            this.Chat_richTextBox.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.Chat_richTextBox.Location = new System.Drawing.Point(3, 3);
+            this.Chat_richTextBox.Name = "Chat_richTextBox";
+            this.Chat_richTextBox.ReadOnly = true;
+            this.Chat_richTextBox.Size = new System.Drawing.Size(315, 526);
+            this.Chat_richTextBox.TabIndex = 2;
+            this.Chat_richTextBox.Text = "";
             // 
             // Contacts_panel
             // 
@@ -103,10 +103,12 @@
             this.Controls.Add(this.Chat_panel);
             this.Name = "MainForm";
             this.Text = "AmChat";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.AM_Chat_Load);
             this.Chat_panel.ResumeLayout(false);
             this.Chat_panel.PerformLayout();
             this.ResumeLayout(false);
+
         }
 
         #endregion
@@ -115,7 +117,7 @@
         private System.Windows.Forms.Panel Chat_panel;
         private System.Windows.Forms.TextBox InputMessage_textBox;
         private System.Windows.Forms.Button Send_button;
-        private System.Windows.Forms.RichTextBox ChatHistory_richTextBox;
+        private System.Windows.Forms.RichTextBox Chat_richTextBox;
         private System.Windows.Forms.Button AddContact_button;
     }
 }

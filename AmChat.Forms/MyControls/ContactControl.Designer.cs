@@ -40,6 +40,7 @@
             this.ContactLogin_label.Size = new System.Drawing.Size(51, 20);
             this.ContactLogin_label.TabIndex = 0;
             this.ContactLogin_label.Text = "label1";
+            this.ContactLogin_label.Click += new System.EventHandler(this.ContactControl_Click);
             // 
             // ContactControl
             // 

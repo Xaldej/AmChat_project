@@ -3,13 +3,11 @@ using AmChat.Forms.MyControls;
 using AmChat.Infrastructure;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AmChat.Forms
@@ -17,6 +15,8 @@ namespace AmChat.Forms
     public partial class MainForm : Form
     {   
         private ClientMessengerService MessengerService { get; set; }
+
+        private ChatHistoryServise ChatHistoryServise { get; set; }
 
         List<ContactControl> ContactsControls { get; set; }
 
@@ -30,6 +30,8 @@ namespace AmChat.Forms
         private void AM_Chat_Load(object sender, EventArgs e)
         {
             Login();
+
+            ChatHistoryServise = new ChatHistoryServise();
         }
 
         private void Login()
@@ -46,7 +48,7 @@ namespace AmChat.Forms
             MessengerService = new ClientMessengerService(userLogin);
             MessengerService.ContactsAreUpdated += UpdateContacts;
             MessengerService.ErrorIsGotten += ShowErrorToUser;
-            MessengerService.MessageForCurrentContactIsGotten += ShowGottenMessage;
+            MessengerService.MessageForCurrentContactIsGotten += ShowMessageFromUser;
             MessengerService.MessageForOtherContactIsGotten += ShowUnreadMessages;
             MessengerService.MessageFromNewContactIsGotten += AddNewContactWithNewMessage;
 
@@ -93,7 +95,6 @@ namespace AmChat.Forms
 
         private void ChangeContact(ContactControl contactControl)
         {
-            //TO DO: update history
             var previousChosenControls = Contacts_panel.Controls.OfType<ContactControl>().Where(c => c.BackColor == Color.Silver);
 
             foreach (var control in previousChosenControls)
@@ -104,6 +105,31 @@ namespace AmChat.Forms
             Chat_panel.Enabled = true;
 
             MessengerService.ChosenUser = contactControl.User;
+
+            UpdateChatHistory();
+        }
+
+        private void UpdateChatHistory()
+        {
+            Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.Clear()));
+
+            var messagesHistory = ChatHistoryServise.GetHistory(MessengerService.ChosenUser);
+
+            foreach (var historyMessage in messagesHistory)
+            {
+                HorizontalAlignment alignment;
+
+                if (historyMessage.IsMyMessage == true)
+                {
+                    alignment = HorizontalAlignment.Right;
+                }
+                else
+                {
+                    alignment = HorizontalAlignment.Left;
+                }
+
+                AddMessageToChat(historyMessage.Message, alignment);
+            }
         }
 
         private void InputMessage_textBox_KeyDown(object sender, KeyEventArgs e)
@@ -117,13 +143,7 @@ namespace AmChat.Forms
         private void Send_button_Click(object sender, EventArgs e)
         {
             TrySendMessage();
-        }
-
-        private void ShowGottenMessage(string message)
-        {
-            ChatHistory_richTextBox.Invoke(new Action(() => ChatHistory_richTextBox.SelectionAlignment = HorizontalAlignment.Left));
-            ChatHistory_richTextBox.Invoke(new Action(() => ChatHistory_richTextBox.AppendText(message + "\n")));
-        }
+        }        
 
         private void TrySendMessage()
         {
@@ -133,7 +153,7 @@ namespace AmChat.Forms
 
             if (isUserInputCorrect)
             {
-                ShowMessage(userInput);
+                ShowMessageToUser(userInput);
                 try
                 {
                     MessengerService.SendMessage(userInput);
@@ -141,19 +161,31 @@ namespace AmChat.Forms
                 catch
                 {
 
-                    ChatHistory_richTextBox.SelectionAlignment = HorizontalAlignment.Center;
-                    ChatHistory_richTextBox.AppendText("------NO CONNECTION TO SERVER------\n" +
+                    Chat_richTextBox.SelectionAlignment = HorizontalAlignment.Center;
+                    Chat_richTextBox.AppendText("------NO CONNECTION TO SERVER------\n" +
                                                        "message is not sent\n" +
                                                        "try to reconnect\n");
                 }
             }
         }
 
-        private void ShowMessage(string userInput)
+        private void AddMessageToChat(string message, HorizontalAlignment alignment)
         {
-            ChatHistory_richTextBox.SelectionAlignment = HorizontalAlignment.Right;
-            ChatHistory_richTextBox.AppendText(userInput + "\n");
+            Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.SelectionAlignment = alignment));
+            Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.AppendText(message + "\n")));
+        }
+
+        private void ShowMessageFromUser(string message)
+        {
+            AddMessageToChat(message, HorizontalAlignment.Left);
+            ChatHistoryServise.SaveHistory(MessengerService.ChosenUser, message, false);
+        }
+
+        private void ShowMessageToUser(string message)
+        {
+            AddMessageToChat(message, HorizontalAlignment.Right);
             InputMessage_textBox.Clear();
+            ChatHistoryServise.SaveHistory(MessengerService.ChosenUser, message, true);
         }
 
         private bool ValidateUserInput(string inputMessage)
@@ -181,6 +213,11 @@ namespace AmChat.Forms
         {
             var message = "/addcontact:" + userName;
             MessengerService.ExecuteCommands(message);
+        }
+
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            //TO DO: stop all threads
         }
     }
 }
