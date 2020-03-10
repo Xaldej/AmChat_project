@@ -46,7 +46,8 @@ namespace AmChat.Forms
         private void CreateMessenger(string userLogin)
         {
             MessengerService = new ClientMessengerService(userLogin);
-            MessengerService.ContactsAreUpdated += UpdateContacts;
+            MessengerService.ContactsReceived += UpdateContacts;
+            MessengerService.ContactAdded += AddContactToContactPanel;
             MessengerService.ErrorIsGotten += ShowErrorToUser;
             MessengerService.MessageForCurrentContactIsGotten += ShowMessageFromUser;
             MessengerService.MessageForOtherContactIsGotten += ShowUnreadMessages;
@@ -56,16 +57,21 @@ namespace AmChat.Forms
             thread.Start();
         }
 
-        private void AddNewContactWithNewMessage(MessageToUser obj)
+        private void AddNewContactWithNewMessage(MessageToUser messageToShow)
         {
-            throw new NotImplementedException();
+            AddContactToContactPanel(messageToShow.FromUser);
+            ShowUnreadMessages(messageToShow);
         }
 
         private void ShowUnreadMessages(MessageToUser messageToShow)
         {
-            var contact = ContactsControls.Where(c => c.User.Id == messageToShow.FromUserId).FirstOrDefault();
+            var fromUser = messageToShow.FromUser;
 
-            contact.ShowUnreadMessagesNotification();
+            var contactControl = ContactsControls.Where(c => c.User.Equals(fromUser)).FirstOrDefault();
+
+            ChatHistoryServise.SaveHistory(fromUser, messageToShow.Text, false);
+
+            contactControl.ShowUnreadMessagesNotification();
         }
 
         private void ShowErrorToUser(string errorText, bool exitApp)
@@ -83,14 +89,19 @@ namespace AmChat.Forms
 
             foreach (var contact in contacts)
             {
-                var contactControl = new ContactControl(contact) { Dock = DockStyle.Top };
-
-                contactControl.ContactChosen += ChangeContact;
-
-                Contacts_panel.Invoke(new Action(() => Contacts_panel.Controls.Add(contactControl)));
-
-                ContactsControls.Add(contactControl);
+                AddContactToContactPanel(contact);
             }
+        }
+
+        private void AddContactToContactPanel(UserInfo contact)
+        {
+            var contactControl = new ContactControl(contact) { Dock = DockStyle.Top };
+
+            contactControl.ContactChosen += ChangeContact;
+
+            Contacts_panel.Invoke(new Action(() => Contacts_panel.Controls.Add(contactControl)));
+
+            ContactsControls.Add(contactControl);
         }
 
         private void ChangeContact(ContactControl contactControl)
@@ -211,6 +222,7 @@ namespace AmChat.Forms
 
         private void AddContact(string userName)
         {
+            //TO DO: redo to service method
             var message = "/addcontact:" + userName;
             MessengerService.ExecuteCommands(message);
         }

@@ -8,9 +8,9 @@ namespace AmChat.Infrastructure
 {
     public class MessageToUser
     {
-        public Guid FromUserId { get; set; }
+        public UserInfo FromUser { get; set; }
 
-        public Guid ToUserId { get; set; }
+        public UserInfo ToUser { get; set; }
 
         public string Text { get; set; }
     }

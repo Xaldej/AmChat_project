@@ -41,6 +41,11 @@ namespace AmChat.ClientServices
 
         public void SaveHistory(UserInfo user, string message, bool isMyMessage)
         {
+            if(!UsersChatHistory.ContainsKey(user))
+            {
+                UsersChatHistory.Add(user, new List<ChatHistoryMessage>());
+            }
+
             UsersChatHistory[user].Add(new ChatHistoryMessage(isMyMessage, message));
         }
 

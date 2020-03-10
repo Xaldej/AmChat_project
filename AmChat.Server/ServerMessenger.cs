@@ -16,8 +16,6 @@ namespace AlexeyMelentyevProject_ChatServer
 
         public List<UserInfo> UserContacts { get; set; }
 
-        public List<ServerMessenger> ConnectedClients { get; set; }
-
         public TcpClient TcpClient { get; set; }
 
         NetworkStream Stream { get; set; }
@@ -35,7 +33,6 @@ namespace AlexeyMelentyevProject_ChatServer
         public ServerMessenger(TcpClient tcpClient, List<ServerMessenger> connectedClients)
         {
             TcpClient = tcpClient;
-            ConnectedClients = connectedClients;
 
             User = new UserInfo();
 
@@ -85,9 +82,7 @@ namespace AlexeyMelentyevProject_ChatServer
                     }
                     catch
                     {
-                        var client = ConnectedClients.Where(m => m.Equals(this)).FirstOrDefault();
-                        ConnectedClients.Remove(client);
-
+                        // TO DO: delete client from connectedClients
                         break;
                     }
 

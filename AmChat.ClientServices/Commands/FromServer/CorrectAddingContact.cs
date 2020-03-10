@@ -11,7 +11,7 @@ namespace AmChat.ClientServices.Commands.FromServer
 {
     public class CorrectAddingContact : Command
     {
-        public Action ContactListIsUpdated;
+        public Action<UserInfo> ContactIsGotten;
 
         public override string Name => "CorrectAddingContact";
 
@@ -20,7 +20,7 @@ namespace AmChat.ClientServices.Commands.FromServer
             var userToAdd = JsonParser<UserInfo>.JsonToOneObjects(data);
 
             messenger.UserContacts.Add(userToAdd);
-            ContactListIsUpdated();
+            ContactIsGotten(userToAdd);
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using AlexeyMelentyevProject_ChatServer;
+using AmChat.Data;
+using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -81,7 +83,7 @@ namespace AmChat.Server
 
         private void SendMessageToCertainUser(MessageToUser messageToSend)
         {
-            var clientToSend = ConnectedClients.Where(c => c.User.Id == messageToSend.ToUserId).FirstOrDefault();
+            var clientToSend = ConnectedClients.Where(c => c.User.Equals(messageToSend.ToUser)).FirstOrDefault();
 
             if (clientToSend == null)
             {
@@ -89,6 +91,25 @@ namespace AmChat.Server
             }
             else
             {
+                if(!clientToSend.UserContacts.Contains(messageToSend.FromUser))
+                {
+                    using (var context = new AmChatContext())
+                    {
+                        clientToSend.UserContacts.Add(messageToSend.FromUser);
+
+                        var contactRelationship = new ContactRelationship()
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = clientToSend.User.Id,
+                            ContactId = messageToSend.FromUser.Id,
+                        };
+
+                        context.ContactRelationships.Add(contactRelationship);
+
+                        context.SaveChanges();
+                    }
+                }
+
                 clientToSend.SendMessage(messageToSend);
             }
         }

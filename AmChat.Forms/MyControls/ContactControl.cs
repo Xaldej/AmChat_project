@@ -35,7 +35,7 @@ namespace AmChat.Forms.MyControls
 
         public void ShowUnreadMessagesNotification()
         {
-            ContactLogin_label.Font = new Font(FontFamily.GenericSansSerif, 12, FontStyle.Bold);
+            ContactLogin_label.Invoke(new Action(() => ContactLogin_label.Font = new Font(FontFamily.GenericSansSerif, 12, FontStyle.Bold)));
         }
     }
 }
