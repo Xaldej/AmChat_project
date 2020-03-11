@@ -3,6 +3,7 @@ using AmChat.Forms.MyControls;
 using AmChat.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -29,23 +30,36 @@ namespace AmChat.Forms
 
         private void AM_Chat_Load(object sender, EventArgs e)
         {
-            Login();
-
             ChatHistoryServise = new ChatHistoryServise();
+
+            CreateMessenger();
+
+            GetLogin();
         }
 
-        private void Login()
+        private void GetLogin()
         {
             var loginForm = new LoginForm();
 
-            loginForm.LoginIsEntered += CreateMessenger;
+            loginForm.LoginIsEntered += Login;
 
             loginForm.ShowDialog();
         }
 
-        private void CreateMessenger(string userLogin)
+        private void Login(string userLogin)
         {
-            MessengerService = new ClientMessengerService(userLogin);
+            MessengerService.User.Login = userLogin;
+            MessengerService.Login();
+        }
+
+        private void CreateMessenger()
+        {
+            var ip = ConfigurationManager.AppSettings["ServerIP"];
+            var port = Int32.Parse(ConfigurationManager.AppSettings["ServerPort"]);
+
+            var tcpSettings = new TcpSettings(ip, port);
+
+            MessengerService = new ClientMessengerService(tcpSettings);
             MessengerService.ContactsReceived += UpdateContacts;
             MessengerService.ContactAdded += AddContactToContactPanel;
             MessengerService.ErrorIsGotten += ShowErrorToUser;

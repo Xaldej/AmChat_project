@@ -10,7 +10,7 @@ namespace AmChat.Server
     {
         static void Main(string[] args)
         {
-            var tcpServer = new TcpServer("127.0.0.1", 8888);
+            var tcpServer = new TcpServer();
 
             var thread = new Thread(tcpServer.StartServer);
             thread.Start();

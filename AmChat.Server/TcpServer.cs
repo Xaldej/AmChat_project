@@ -4,6 +4,7 @@ using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -13,23 +14,25 @@ namespace AmChat.Server
 {
     public class TcpServer
     {
-        public int Port { get; set; }
-        public string Ip { get; set; }
-
         public List<ServerMessenger> ConnectedClients { get; set; }
 
         public ServerMessenger Messenger { get; set; }
 
-        TcpServer()
+        public TcpSettings TcpSettings { get; set; }
+
+        public TcpServer()
         {
-            Ip = "127.0.0.1";
-            Port = 8888;
+            var ip = ConfigurationManager.AppSettings["ServerIP"];
+            var port = Int32.Parse(ConfigurationManager.AppSettings["ServerPort"]);
+
+            TcpSettings = new TcpSettings(ip, port);
+
+            ConnectedClients = new List<ServerMessenger>();
         }
 
         public TcpServer(string ip, int port)
         {
-            Ip = ip;
-            Port = port;
+            TcpSettings = new TcpSettings(ip, port);
 
             ConnectedClients = new List<ServerMessenger>();
         }
@@ -40,9 +43,7 @@ namespace AmChat.Server
 
             try
             {
-                //to do: get from config
-                IPAddress localAddr = IPAddress.Parse("127.0.0.1");
-                server = new TcpListener(localAddr, Port);
+                server = new TcpListener(TcpSettings.EndPoint);
 
                 server.Start();
 
@@ -91,26 +92,43 @@ namespace AmChat.Server
             }
             else
             {
-                if(!clientToSend.UserContacts.Contains(messageToSend.FromUser))
+                if(clientToSend.UserContacts.Contains(messageToSend.FromUser))
                 {
-                    using (var context = new AmChatContext())
+                    clientToSend.SendMessage(messageToSend);
+                }
+                else
+                {
+                    try
                     {
-                        clientToSend.UserContacts.Add(messageToSend.FromUser);
-
-                        var contactRelationship = new ContactRelationship()
-                        {
-                            Id = Guid.NewGuid(),
-                            UserId = clientToSend.User.Id,
-                            ContactId = messageToSend.FromUser.Id,
-                        };
-
-                        context.ContactRelationships.Add(contactRelationship);
-
-                        context.SaveChanges();
+                        AddSenderToContacts(messageToSend, clientToSend);
+                        clientToSend.SendMessage(messageToSend);
+                    }
+                    catch
+                    {
+                        var clientToSendError = ConnectedClients.Where(c => c.User.Equals(messageToSend.FromUser)).FirstOrDefault();
+                        clientToSendError.SendCommand("/servererror:Error senging message. Try again");
                     }
                 }
+                
+            }
+        }
 
-                clientToSend.SendMessage(messageToSend);
+        private static void AddSenderToContacts(MessageToUser messageToSend, ServerMessenger clientToSend)
+        {
+            using (var context = new AmChatContext())
+            {
+                clientToSend.UserContacts.Add(messageToSend.FromUser);
+
+                var contactRelationship = new ContactRelationship()
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = clientToSend.User.Id,
+                    ContactId = messageToSend.FromUser.Id,
+                };
+
+                context.ContactRelationships.Add(contactRelationship);
+
+                context.SaveChanges();
             }
         }
     }

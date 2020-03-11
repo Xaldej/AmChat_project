@@ -20,6 +20,8 @@ namespace AmChat.ClientServices
 
         public TcpClient TcpClient { get; set; }
 
+        public TcpSettings TcpSettings { get; set; }
+
         public List<Command> Commands { get; }
 
         NetworkStream Stream { get; set; }
@@ -39,16 +41,14 @@ namespace AmChat.ClientServices
         public Action<MessageToUser> MessageForOtherContactIsGotten;
 
 
-        public ClientMessengerService()
+        ClientMessengerService()
         {
         }
 
-        public ClientMessengerService(string userLogin)
+        public ClientMessengerService(TcpSettings tcpSettings)
         {
-            User = new UserInfo()
-            {
-                Login = userLogin
-            };
+            TcpSettings = tcpSettings;
+            User = new UserInfo();
 
             UserContacts = new List<UserInfo>();
 
@@ -73,9 +73,6 @@ namespace AmChat.ClientServices
             var addContact = new AddContact();
             addContact.SendError = ShowError;
 
-            var connect = new Connect();
-            connect.SendError += ShowError;
-
             var getContactList = new GetConactList();
             getContactList.SendError = ShowError;
 
@@ -86,7 +83,6 @@ namespace AmChat.ClientServices
             Commands.Add(serverError);
 
             Commands.Add(addContact);
-            Commands.Add(connect);
             Commands.Add(getContactList);
             Commands.Add(new Login());
         }
@@ -178,16 +174,35 @@ namespace AmChat.ClientServices
 
         public void Process()
         {
-            Commands.Where(c => c.CheckIsCalled("/connect")).FirstOrDefault().Execute(this, string.Empty);
+            //Commands.Where(c => c.CheckIsCalled("/connect")).FirstOrDefault().Execute(this, string.Empty);
+            ConnectToServer();
 
             using (Stream = TcpClient.GetStream())
             {
-                ExecuteCommands($"/Login:{User.Login}");
-
                 while (true)
                 {
                     ListenMessages();
                 }
+            }
+        }
+
+        public void Login()
+        {
+            ExecuteCommands($"/Login:{User.Login}");
+        }
+
+        private void ConnectToServer()
+        {
+            TcpClient = new TcpClient();
+
+            try
+            {
+                TcpClient.Connect(TcpSettings.EndPoint);
+            }
+            catch
+            {
+                var error = "Cannot connect to server. Check your interner connection and restart the app";
+                ErrorIsGotten(error, true);
             }
         }
 

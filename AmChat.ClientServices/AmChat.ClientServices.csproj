@@ -49,7 +49,6 @@
     <Compile Include="Commands\FromServer\MessageFromContact.cs" />
     <Compile Include="Commands\FromServer\ServerError.cs" />
     <Compile Include="Commands\ToServer\AddContact.cs" />
-    <Compile Include="Commands\ToServer\Connect.cs" />
     <Compile Include="Commands\ToServer\GetConactList.cs" />
     <Compile Include="Commands\ToServer\Login.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
