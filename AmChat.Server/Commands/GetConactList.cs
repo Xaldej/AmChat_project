@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmChat.Server.Commands.FromClient
+namespace AmChat.Server.Commands
 {
     public class GetConactList : Command
     {

@@ -1,7 +1,7 @@
 ﻿using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Interfaces;
-using AmChat.Server.Commands.FromClient;
+using AmChat.Server.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
