@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmChat.ClientServices.Commands.FromServer
+namespace AmChat.ClientServices.Commands
 {
     public class CorrectContactList : Command
     {

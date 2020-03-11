@@ -236,9 +236,7 @@ namespace AmChat.Forms
 
         private void AddContact(string userName)
         {
-            //TO DO: redo to service method
-            var message = "/addcontact:" + userName;
-            MessengerService.ExecuteCommands(message);
+            MessengerService.AddContact(userName);
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)

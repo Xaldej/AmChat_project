@@ -43,14 +43,11 @@
   <ItemGroup>
     <Compile Include="ChatHistoryServise.cs" />
     <Compile Include="ClientMessengerService.cs" />
-    <Compile Include="Commands\FromServer\CorrectAddingContact.cs" />
-    <Compile Include="Commands\FromServer\CorrectContactList.cs" />
-    <Compile Include="Commands\FromServer\CorrectLogin.cs" />
-    <Compile Include="Commands\FromServer\MessageFromContact.cs" />
-    <Compile Include="Commands\FromServer\ServerError.cs" />
-    <Compile Include="Commands\ToServer\AddContact.cs" />
-    <Compile Include="Commands\ToServer\GetConactList.cs" />
-    <Compile Include="Commands\ToServer\Login.cs" />
+    <Compile Include="Commands\CorrectAddingContact.cs" />
+    <Compile Include="Commands\CorrectContactList.cs" />
+    <Compile Include="Commands\CorrectLogin.cs" />
+    <Compile Include="Commands\MessageFromContact.cs" />
+    <Compile Include="Commands\ServerError.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

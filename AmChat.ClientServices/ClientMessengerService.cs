@@ -1,5 +1,4 @@
-﻿using AmChat.ClientServices.Commands.FromServer;
-using AmChat.ClientServices.Commands.ToServer;
+﻿using AmChat.ClientServices.Commands;
 using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Interfaces;
@@ -70,21 +69,11 @@ namespace AmChat.ClientServices
             var serverError = new ServerError();
             serverError.SendError += ShowError;
 
-            var addContact = new AddContact();
-            addContact.SendError = ShowError;
-
-            var getContactList = new GetConactList();
-            getContactList.SendError = ShowError;
-
             Commands.Add(correctAddingContact);
             Commands.Add(correctContactList);
             Commands.Add(new CorrectLogin());
             Commands.Add(messageFromContact);
             Commands.Add(serverError);
-
-            Commands.Add(addContact);
-            Commands.Add(getContactList);
-            Commands.Add(new Login());
         }
 
         private void AddOneContact(UserInfo user)
@@ -188,7 +177,8 @@ namespace AmChat.ClientServices
 
         public void Login()
         {
-            ExecuteCommands($"/Login:{User.Login}");
+            var command = $"/Login:{User.Login}";
+            SendCommand(command);
         }
 
         private void ConnectToServer()
@@ -225,6 +215,12 @@ namespace AmChat.ClientServices
         private void ShowError(string errorText)
         {
             ErrorIsGotten(errorText, false);
+        }
+
+        public void AddContact(string userName)
+        {   
+            var command = "/addcontact:" + userName;
+            SendCommand(command);
         }
     }
 }
