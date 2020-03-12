@@ -21,16 +21,17 @@ namespace AmChat.Server.Commands
             {
                 messenger.UserContacts = GetContactsFromDb(messenger.User);
             }
-            catch (Exception e)
+            catch
             {
-                messenger.SendMessage($"/servererror:{e.Message}");
+                var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Cannot load contact list. Try to restart the app");
+                messenger.SendMessage(error);
             }
 
             if (messenger.UserContacts.Count() > 0)
             {
                 var contactsJson = JsonParser<UserInfo>.ManyObjectsToJson(messenger.UserContacts);
 
-                var command = "/correctcontactlist:" + contactsJson;
+                var command = CommandConverter.CreateJsonMessageCommand("/correctcontactlist", contactsJson);
                 messenger.SendMessage(command);
             }
         }

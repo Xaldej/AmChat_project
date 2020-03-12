@@ -124,25 +124,19 @@ namespace AmChat.ClientServices
 
             var message = builder.ToString();
 
-            if (CommandIdentifier.IsMessageACommand(message))
-            {
-                ExecuteCommands(message);
-            }
-            else
-            {
-                MessageForCurrentContactIsGotten(message);
-            }
+            ProcessMessage(message);
+            
         }
 
-        public void ExecuteCommands(string message)
-        {   
-            var commandAndData = CommandIdentifier.GetCommandAndDataFromMessage(message);
+        private void ProcessMessage(string message)
+        {
+            var commandMessage = CommandConverter.GetCommandMessage(message);
 
-            var commandsToExecute = Commands.Where(c => c.CheckIsCalled(commandAndData.Command));
+            var commandsToExecute = Commands.Where(c => c.CheckIsCalled(commandMessage.CommandName));
 
             foreach (var command in commandsToExecute)
             {
-                command.Execute(this, commandAndData.Data);
+                command.Execute(this, commandMessage.CommandData);
             }
         }
 
@@ -155,14 +149,14 @@ namespace AmChat.ClientServices
                 Text = message,
             };
 
-            var command = "/sendmessagetouser:" + JsonParser<MessageToUser>.OneObjectToJson(messageToUser);
+            var messageToUserJson = JsonParser<MessageToUser>.OneObjectToJson(messageToUser);
+            var command = CommandConverter.CreateJsonMessageCommand("/sendmessagetouser", messageToUserJson);
 
             SendMessage(command);
         }
 
         public void Process()
         {
-            //Commands.Where(c => c.CheckIsCalled("/connect")).FirstOrDefault().Execute(this, string.Empty);
             ConnectToServer();
 
             using (Stream = TcpClient.GetStream())
@@ -176,7 +170,7 @@ namespace AmChat.ClientServices
 
         public void Login()
         {
-            var command = $"/Login:{User.Login}";
+            var command = CommandConverter.CreateJsonMessageCommand("/login", User.Login);
             SendMessage(command);
         }
 
@@ -195,9 +189,9 @@ namespace AmChat.ClientServices
             }
         }
 
-        public void SendMessage(string command)
+        public void SendMessage(string message)
         {
-            byte[] data = Encoding.Unicode.GetBytes(command);
+            byte[] data = Encoding.Unicode.GetBytes(message);
             Stream.Write(data, 0, data.Length);
         }
 
@@ -218,7 +212,7 @@ namespace AmChat.ClientServices
 
         public void AddContact(string userName)
         {   
-            var command = "/addcontact:" + userName;
+            var command = CommandConverter.CreateJsonMessageCommand("/addcontact",  userName);
             SendMessage(command);
         }
     }

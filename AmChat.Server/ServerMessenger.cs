@@ -90,47 +90,40 @@ namespace AlexeyMelentyevProject_ChatServer
 
                     string message = builder.ToString();
 
-                    if (CommandIdentifier.IsMessageACommand(message))
-                    {
-                        ExecuteCommands(message);
-                    }
-                    else
-                    {
-                        SendMessage("/servererror:Unknown command");
-                    }
+                    ProcessMessage(message);
                 }
             }
         }
 
-        private void ExecuteCommands(string message)
+        private void ProcessMessage(string message)
         {
-            var commandAndData = CommandIdentifier.GetCommandAndDataFromMessage(message);
+            var commandMessage = CommandConverter.GetCommandMessage(message);
 
-            var commandsToExecute = Commands.Where(c => c.CheckIsCalled(commandAndData.Command));
+            var commandsToExecute = Commands.Where(c => c.CheckIsCalled(commandMessage.CommandName));
 
             if (commandsToExecute.Count() == 0)
             {
-                SendMessage("/servererror:Unknown command" + commandAndData.Command);
+                var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Unknown command");
+                SendMessage(error);
                 return;
             }
 
             foreach (var command in commandsToExecute)
             {
-                command.Execute(this, commandAndData.Data);
+                command.Execute(this, commandMessage.CommandData);
             }
         }
 
-        public void SendMessage(string command)
+        public void SendMessage(string message)
         {
-            byte[] data = new byte[TcpClient.ReceiveBufferSize];
-            data = Encoding.Unicode.GetBytes(command);
-
+            byte[] data = Encoding.Unicode.GetBytes(message);
             Stream.Write(data, 0, data.Length);
         }
 
         public void SendMessageToOtherUser(MessageToUser message)
         {
-            var command = "/messagefromcontact:" + JsonParser<MessageToUser>.OneObjectToJson(message);
+            var messageToUser = JsonParser<MessageToUser>.OneObjectToJson(message);
+            var command = CommandConverter.CreateJsonMessageCommand("/messagefromcontact", messageToUser);
             SendMessage(command);
         }
     }

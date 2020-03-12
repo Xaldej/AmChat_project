@@ -8,14 +8,14 @@ namespace AmChat.Infrastructure.Commands
 {
     public class CommandMessage
     {
-        public string Command;
+        public string CommandName;
 
-        public string Data;
+        public string CommandData;
 
         public CommandMessage(string command, string data)
         {
-            Command = command;
-            Data = data;
+            CommandName = command;
+            CommandData = data;
         }
     }
 }

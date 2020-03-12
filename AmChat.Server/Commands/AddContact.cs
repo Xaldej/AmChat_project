@@ -21,12 +21,10 @@ namespace AmChat.Server.Commands
             {
                 AddContactFromDb(messenger, data);
             }
-            catch (Exception e)
+            catch
             {
-                var errorMessage = "/servererror:" +
-                    "Error adding contact\n\n" +
-                    "Details:\n" + e.Message;
-                messenger.SendMessage(errorMessage);
+                var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Error adding contact. Check user login and try again");
+                messenger.SendMessage(error);
             }
 
         }
@@ -42,18 +40,21 @@ namespace AmChat.Server.Commands
 
                 if (userToAdd == null)
                 {
-                    messenger.SendMessage("/servererror:Contact is not found");
+                    var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Contact is not found");
+                    messenger.SendMessage(error);
                 }
                 else
                 {
                     UserInfo userInfoToAdd = UserToUserInfo(userToAdd);
                     if (messenger.UserContacts.Contains(userInfoToAdd))
                     {
-                        messenger.SendMessage("/servererror:Contact is already in your list");
+                        var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Contact is already in your list");
+                        messenger.SendMessage(error);
                     }
                     else if(messenger.User.Equals(userInfoToAdd))
                     {
-                        messenger.SendMessage("/servererror:Connot add yourself. Check contact name and try again");
+                        var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Connot add yourself. Check contact login and try again");
+                        messenger.SendMessage(error);
                     }
                     else
                     {
@@ -70,7 +71,8 @@ namespace AmChat.Server.Commands
 
                         context.SaveChanges();
 
-                        var command = "/correctaddingcontact:" + JsonParser<UserInfo>.OneObjectToJson(userInfoToAdd);
+                        var commandData = JsonParser<UserInfo>.OneObjectToJson(userInfoToAdd);
+                        var command = CommandConverter.CreateJsonMessageCommand("/correctaddingcontact", commandData);
                         messenger.SendMessage(command);
                     }
 

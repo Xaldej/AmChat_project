@@ -17,8 +17,9 @@ namespace AmChat.ClientServices.Commands
         {
             messenger.User.Id = Guid.Parse(data);
 
-            var message = "/getconactlist:" + data;
-            messenger.SendMessage(message);
+            var command = CommandConverter.CreateJsonMessageCommand("/getconactlist", data);
+
+            messenger.SendMessage(command);
         }
     }
 }
