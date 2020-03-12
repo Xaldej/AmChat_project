@@ -1,4 +1,5 @@
-﻿using AmChat.Infrastructure.Commands;
+﻿using AmChat.Infrastructure;
+using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,11 @@ namespace AmChat.ClientServices.Commands
         public override string Name => "CorrectLogin";
 
         public override void Execute(IMessengerService messenger, string data)
-        {   
+        {
+            messenger.User.Id = Guid.Parse(data);
+
             var message = "/getconactlist:" + data;
-            messenger.SendCommand(message);
+            messenger.SendMessage(message);
         }
     }
 }

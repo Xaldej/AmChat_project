@@ -14,7 +14,7 @@ namespace AmChat.Infrastructure
             return JsonConvert.DeserializeObject<List<T>>(json);
         }
 
-        public static T JsonToOneObjects(string json)
+        public static T JsonToOneObject(string json)
         {
             return JsonConvert.DeserializeObject<T>(json);
         }

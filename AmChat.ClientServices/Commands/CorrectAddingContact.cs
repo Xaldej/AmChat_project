@@ -17,7 +17,7 @@ namespace AmChat.ClientServices.Commands
 
         public override void Execute(IMessengerService messenger, string data)
         {
-            var userToAdd = JsonParser<UserInfo>.JsonToOneObjects(data);
+            var userToAdd = JsonParser<UserInfo>.JsonToOneObject(data);
 
             messenger.UserContacts.Add(userToAdd);
             ContactIsGotten(userToAdd);

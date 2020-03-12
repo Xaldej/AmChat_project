@@ -17,7 +17,7 @@ namespace AmChat.Server.Commands
 
         public override void Execute(IMessengerService messenger, string data)
         {
-            var messageToUser = JsonParser<MessageToUser>.JsonToOneObjects(data);
+            var messageToUser = JsonParser<MessageToUser>.JsonToOneObject(data);
 
             MessageToUserIsGotten(messageToUser);
         }

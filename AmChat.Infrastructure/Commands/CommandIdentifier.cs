@@ -25,7 +25,7 @@ namespace AmChat.Infrastructure.Commands
             return result;
         }
 
-        public static CommandNameAndData GetCommandAndDataFromMessage(string fullCommand)
+        public static CommandMessage GetCommandAndDataFromMessage(string fullCommand)
         {
             string commandName = string.Empty;
             string commandData = string.Empty;
@@ -51,7 +51,7 @@ namespace AmChat.Infrastructure.Commands
                 }
             }
 
-            return new CommandNameAndData(commandName, commandData);
+            return new CommandMessage(commandName, commandData);
         }
     }
 }

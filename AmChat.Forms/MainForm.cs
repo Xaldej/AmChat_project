@@ -181,7 +181,7 @@ namespace AmChat.Forms
                 ShowMessageToUser(userInput);
                 try
                 {
-                    MessengerService.SendMessage(userInput);
+                    MessengerService.SendMessageToUser(userInput);
                 }
                 catch
                 {

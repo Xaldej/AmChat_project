@@ -22,13 +22,13 @@ namespace AmChat.Server.Commands
             {
                 messenger.User = GetUserFromDB(userName);
                 var id = messenger.User.Id;
-                messenger.SendCommand($"/correctlogin:{id}");
+                messenger.SendMessage($"/correctlogin:{id}");
             }
             catch (Exception e)
             {
                 Console.WriteLine("User is not logged in");
                 var errorMessage = "Login problems. Try to reconnect\n" + "Detailed error: " + e.Message;
-                messenger.SendCommand(errorMessage);
+                messenger.SendMessage(errorMessage);
             }
         }
 

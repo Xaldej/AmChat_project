@@ -26,7 +26,7 @@ namespace AmChat.Server.Commands
                 var errorMessage = "/servererror:" +
                     "Error adding contact\n\n" +
                     "Details:\n" + e.Message;
-                messenger.SendCommand(errorMessage);
+                messenger.SendMessage(errorMessage);
             }
 
         }
@@ -42,18 +42,18 @@ namespace AmChat.Server.Commands
 
                 if (userToAdd == null)
                 {
-                    messenger.SendCommand("/servererror:Contact is not found");
+                    messenger.SendMessage("/servererror:Contact is not found");
                 }
                 else
                 {
                     UserInfo userInfoToAdd = UserToUserInfo(userToAdd);
                     if (messenger.UserContacts.Contains(userInfoToAdd))
                     {
-                        messenger.SendCommand("/servererror:Contact is already in your list");
+                        messenger.SendMessage("/servererror:Contact is already in your list");
                     }
                     else if(messenger.User.Equals(userInfoToAdd))
                     {
-                        messenger.SendCommand("/servererror:Connot add yourself. Check contact name and try again");
+                        messenger.SendMessage("/servererror:Connot add yourself. Check contact name and try again");
                     }
                     else
                     {
@@ -71,7 +71,7 @@ namespace AmChat.Server.Commands
                         context.SaveChanges();
 
                         var command = "/correctaddingcontact:" + JsonParser<UserInfo>.OneObjectToJson(userInfoToAdd);
-                        messenger.SendCommand(command);
+                        messenger.SendMessage(command);
                     }
 
                 }

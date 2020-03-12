@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure.Commands
 {
-    public class CommandNameAndData
+    public class CommandMessage
     {
         public string Command;
 
         public string Data;
 
-        public CommandNameAndData(string command, string data)
+        public CommandMessage(string command, string data)
         {
             Command = command;
             Data = data;

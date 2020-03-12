@@ -94,19 +94,19 @@ namespace AmChat.Server
             {
                 if(clientToSend.UserContacts.Contains(messageToSend.FromUser))
                 {
-                    clientToSend.SendMessage(messageToSend);
+                    clientToSend.SendMessageToOtherUser(messageToSend);
                 }
                 else
                 {
                     try
                     {
                         AddSenderToContacts(messageToSend, clientToSend);
-                        clientToSend.SendMessage(messageToSend);
+                        clientToSend.SendMessageToOtherUser(messageToSend);
                     }
                     catch
                     {
                         var clientToSendError = ConnectedClients.Where(c => c.User.Equals(messageToSend.FromUser)).FirstOrDefault();
-                        clientToSendError.SendCommand("/servererror:Error senging message. Try again");
+                        clientToSendError.SendMessage("/servererror:Error senging message. Try again");
                     }
                 }
                 

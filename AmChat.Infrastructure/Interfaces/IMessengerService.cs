@@ -17,6 +17,6 @@ namespace AmChat.Infrastructure.Interfaces
 
         void ListenMessages();
 
-        void SendCommand(string command);
+        void SendMessage(string message);
     }
 }

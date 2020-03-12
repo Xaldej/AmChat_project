@@ -94,7 +94,7 @@ namespace AlexeyMelentyevProject_ChatServer
                     }
                     else
                     {
-                        SendCommand("/servererror:Unknown command");
+                        SendMessage("/servererror:Unknown command");
                     }
                 }
             }
@@ -108,7 +108,7 @@ namespace AlexeyMelentyevProject_ChatServer
 
             if (commandsToExecute.Count() == 0)
             {
-                SendCommand("/servererror:Unknown command" + commandAndData.Command);
+                SendMessage("/servererror:Unknown command" + commandAndData.Command);
                 return;
             }
 
@@ -118,7 +118,7 @@ namespace AlexeyMelentyevProject_ChatServer
             }
         }
 
-        public void SendCommand(string command)
+        public void SendMessage(string command)
         {
             byte[] data = new byte[TcpClient.ReceiveBufferSize];
             data = Encoding.Unicode.GetBytes(command);
@@ -126,10 +126,10 @@ namespace AlexeyMelentyevProject_ChatServer
             Stream.Write(data, 0, data.Length);
         }
 
-        public void SendMessage(MessageToUser message)
+        public void SendMessageToOtherUser(MessageToUser message)
         {
             var command = "/messagefromcontact:" + JsonParser<MessageToUser>.OneObjectToJson(message);
-            SendCommand(command);
+            SendMessage(command);
         }
     }
 }

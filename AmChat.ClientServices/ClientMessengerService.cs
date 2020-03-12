@@ -146,7 +146,7 @@ namespace AmChat.ClientServices
             }
         }
 
-        public void SendMessage(string message)
+        public void SendMessageToUser(string message)
         {
             var messageToUser = new MessageToUser()
             {
@@ -157,8 +157,7 @@ namespace AmChat.ClientServices
 
             var command = "/sendmessagetouser:" + JsonParser<MessageToUser>.OneObjectToJson(messageToUser);
 
-            byte[] data = Encoding.Unicode.GetBytes(command);
-            Stream.Write(data, 0, data.Length);
+            SendMessage(command);
         }
 
         public void Process()
@@ -178,7 +177,7 @@ namespace AmChat.ClientServices
         public void Login()
         {
             var command = $"/Login:{User.Login}";
-            SendCommand(command);
+            SendMessage(command);
         }
 
         private void ConnectToServer()
@@ -196,7 +195,7 @@ namespace AmChat.ClientServices
             }
         }
 
-        public void SendCommand(string command)
+        public void SendMessage(string command)
         {
             byte[] data = Encoding.Unicode.GetBytes(command);
             Stream.Write(data, 0, data.Length);
@@ -220,7 +219,7 @@ namespace AmChat.ClientServices
         public void AddContact(string userName)
         {   
             var command = "/addcontact:" + userName;
-            SendCommand(command);
+            SendMessage(command);
         }
     }
 }

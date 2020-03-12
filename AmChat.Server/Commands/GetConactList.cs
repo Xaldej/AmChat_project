@@ -23,7 +23,7 @@ namespace AmChat.Server.Commands
             }
             catch (Exception e)
             {
-                messenger.SendCommand($"/servererror:{e.Message}");
+                messenger.SendMessage($"/servererror:{e.Message}");
             }
 
             if (messenger.UserContacts.Count() > 0)
@@ -31,7 +31,7 @@ namespace AmChat.Server.Commands
                 var contactsJson = JsonParser<UserInfo>.ManyObjectsToJson(messenger.UserContacts);
 
                 var command = "/correctcontactlist:" + contactsJson;
-                messenger.SendCommand(command);
+                messenger.SendMessage(command);
             }
         }
 

@@ -47,7 +47,7 @@
     <Compile Include="ChatHistoryMessage.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\CommandIdentifier.cs" />
-    <Compile Include="Commands\CommandNameAndData.cs" />
+    <Compile Include="Commands\CommandMessage.cs" />
     <Compile Include="Interfaces\IMessengerService.cs" />
     <Compile Include="JsonParser.cs" />
     <Compile Include="MessageToUser.cs" />

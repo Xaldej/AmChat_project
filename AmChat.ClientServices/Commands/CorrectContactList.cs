@@ -17,7 +17,7 @@ namespace AmChat.ClientServices.Commands
 
         public override void Execute(IMessengerService messenger, string data)
         {
-            messenger.UserContacts = JsonParser<IEnumerable<UserInfo>>.JsonToOneObjects(data).ToList();
+            messenger.UserContacts = JsonParser<IEnumerable<UserInfo>>.JsonToOneObject(data).ToList();
             ContactListIsUpdated();
         }
     }
