@@ -55,6 +55,79 @@ namespace AmChat.ClientServices
             InitializeCommands();
         }
 
+        public void AddContact(string userName)
+        {
+            var command = CommandConverter.CreateJsonMessageCommand("/addcontact", userName);
+            SendMessage(command);
+        }
+
+        public void ListenMessages()
+        {
+            byte[] data = new byte[TcpClient.ReceiveBufferSize];
+            StringBuilder builder = new StringBuilder();
+            int bytes = 0;
+            try
+            {
+                do
+                {
+                    bytes = Stream.Read(data, 0, data.Length);
+                    builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+                }
+                while (Stream.DataAvailable);
+            }
+            catch
+            {
+                string errorMessage = "Connection lost. Check your internet connection and try to restart the app";
+                ErrorIsGotten(errorMessage, true);
+            }
+
+            var message = builder.ToString();
+
+            ProcessMessage(message);
+
+        }
+
+        public void Login()
+        {
+            var command = CommandConverter.CreateJsonMessageCommand("/login", User.Login);
+            SendMessage(command);
+        }
+
+        public void Process()
+        {
+            ConnectToServer();
+
+            using (Stream = TcpClient.GetStream())
+            {
+                while (true)
+                {
+                    ListenMessages();
+                }
+            }
+        }
+
+        public void SendMessageToOtherUser(string message)
+        {
+            var messageToUser = new MessageToUser()
+            {
+                FromUser = User,
+                ToUser = ChosenUser,
+                Text = message,
+            };
+
+            var messageToUserJson = JsonParser<MessageToUser>.OneObjectToJson(messageToUser);
+            var command = CommandConverter.CreateJsonMessageCommand("/sendmessagetouser", messageToUserJson);
+
+            SendMessage(command);
+        }
+
+        public void SendMessage(string message)
+        {
+            byte[] data = Encoding.Unicode.GetBytes(message);
+            Stream.Write(data, 0, data.Length);
+        }
+
+
         private void InitializeCommands()
         {
             var correctAddingContact = new CorrectAddingContact();
@@ -81,6 +154,26 @@ namespace AmChat.ClientServices
             ContactAdded(user);
         }
 
+        private void ConnectToServer()
+        {
+            TcpClient = new TcpClient();
+
+            try
+            {
+                TcpClient.Connect(TcpSettings.EndPoint);
+            }
+            catch
+            {
+                var error = "Cannot connect to server. Check your interner connection and restart the app";
+                ErrorIsGotten(error, true);
+            }
+        }
+
+        private void ShowError(string errorText)
+        {
+            ErrorIsGotten(errorText, false);
+        }
+
         private void ShowNewMessage(MessageToUser messageToShow)
         {
             if (ChosenUser == null || !ChosenUser.Equals(messageToShow.FromUser)) 
@@ -102,32 +195,6 @@ namespace AmChat.ClientServices
             }
         }
 
-        public void ListenMessages()
-        {
-            byte[] data = new byte[TcpClient.ReceiveBufferSize];
-            StringBuilder builder = new StringBuilder();
-            int bytes = 0;
-            try
-            {
-                do
-                {
-                    bytes = Stream.Read(data, 0, data.Length);
-                    builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-                }
-                while (Stream.DataAvailable);
-            }
-            catch
-            {
-                string errorMessage = "Connection lost. Check your internet connection and try to restart the app";
-                ErrorIsGotten(errorMessage, true);
-            }
-
-            var message = builder.ToString();
-
-            ProcessMessage(message);
-            
-        }
-
         private void ProcessMessage(string message)
         {
             var commandMessage = CommandConverter.GetCommandMessage(message);
@@ -140,80 +207,9 @@ namespace AmChat.ClientServices
             }
         }
 
-        public void SendMessageToUser(string message)
-        {
-            var messageToUser = new MessageToUser()
-            {
-                FromUser = User,
-                ToUser = ChosenUser,
-                Text = message,
-            };
-
-            var messageToUserJson = JsonParser<MessageToUser>.OneObjectToJson(messageToUser);
-            var command = CommandConverter.CreateJsonMessageCommand("/sendmessagetouser", messageToUserJson);
-
-            SendMessage(command);
-        }
-
-        public void Process()
-        {
-            ConnectToServer();
-
-            using (Stream = TcpClient.GetStream())
-            {
-                while (true)
-                {
-                    ListenMessages();
-                }
-            }
-        }
-
-        public void Login()
-        {
-            var command = CommandConverter.CreateJsonMessageCommand("/login", User.Login);
-            SendMessage(command);
-        }
-
-        private void ConnectToServer()
-        {
-            TcpClient = new TcpClient();
-
-            try
-            {
-                TcpClient.Connect(TcpSettings.EndPoint);
-            }
-            catch
-            {
-                var error = "Cannot connect to server. Check your interner connection and restart the app";
-                ErrorIsGotten(error, true);
-            }
-        }
-
-        public void SendMessage(string message)
-        {
-            byte[] data = Encoding.Unicode.GetBytes(message);
-            Stream.Write(data, 0, data.Length);
-        }
-
         private void UpdateContacts()
         {
             ContactsReceived(UserContacts);
-        }
-
-        private void UpdateContacts(UserInfo user)
-        {
-            ContactAdded(user);
-        }
-
-        private void ShowError(string errorText)
-        {
-            ErrorIsGotten(errorText, false);
-        }
-
-        public void AddContact(string userName)
-        {   
-            var command = CommandConverter.CreateJsonMessageCommand("/addcontact",  userName);
-            SendMessage(command);
         }
     }
 }

@@ -28,28 +28,48 @@ namespace AmChat.Forms
             ContactsControls = new List<ContactControl>();
         }
 
-        private void AM_Chat_Load(object sender, EventArgs e)
+        private void AddContact(string userName)
         {
-            ChatHistoryServise = new ChatHistoryServise();
-
-            CreateMessenger();
-
-            GetLogin();
+            MessengerService.AddContact(userName);
         }
 
-        private void GetLogin()
+        private void AddContactToContactPanel(UserInfo contact)
         {
-            var loginForm = new LoginForm();
+            var contactControl = new ContactControl(contact) { Dock = DockStyle.Top };
 
-            loginForm.LoginIsEntered += Login;
+            contactControl.ContactChosen += ChangeContact;
 
-            loginForm.ShowDialog();
+            Contacts_panel.Invoke(new Action(() => Contacts_panel.Controls.Add(contactControl)));
+
+            ContactsControls.Add(contactControl);
         }
 
-        private void Login(string userLogin)
+        private void AddMessageToChat(string message, HorizontalAlignment alignment)
         {
-            MessengerService.User.Login = userLogin;
-            MessengerService.Login();
+            Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.SelectionAlignment = alignment));
+            Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.AppendText(message + "\n")));
+        }
+
+        private void AddNewContactWithNewMessage(MessageToUser messageToShow)
+        {
+            AddContactToContactPanel(messageToShow.FromUser);
+            ShowUnreadMessages(messageToShow);
+        }
+
+        private void ChangeContact(ContactControl contactControl)
+        {
+            var previousChosenControls = Contacts_panel.Controls.OfType<ContactControl>().Where(c => c.BackColor == Color.Silver);
+
+            foreach (var control in previousChosenControls)
+            {
+                control.BackColor = Color.Gainsboro;
+            }
+
+            Chat_panel.Enabled = true;
+
+            MessengerService.ChosenUser = contactControl.User;
+
+            UpdateChatHistory();
         }
 
         private void CreateMessenger()
@@ -71,10 +91,32 @@ namespace AmChat.Forms
             thread.Start();
         }
 
-        private void AddNewContactWithNewMessage(MessageToUser messageToShow)
+        private void GetLogin()
         {
-            AddContactToContactPanel(messageToShow.FromUser);
-            ShowUnreadMessages(messageToShow);
+            var loginForm = new LoginForm();
+
+            loginForm.LoginIsEntered += Login;
+
+            loginForm.ShowDialog();
+        }
+
+        private void Login(string userLogin)
+        {
+            MessengerService.User.Login = userLogin;
+            MessengerService.Login();
+        }
+
+        private void ShowMessageFromUser(string message)
+        {
+            AddMessageToChat(message, HorizontalAlignment.Left);
+            ChatHistoryServise.SaveHistory(MessengerService.ChosenUser, message, false);
+        }
+
+        private void ShowMessageToUser(string message)
+        {
+            AddMessageToChat(message, HorizontalAlignment.Right);
+            InputMessage_textBox.Clear();
+            ChatHistoryServise.SaveHistory(MessengerService.ChosenUser, message, true);
         }
 
         private void ShowUnreadMessages(MessageToUser messageToShow)
@@ -97,41 +139,28 @@ namespace AmChat.Forms
             }
         }
 
-        private void UpdateContacts(List<UserInfo> contacts)
+        private void TrySendMessage()
         {
-            Contacts_panel.Invoke(new Action(() => Contacts_panel.Controls.Clear()));
+            var userInput = InputMessage_textBox.Text;
 
-            foreach (var contact in contacts)
+            var isUserInputCorrect = ValidateUserInput(userInput);
+
+            if (isUserInputCorrect)
             {
-                AddContactToContactPanel(contact);
+                ShowMessageToUser(userInput);
+                try
+                {
+                    MessengerService.SendMessageToOtherUser(userInput);
+                }
+                catch
+                {
+
+                    Chat_richTextBox.SelectionAlignment = HorizontalAlignment.Center;
+                    Chat_richTextBox.AppendText("------NO CONNECTION TO SERVER------\n" +
+                                                       "message is not sent\n" +
+                                                       "try to reconnect\n");
+                }
             }
-        }
-
-        private void AddContactToContactPanel(UserInfo contact)
-        {
-            var contactControl = new ContactControl(contact) { Dock = DockStyle.Top };
-
-            contactControl.ContactChosen += ChangeContact;
-
-            Contacts_panel.Invoke(new Action(() => Contacts_panel.Controls.Add(contactControl)));
-
-            ContactsControls.Add(contactControl);
-        }
-
-        private void ChangeContact(ContactControl contactControl)
-        {
-            var previousChosenControls = Contacts_panel.Controls.OfType<ContactControl>().Where(c => c.BackColor == Color.Silver);
-
-            foreach (var control in previousChosenControls)
-            {
-                control.BackColor = Color.Gainsboro;
-            }
-
-            Chat_panel.Enabled = true;
-
-            MessengerService.ChosenUser = contactControl.User;
-
-            UpdateChatHistory();
         }
 
         private void UpdateChatHistory()
@@ -157,60 +186,14 @@ namespace AmChat.Forms
             }
         }
 
-        private void InputMessage_textBox_KeyDown(object sender, KeyEventArgs e)
+        private void UpdateContacts(List<UserInfo> contacts)
         {
-            if (e.KeyCode == Keys.Enter)
+            Contacts_panel.Invoke(new Action(() => Contacts_panel.Controls.Clear()));
+
+            foreach (var contact in contacts)
             {
-                TrySendMessage();
+                AddContactToContactPanel(contact);
             }
-        }
-
-        private void Send_button_Click(object sender, EventArgs e)
-        {
-            TrySendMessage();
-        }        
-
-        private void TrySendMessage()
-        {
-            var userInput = InputMessage_textBox.Text;
-
-            var isUserInputCorrect = ValidateUserInput(userInput);
-
-            if (isUserInputCorrect)
-            {
-                ShowMessageToUser(userInput);
-                try
-                {
-                    MessengerService.SendMessageToUser(userInput);
-                }
-                catch
-                {
-
-                    Chat_richTextBox.SelectionAlignment = HorizontalAlignment.Center;
-                    Chat_richTextBox.AppendText("------NO CONNECTION TO SERVER------\n" +
-                                                       "message is not sent\n" +
-                                                       "try to reconnect\n");
-                }
-            }
-        }
-
-        private void AddMessageToChat(string message, HorizontalAlignment alignment)
-        {
-            Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.SelectionAlignment = alignment));
-            Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.AppendText(message + "\n")));
-        }
-
-        private void ShowMessageFromUser(string message)
-        {
-            AddMessageToChat(message, HorizontalAlignment.Left);
-            ChatHistoryServise.SaveHistory(MessengerService.ChosenUser, message, false);
-        }
-
-        private void ShowMessageToUser(string message)
-        {
-            AddMessageToChat(message, HorizontalAlignment.Right);
-            InputMessage_textBox.Clear();
-            ChatHistoryServise.SaveHistory(MessengerService.ChosenUser, message, true);
         }
 
         private bool ValidateUserInput(string inputMessage)
@@ -225,6 +208,7 @@ namespace AmChat.Forms
             return isMessageCorrect;
         }
 
+
         private void AddContact_button_Click(object sender, EventArgs e)
         {
             var addContactForm = new AddContactForm();
@@ -234,14 +218,31 @@ namespace AmChat.Forms
             addContactForm.ShowDialog();
         }
 
-        private void AddContact(string userName)
+        private void AM_Chat_Load(object sender, EventArgs e)
         {
-            MessengerService.AddContact(userName);
+            ChatHistoryServise = new ChatHistoryServise();
+
+            CreateMessenger();
+
+            GetLogin();
+        }
+
+        private void InputMessage_textBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                TrySendMessage();
+            }
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             //TO DO: stop all threads
+        }
+
+        private void Send_button_Click(object sender, EventArgs e)
+        {
+            TrySendMessage();
         }
     }
 }

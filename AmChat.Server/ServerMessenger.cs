@@ -46,23 +46,6 @@ namespace AlexeyMelentyevProject_ChatServer
            
         }
 
-        private void InitializeCommands()
-        {
-            var sendMessageToUser = new SendMessageToUser();
-            sendMessageToUser.MessageToUserIsGotten += SendMessageToContact;
-
-
-            Commands.Add(new AddContact());
-            Commands.Add(new GetConactList());
-            Commands.Add(new Login());
-            Commands.Add(sendMessageToUser);
-        }
-
-        private void SendMessageToContact(MessageToUser messageToSent)
-        {
-            NewMwssageForCertainUserIsGotten(messageToSent);
-        }
-
         public void ListenMessages()
         {
             using (Stream = TcpClient.GetStream())
@@ -95,6 +78,32 @@ namespace AlexeyMelentyevProject_ChatServer
             }
         }
 
+        public void SendMessage(string message)
+        {
+            byte[] data = Encoding.Unicode.GetBytes(message);
+            Stream.Write(data, 0, data.Length);
+        }
+
+        public void SendMessageToOtherUser(MessageToUser message)
+        {
+            var messageToUser = JsonParser<MessageToUser>.OneObjectToJson(message);
+            var command = CommandConverter.CreateJsonMessageCommand("/messagefromcontact", messageToUser);
+            SendMessage(command);
+        }
+
+
+        private void InitializeCommands()
+        {
+            var sendMessageToUser = new SendMessageToUser();
+            sendMessageToUser.MessageToUserIsGotten += SendMessageToContact;
+
+
+            Commands.Add(new AddContact());
+            Commands.Add(new GetConactList());
+            Commands.Add(new Login());
+            Commands.Add(sendMessageToUser);
+        }
+
         private void ProcessMessage(string message)
         {
             var commandMessage = CommandConverter.GetCommandMessage(message);
@@ -114,17 +123,9 @@ namespace AlexeyMelentyevProject_ChatServer
             }
         }
 
-        public void SendMessage(string message)
+        private void SendMessageToContact(MessageToUser messageToSent)
         {
-            byte[] data = Encoding.Unicode.GetBytes(message);
-            Stream.Write(data, 0, data.Length);
-        }
-
-        public void SendMessageToOtherUser(MessageToUser message)
-        {
-            var messageToUser = JsonParser<MessageToUser>.OneObjectToJson(message);
-            var command = CommandConverter.CreateJsonMessageCommand("/messagefromcontact", messageToUser);
-            SendMessage(command);
+            NewMwssageForCertainUserIsGotten(messageToSent);
         }
     }
 }
