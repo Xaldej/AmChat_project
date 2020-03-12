@@ -24,6 +24,8 @@ namespace AlexeyMelentyevProject_ChatServer
 
         public Action<MessageToUser> NewMwssageForCertainUserIsGotten;
 
+        public Action<ServerMessenger> ClientDisconnected;
+
 
         ServerMessenger()
         {
@@ -82,7 +84,7 @@ namespace AlexeyMelentyevProject_ChatServer
                     }
                     catch
                     {
-                        // TO DO: delete client from connectedClients
+                        ClientDisconnected(this);
                         break;
                     }
 

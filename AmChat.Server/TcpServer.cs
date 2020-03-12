@@ -74,12 +74,18 @@ namespace AmChat.Server
         {
             var client = new ServerMessenger(tcpClient, ConnectedClients);
             client.NewMwssageForCertainUserIsGotten += SendMessageToCertainUser;
+            client.ClientDisconnected += DeleteDisconnectedClient;
             ConnectedClients.Add(client);
 
             var thread = new Thread(new ThreadStart(client.ListenMessages));
             thread.Start();
 
             Console.WriteLine("client is connected");
+        }
+
+        private void DeleteDisconnectedClient(ServerMessenger client)
+        {
+            ConnectedClients.Remove(client);
         }
 
         private void SendMessageToCertainUser(MessageToUser messageToSend)
