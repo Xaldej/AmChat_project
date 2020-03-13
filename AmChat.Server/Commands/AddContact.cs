@@ -15,69 +15,186 @@ namespace AmChat.Server.Commands
     {
         public override string Name => "AddContact";
 
+        private string ErrorMessage { get; set; }
+
         public override void Execute(IMessengerService messenger, string data)
         {
             try
             {
-                AddContactFromDb(messenger, data);
+                AddContactForUser(messenger, data);
             }
             catch
             {
                 var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Error adding contact. Check user login and try again");
                 messenger.SendMessage(error);
             }
-
         }
 
-        private void AddContactFromDb(IMessengerService messenger, string data)
+        private void AddContactForUser(IMessengerService messenger, string loginToAdd)
         {
-            var user = messenger.User;
-
-            User userToAdd;
-            using (var context = new AmChatContext())
+            if (IsLoginToAddCorrect(messenger, loginToAdd))
             {
-                userToAdd = context.Users.Where(u => u.Login == data).FirstOrDefault();
+                User userToAdd = GetUserFromDB(loginToAdd);
+                var userInfoToAdd = UserToUserInfo(userToAdd);
 
-                if (userToAdd == null)
+                if (CanUserBeAdded(messenger, userToAdd))
                 {
-                    var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Contact is not found");
-                    messenger.SendMessage(error);
+                    var chat = AddChatAndRelationshipsToDb(messenger, userInfoToAdd);
+                    AddChatForUser(messenger, userInfoToAdd, chat);
                 }
                 else
                 {
-                    UserInfo userInfoToAdd = UserToUserInfo(userToAdd);
-                    if (messenger.UserContacts.Contains(userInfoToAdd))
-                    {
-                        var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Contact is already in your list");
-                        messenger.SendMessage(error);
-                    }
-                    else if(messenger.User.Equals(userInfoToAdd))
-                    {
-                        var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Connot add yourself. Check contact login and try again");
-                        messenger.SendMessage(error);
-                    }
-                    else
-                    {
-                        messenger.UserContacts.Add(userInfoToAdd);
-
-                        var contactRelationship = new ContactRelationship()
-                        {
-                            Id = Guid.NewGuid(),
-                            UserId = messenger.User.Id,
-                            ContactId = userToAdd.Id,
-                        };
-
-                        context.ContactRelationships.Add(contactRelationship);
-
-                        context.SaveChanges();
-
-                        var commandData = JsonParser<UserInfo>.OneObjectToJson(userInfoToAdd);
-                        var command = CommandConverter.CreateJsonMessageCommand("/correctaddingcontact", commandData);
-                        messenger.SendMessage(command);
-                    }
-
+                    var error = CommandConverter.CreateJsonMessageCommand("/servererror", ErrorMessage);
+                    messenger.SendMessage(error);
                 }
             }
+            else
+            {
+                var error = CommandConverter.CreateJsonMessageCommand("/servererror", ErrorMessage);
+                messenger.SendMessage(error);
+                return;
+            }
+        }
+
+
+        private void AddChatForUser(IMessengerService messenger, UserInfo userToAdd, Chat chat)
+        {
+            var userChat = ChatToUserChat(chat, messenger, userToAdd);
+
+            messenger.UserChats.Add(userChat);
+
+            var commandData = JsonParser<UserChat>.OneObjectToJson(userChat);
+            var command = CommandConverter.CreateJsonMessageCommand("/correctaddingcontact", commandData);
+            messenger.SendMessage(command);
+        }
+
+        private Chat AddChatAndRelationshipsToDb(IMessengerService messenger, UserInfo userInfoToAdd)
+        {
+            using (var context = new AmChatContext())
+            {
+                var usersToAdd = new List<UserInfo>()
+                        {
+                            messenger.User,
+                            userInfoToAdd
+                        };
+
+                var chat = AddChat(context, usersToAdd);
+
+                AddChatForUser(context, messenger, chat);
+
+                AddUsersInChat(context, usersToAdd, chat);
+
+                context.SaveChanges();
+
+                return chat;
+            }
+        }
+
+        private void AddUsersInChat(AmChatContext context, List<UserInfo> usersToAdd, Chat chat)
+        {
+            foreach (var user in usersToAdd)
+            {
+                var userInChat = new UsersInChat()
+                {
+                    Id = Guid.NewGuid(),
+                    ChatId = chat.Id,
+                    UserId = user.Id,
+                };
+
+                context.UsersInChat.Add(userInChat);
+            }
+        }
+
+        private void AddChatForUser(AmChatContext context, IMessengerService messenger, Chat chat)
+        {
+            var usersChat = new UsersChats()
+            {
+                Id = Guid.NewGuid(),
+                UserId = messenger.User.Id,
+                ChatId = chat.Id,
+            };
+
+            context.UsersChats.Add(usersChat);
+        }
+
+        private Chat AddChat(AmChatContext context, List<UserInfo> usersToAdd)
+        {
+            var id = Guid.NewGuid();
+            var name = string.Empty;
+            var userIds = new List<Guid>();
+
+            foreach (var user in usersToAdd)
+            {
+                name += user.Login;
+                userIds.Add(user.Id);
+            }
+            var chat = new Chat()
+            {
+                Id = id,
+                Name = name,
+                IsMultipleUsersChat = false,
+            };
+
+            context.Chats.Add(chat);
+
+            return chat;
+        }
+
+        private User GetUserFromDB(string login)
+        {
+            User user;
+            using (var context = new AmChatContext())
+            {
+                user = context.Users.Where(u => u.Login == login).FirstOrDefault();
+            }
+
+            return user;
+        }
+
+
+        private bool CanUserBeAdded(IMessengerService messenger, User userToAdd)
+        {
+            if (userToAdd == null)
+            {
+                ErrorMessage = "Contact is not found";
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool IsLoginToAddCorrect(IMessengerService messenger, string loginToAdd)
+        {
+            if (loginToAdd == messenger.User.Login)
+            {
+                ErrorMessage = "Connot add yourself. Check contact login and try again";
+                return false;
+            }
+
+            var isContactInUserChats = messenger.UserChats.Where(uc => uc.Name == loginToAdd).FirstOrDefault() != null;
+            if (isContactInUserChats)
+            {
+                ErrorMessage = "Contact is already in your list";
+                return false;
+            }
+
+            return true;
+        }
+
+
+        private UserChat ChatToUserChat(Chat chat, IMessengerService messenger, UserInfo userToAdd)
+        {
+            List<UserInfo> usersInChat = new List<UserInfo>()
+            {
+                messenger.User,
+                userToAdd,
+            };
+            return new UserChat()
+            {
+                Id = chat.Id,
+                Name = chat.Name,
+                UsersInChat = usersInChat,
+            };
         }
 
         private UserInfo UserToUserInfo(User user)

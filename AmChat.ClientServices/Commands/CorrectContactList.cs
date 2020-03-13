@@ -3,6 +3,7 @@ using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,8 +17,9 @@ namespace AmChat.ClientServices.Commands
         public override string Name => "CorrectContactList";
 
         public override void Execute(IMessengerService messenger, string data)
-        {
-            messenger.UserContacts = JsonParser<IEnumerable<UserInfo>>.JsonToOneObject(data).ToList();
+        {   
+            var chats = new ObservableCollection<UserChat>(JsonParser<IEnumerable<UserChat>>.JsonToOneObject(data));
+            messenger.UserChats = chats;
             ContactListIsUpdated();
         }
     }

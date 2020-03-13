@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure
 {
-    public class MessageToUser
+    public class MessageToChat
     {
         public UserInfo FromUser { get; set; }
 
-        public UserInfo ToUser { get; set; }
+        public UserChat ToChat { get; set; }
 
         public string Text { get; set; }
     }

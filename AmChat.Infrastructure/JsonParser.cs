@@ -9,7 +9,7 @@ namespace AmChat.Infrastructure
 {
     public static class JsonParser<T>
     {
-        public static List<T> JsonToManyObjects(string json)
+        public static IEnumerable<T> JsonToManyObjects(string json)
         {
             return JsonConvert.DeserializeObject<List<T>>(json);
         }
@@ -19,7 +19,7 @@ namespace AmChat.Infrastructure
             return JsonConvert.DeserializeObject<T>(json);
         }
 
-        public static string ManyObjectsToJson(List<T> objs)
+        public static string ManyObjectsToJson(IEnumerable<T> objs)
         {
             return JsonConvert.SerializeObject(objs);
         }

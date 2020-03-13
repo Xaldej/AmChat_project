@@ -4,6 +4,7 @@ using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -15,7 +16,7 @@ namespace AmChat.ClientServices
     {
         public UserInfo User { get; set; }
 
-        public List<UserInfo> UserContacts { get; set; }
+        public ObservableCollection<UserChat> UserChats { get; set; }
 
         public TcpClient TcpClient { get; set; }
 
@@ -25,19 +26,19 @@ namespace AmChat.ClientServices
 
         NetworkStream Stream { get; set; }
 
-        public UserInfo ChosenUser { get; set; }
+        public UserChat ChosenChat { get; set; }
 
         public Action<string> MessageForCurrentContactIsGotten;
 
         public Action<string, bool> ErrorIsGotten;
 
-        public Action<List<UserInfo>> ContactsReceived;
+        public Action<ObservableCollection<UserChat>> ContactsReceived;
 
-        public Action<UserInfo> ContactAdded;
+        public Action<UserChat> ContactAdded;
 
-        public Action<MessageToUser> MessageFromNewContactIsGotten;
+        public Action<MessageToChat> MessageFromNewContactIsGotten;
 
-        public Action<MessageToUser> MessageForOtherContactIsGotten;
+        public Action<MessageToChat> MessageForOtherContactIsGotten;
 
 
         ClientMessengerService()
@@ -49,7 +50,7 @@ namespace AmChat.ClientServices
             TcpSettings = tcpSettings;
             User = new UserInfo();
 
-            UserContacts = new List<UserInfo>();
+            UserChats = new ObservableCollection<UserChat>();
 
             Commands = new List<Command>();
             InitializeCommands();
@@ -106,17 +107,17 @@ namespace AmChat.ClientServices
             }
         }
 
-        public void SendMessageToOtherUser(string message)
+        public void SendMessageToChat(string message)
         {
-            var messageToUser = new MessageToUser()
+            var messageToChat = new MessageToChat()
             {
                 FromUser = User,
-                ToUser = ChosenUser,
+                ToChat = ChosenChat,
                 Text = message,
             };
 
-            var messageToUserJson = JsonParser<MessageToUser>.OneObjectToJson(messageToUser);
-            var command = CommandConverter.CreateJsonMessageCommand("/sendmessagetouser", messageToUserJson);
+            var messageToUserJson = JsonParser<MessageToChat>.OneObjectToJson(messageToChat);
+            var command = CommandConverter.CreateJsonMessageCommand("/sendmessagetochat", messageToUserJson);
 
             SendMessage(command);
         }
@@ -136,7 +137,7 @@ namespace AmChat.ClientServices
             var correctContactList = new CorrectContactList();
             correctContactList.ContactListIsUpdated += UpdateContacts;
 
-            var messageFromContact = new MessageFromContact();
+            var messageFromContact = new MessageToCertainChat();
             messageFromContact.NewMessageIsGotten += ShowNewMessage;
 
             var serverError = new ServerError();
@@ -149,7 +150,7 @@ namespace AmChat.ClientServices
             Commands.Add(serverError);
         }
 
-        private void AddOneContact(UserInfo user)
+        private void AddOneContact(UserChat user)
         {
             ContactAdded(user);
         }
@@ -174,11 +175,12 @@ namespace AmChat.ClientServices
             ErrorIsGotten(errorText, false);
         }
 
-        private void ShowNewMessage(MessageToUser messageToShow)
+        private void ShowNewMessage(MessageToChat messageToShow)
         {
-            if (ChosenUser == null || !ChosenUser.Equals(messageToShow.FromUser)) 
+            // TO FIX
+            if (ChosenChat == null || !ChosenChat.Equals(messageToShow.ToChat)) 
             {
-                var userToShowMessage = UserContacts.Where(u => u.Equals(messageToShow.FromUser)).FirstOrDefault();
+                var userToShowMessage = UserChats.Where(u => u.Equals(messageToShow.ToChat)).FirstOrDefault();
 
                 if (userToShowMessage == null)
                 {
@@ -209,7 +211,7 @@ namespace AmChat.ClientServices
 
         private void UpdateContacts()
         {
-            ContactsReceived(UserContacts);
+            ContactsReceived(UserChats);
         }
     }
 }

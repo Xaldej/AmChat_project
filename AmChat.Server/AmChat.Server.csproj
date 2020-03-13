@@ -55,9 +55,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AddContact.cs" />
-    <Compile Include="Commands\GetConactList.cs" />
+    <Compile Include="Commands\GetChats.cs" />
     <Compile Include="Commands\Login.cs" />
-    <Compile Include="Commands\SendMessageToUser.cs" />
+    <Compile Include="Commands\SendMessageToChat.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerMessenger.cs" />

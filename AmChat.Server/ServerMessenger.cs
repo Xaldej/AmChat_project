@@ -4,6 +4,7 @@ using AmChat.Infrastructure.Interfaces;
 using AmChat.Server.Commands;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -14,15 +15,13 @@ namespace AlexeyMelentyevProject_ChatServer
     {
         public UserInfo User { get; set; }
 
-        public List<UserInfo> UserContacts { get; set; }
+        public ObservableCollection<UserChat> UserChats { get; set; }
 
         public TcpClient TcpClient { get; set; }
 
         NetworkStream Stream { get; set; }
 
         public List<Command> Commands { get; }
-
-        public Action<MessageToUser> NewMwssageForCertainUserIsGotten;
 
         public Action<ServerMessenger> ClientDisconnected;
 
@@ -38,7 +37,7 @@ namespace AlexeyMelentyevProject_ChatServer
 
             User = new UserInfo();
 
-            UserContacts = new List<UserInfo>();
+            UserChats = new ObservableCollection<UserChat>();
 
             Commands = new List<Command>();
 
@@ -84,24 +83,20 @@ namespace AlexeyMelentyevProject_ChatServer
             Stream.Write(data, 0, data.Length);
         }
 
-        public void SendMessageToOtherUser(MessageToUser message)
+        public void SendMessageToExistingChat(MessageToChat message)
         {
-            var messageToUser = JsonParser<MessageToUser>.OneObjectToJson(message);
-            var command = CommandConverter.CreateJsonMessageCommand("/messagefromcontact", messageToUser);
+            var messageToUser = JsonParser<MessageToChat>.OneObjectToJson(message);
+            var command = CommandConverter.CreateJsonMessageCommand("/messagetocertainchat", messageToUser);
             SendMessage(command);
         }
 
 
         private void InitializeCommands()
         {
-            var sendMessageToUser = new SendMessageToUser();
-            sendMessageToUser.MessageToUserIsGotten += SendMessageToContact;
-
-
             Commands.Add(new AddContact());
-            Commands.Add(new GetConactList());
+            Commands.Add(new GetChats());
             Commands.Add(new Login());
-            Commands.Add(sendMessageToUser);
+            Commands.Add(new SendMessageToChat());
         }
 
         private void ProcessMessage(string message)
@@ -121,11 +116,6 @@ namespace AlexeyMelentyevProject_ChatServer
             {
                 command.Execute(this, commandMessage.CommandData);
             }
-        }
-
-        private void SendMessageToContact(MessageToUser messageToSent)
-        {
-            NewMwssageForCertainUserIsGotten(messageToSent);
         }
     }
 }

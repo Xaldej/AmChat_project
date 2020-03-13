@@ -9,17 +9,17 @@ using System.Threading.Tasks;
 
 namespace AmChat.Server.Commands
 {
-    public class SendMessageToUser : Command
+    public class SendMessageToChat : Command
     {
-        public Action<MessageToUser> MessageToUserIsGotten;
-
-        public override string Name => "SendMessageToUser";
+        public override string Name => "SendMessageToChat";
 
         public override void Execute(IMessengerService messenger, string data)
         {
-            var messageToUser = JsonParser<MessageToUser>.JsonToOneObject(data);
+            var messageToChat = JsonParser<MessageToChat>.JsonToOneObject(data);
 
-            MessageToUserIsGotten(messageToUser);
+            var chat = messenger.UserChats.Where(c => c.Equals(messageToChat.ToChat)).FirstOrDefault();
+
+            chat.ChatMessages.Add(messageToChat);
         }
     }
 }

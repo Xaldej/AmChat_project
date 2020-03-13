@@ -14,9 +14,7 @@ namespace AmChat.Infrastructure
 
         public override bool Equals(object obj)
         {
-            UserInfo userToCompare = obj as UserInfo;
-
-            if(userToCompare==null)
+            if (!(obj is UserInfo userToCompare))
             {
                 return false;
             }

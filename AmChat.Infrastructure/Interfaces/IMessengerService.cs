@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -11,7 +12,7 @@ namespace AmChat.Infrastructure.Interfaces
     {
         UserInfo User { get; set; }
 
-        List<UserInfo> UserContacts { get; set; }
+        ObservableCollection<UserChat> UserChats { get; set; }
 
         TcpClient TcpClient { get; set; }
 

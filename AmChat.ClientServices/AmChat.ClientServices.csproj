@@ -46,7 +46,7 @@
     <Compile Include="Commands\CorrectAddingContact.cs" />
     <Compile Include="Commands\CorrectContactList.cs" />
     <Compile Include="Commands\CorrectLogin.cs" />
-    <Compile Include="Commands\MessageFromContact.cs" />
+    <Compile Include="Commands\MessageToCertainChat.cs" />
     <Compile Include="Commands\ServerError.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

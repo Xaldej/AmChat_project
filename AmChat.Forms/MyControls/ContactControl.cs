@@ -13,17 +13,26 @@ namespace AmChat.Forms.MyControls
 {
     public partial class ContactControl : UserControl
     {
-        public UserInfo User { get; set; }
+        public UserChat Chat { get; set; }
 
         public Action<ContactControl> ContactChosen;
 
-        public ContactControl(UserInfo user)
+        public ContactControl(UserChat chat, string userLogin)
         {
-            User = user;
+            Chat = chat;
 
             InitializeComponent();
 
-            ContactLogin_label.Text = User.Login;
+            ContactLogin_label.Text = GetCorrectChatName(userLogin);
+        }
+
+        private string GetCorrectChatName(string userLogin)
+        {
+            var fullChatName = Chat.Name;
+            var i = fullChatName.IndexOf(userLogin);
+            var correctChatName = fullChatName.Remove(i, userLogin.Length);
+
+            return correctChatName;
         }
 
         private void ContactControl_Click(object sender, EventArgs e)

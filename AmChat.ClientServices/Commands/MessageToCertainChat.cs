@@ -9,15 +9,15 @@ using System.Threading.Tasks;
 
 namespace AmChat.ClientServices.Commands
 {
-    class MessageFromContact : Command
+    class MessageToCertainChat : Command
     {
-        public Action<MessageToUser> NewMessageIsGotten;
+        public Action<MessageToChat> NewMessageIsGotten;
 
-        public override string Name => "MessageFromContact";
+        public override string Name => "MessageToCertainChat";
 
         public override void Execute(IMessengerService messenger, string data)
         {
-            var message = JsonParser<MessageToUser>.JsonToOneObject(data);
+            var message = JsonParser<MessageToChat>.JsonToOneObject(data);
 
             NewMessageIsGotten(message);
         }

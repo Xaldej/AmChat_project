@@ -9,47 +9,47 @@ namespace AmChat.ClientServices
 {
     public class ChatHistoryServise
     {
-        protected Dictionary<UserInfo, List<ChatHistoryMessage>> UsersChatHistory;
+        protected Dictionary<UserChat, List<ChatHistoryMessage>> UsersChatHistory;
 
         public ChatHistoryServise()
         {
-            UsersChatHistory = new Dictionary<UserInfo, List<ChatHistoryMessage>>();
+            UsersChatHistory = new Dictionary<UserChat, List<ChatHistoryMessage>>();
         }
 
-        public List<ChatHistoryMessage> GetHistory(UserInfo user)
+        public List<ChatHistoryMessage> GetHistory(UserChat chat)
         {
             List<ChatHistoryMessage> history;
 
-            if (UsersChatHistory.ContainsKey(user))
+            if (UsersChatHistory.ContainsKey(chat))
             {
-                history = UsersChatHistory[user];
+                history = UsersChatHistory[chat];
 
                 if (history.Count() == 0)
                 {
-                    history = GetHistoryFromServer(user);
+                    history = GetHistoryFromServer(chat);
                 }
             }
             else
             {
-                history = GetHistoryFromServer(user);
+                history = GetHistoryFromServer(chat);
 
-                UsersChatHistory.Add(user, history);
+                UsersChatHistory.Add(chat, history);
             }
 
             return history;
         }
 
-        public void SaveHistory(UserInfo user, string message, bool isMyMessage)
+        public void SaveHistory(UserChat chat, string message, bool isMyMessage)
         {
-            if(!UsersChatHistory.ContainsKey(user))
+            if(!UsersChatHistory.ContainsKey(chat))
             {
-                UsersChatHistory.Add(user, new List<ChatHistoryMessage>());
+                UsersChatHistory.Add(chat, new List<ChatHistoryMessage>());
             }
 
-            UsersChatHistory[user].Add(new ChatHistoryMessage(isMyMessage, message));
+            UsersChatHistory[chat].Add(new ChatHistoryMessage(isMyMessage, message));
         }
 
-        private List<ChatHistoryMessage> GetHistoryFromServer(UserInfo user)
+        private List<ChatHistoryMessage> GetHistoryFromServer(UserChat user)
         {
             //TO DO
 

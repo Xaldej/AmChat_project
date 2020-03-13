@@ -11,16 +11,16 @@ namespace AmChat.ClientServices.Commands
 {
     public class CorrectAddingContact : Command
     {
-        public Action<UserInfo> ContactIsGotten;
+        public Action<UserChat> ContactIsGotten;
 
         public override string Name => "CorrectAddingContact";
 
         public override void Execute(IMessengerService messenger, string data)
         {
-            var userToAdd = JsonParser<UserInfo>.JsonToOneObject(data);
+            var chatToAdd = JsonParser<UserChat>.JsonToOneObject(data);
 
-            messenger.UserContacts.Add(userToAdd);
-            ContactIsGotten(userToAdd);
+            messenger.UserChats.Add(chatToAdd);
+            ContactIsGotten(chatToAdd);
         }
     }
 }
