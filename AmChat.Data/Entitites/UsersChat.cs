@@ -7,14 +7,16 @@ using System.Threading.Tasks;
 
 namespace AmChat.Data.Entitites
 {
-    public class UsersChats : BaseEntity
+    public class UsersChat
     {
+        public int Id { get; set; }
+
+        public User User { get; set; }
+
         [Required]
         public Guid UserId { get; set; }
 
         [Required]
         public Guid ChatId { get; set; }
-
-        public ICollection<Chat> Chats { get; set; }
     }
 }

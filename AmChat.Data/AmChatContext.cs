@@ -19,8 +19,8 @@ namespace AmChat.Data
 
         public DbSet<User> Users { get; set; }
 
-        public DbSet<UsersChats> UsersChats { get; set; }
+        public DbSet<UsersChat> UsersChats { get; set; }
 
-        public DbSet<UsersInChat> UsersInChat { get; set; }
+        public DbSet<UserInChat> UsersInChat { get; set; }
     }
 }

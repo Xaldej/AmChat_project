@@ -25,6 +25,8 @@ namespace AlexeyMelentyevProject_ChatServer
 
         public Action<ServerMessenger> ClientDisconnected;
 
+        public Action<UserChat> NewChatIsCreated;
+
 
         ServerMessenger()
         {
@@ -93,15 +95,33 @@ namespace AlexeyMelentyevProject_ChatServer
 
         private void InitializeCommands()
         {
-            Commands.Add(new AddContact());
+            var addContact = new AddContact();
+            addContact.NewChatIsCreated += OnNewChatIsCreated;
+
+            Commands.Add(addContact);
             Commands.Add(new GetChats());
             Commands.Add(new Login());
             Commands.Add(new SendMessageToChat());
         }
 
+        private void OnNewChatIsCreated(UserChat chat)
+        {
+            NewChatIsCreated(chat);
+        }
+
         private void ProcessMessage(string message)
         {
-            var commandMessage = CommandConverter.GetCommandMessage(message);
+            CommandMessage commandMessage;
+            try
+            {
+                commandMessage = CommandConverter.GetCommandMessage(message);
+            }
+            catch
+            {
+                //TO DO: log errors
+                return;
+            }
+            
 
             var commandsToExecute = Commands.Where(c => c.CheckIsCalled(commandMessage.CommandName));
 

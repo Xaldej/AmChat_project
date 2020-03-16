@@ -14,5 +14,7 @@ namespace AmChat.Data.Entitites
         [MaxLength(255)]
         [Index(IsUnique = true)]
         public string Login { get; set; }
+
+        public ICollection<UsersChat> UsersChats { get; set; }
     }
 }

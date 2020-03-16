@@ -177,7 +177,6 @@ namespace AmChat.ClientServices
 
         private void ShowNewMessage(MessageToChat messageToShow)
         {
-            // TO FIX
             if (ChosenChat == null || !ChosenChat.Equals(messageToShow.ToChat)) 
             {
                 var userToShowMessage = UserChats.Where(u => u.Equals(messageToShow.ToChat)).FirstOrDefault();

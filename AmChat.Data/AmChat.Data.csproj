@@ -54,9 +54,9 @@
     <Compile Include="AmChatContext.cs" />
     <Compile Include="Entitites\BaseEntity.cs" />
     <Compile Include="Entitites\Chat.cs" />
-    <Compile Include="Entitites\UsersChats.cs" />
+    <Compile Include="Entitites\UsersChat.cs" />
     <Compile Include="Entitites\User.cs" />
-    <Compile Include="Entitites\UsersInChat.cs" />
+    <Compile Include="Entitites\UserInChat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
