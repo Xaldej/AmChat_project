@@ -123,7 +123,7 @@ namespace AmChat.ClientServices
             var messageToChat = new MessageToChat()
             {
                 FromUser = User,
-                ToChat = ChosenChat,
+                ToChatId = ChosenChat.Id,
                 Text = message,
             };
 
@@ -147,16 +147,11 @@ namespace AmChat.ClientServices
             var serverError = new ServerError();
             serverError.SendError += ShowError;
             
-            Commands.Add(new CorrectAddingContact());
+            Commands.Add(new ChatIsAdded());
             Commands.Add(new CorrectContactList());
             Commands.Add(new CorrectLogin());
             Commands.Add(new MessageToCertainChat());
             Commands.Add(serverError);
-        }
-
-        private void AddOneContact(UserChat user)
-        {
-            ContactAdded(user);
         }
 
         private void ConnectToServer()
@@ -194,9 +189,10 @@ namespace AmChat.ClientServices
             }
             else
             {
-                if (ChosenChat == null || !ChosenChat.Equals(messageToShow.ToChat))
+                
+                if (ChosenChat == null || ChosenChat.Id != messageToShow.ToChatId)
                 {
-                    var userToShowMessage = UserChats.Where(u => u.Equals(messageToShow.ToChat)).FirstOrDefault();
+                    var chatToShowMessage = UserChats.Where(c => c.Id == messageToShow.ToChatId).FirstOrDefault();
 
                     MessageForOtherContactIsGotten(messageToShow);
                 }

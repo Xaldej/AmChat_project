@@ -43,7 +43,7 @@
   <ItemGroup>
     <Compile Include="ChatHistoryServise.cs" />
     <Compile Include="ClientMessengerService.cs" />
-    <Compile Include="Commands\CorrectAddingContact.cs" />
+    <Compile Include="Commands\ChatIsAdded.cs" />
     <Compile Include="Commands\CorrectContactList.cs" />
     <Compile Include="Commands\CorrectLogin.cs" />
     <Compile Include="Commands\MessageToCertainChat.cs" />

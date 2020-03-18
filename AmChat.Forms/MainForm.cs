@@ -116,9 +116,7 @@ namespace AmChat.Forms
 
         private void ShowUnreadMessages(MessageToChat messageToShow)
         {
-            var fromChat = messageToShow.ToChat;
-
-            var contactControl = ContactsControls.Where(c => c.Chat.Equals(fromChat)).FirstOrDefault();
+            var contactControl = ContactsControls.Where(c => c.Chat.Id == messageToShow.ToChatId).FirstOrDefault();
 
             contactControl.ShowUnreadMessagesNotification();
         }

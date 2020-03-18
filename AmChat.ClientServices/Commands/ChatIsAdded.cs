@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace AmChat.ClientServices.Commands
 {
-    public class CorrectAddingContact : Command
+    public class ChatIsAdded : Command
     {
-        public override string Name => "CorrectAddingContact";
+        public override string Name => "ChatIsAdded";
 
         public override void Execute(IMessengerService messenger, string data)
         {

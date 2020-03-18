@@ -17,7 +17,7 @@ namespace AmChat.Server.Commands
         {
             var messageToChat = JsonParser<MessageToChat>.JsonToOneObject(data);
 
-            var chat = messenger.UserChats.Where(c => c.Equals(messageToChat.ToChat)).FirstOrDefault();
+            var chat = messenger.UserChats.Where(c => c.Id == messageToChat.ToChatId).FirstOrDefault();
 
             chat.ChatMessages.Add(messageToChat);
         }

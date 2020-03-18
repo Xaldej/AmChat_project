@@ -33,7 +33,7 @@ namespace AlexeyMelentyevProject_ChatServer
 
         }
 
-        public ServerMessenger(TcpClient tcpClient, List<ServerMessenger> connectedClients)
+        public ServerMessenger(TcpClient tcpClient)
         {
             TcpClient = tcpClient;
 
@@ -111,7 +111,7 @@ namespace AlexeyMelentyevProject_ChatServer
 
         private void ProcessMessage(string message)
         {
-            CommandMessage commandMessage;
+            CommandMessage commandMessage = new CommandMessage("/EmptyCommand", string.Empty); ;
             try
             {
                 commandMessage = CommandConverter.GetCommandMessage(message);
@@ -122,7 +122,11 @@ namespace AlexeyMelentyevProject_ChatServer
                 return;
             }
             
-
+            if(commandMessage==null)
+            {
+                return;
+                //TO DO: log errors
+            }
             var commandsToExecute = Commands.Where(c => c.CheckIsCalled(commandMessage.CommandName));
 
             if (commandsToExecute.Count() == 0)

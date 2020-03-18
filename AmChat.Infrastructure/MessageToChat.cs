@@ -10,7 +10,7 @@ namespace AmChat.Infrastructure
     {
         public UserInfo FromUser { get; set; }
 
-        public UserChat ToChat { get; set; }
+        public Guid ToChatId { get; set; }
 
         public string Text { get; set; }
     }

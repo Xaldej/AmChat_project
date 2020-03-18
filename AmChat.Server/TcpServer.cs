@@ -2,8 +2,10 @@
 using AmChat.Data;
 using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
+using AmChat.Infrastructure.Commands;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Linq;
@@ -17,7 +19,9 @@ namespace AmChat.Server
     {
         public List<ServerMessenger> ConnectedClients { get; set; }
 
-        List<UserChat> UsersChats { get; set; }
+        List<UserChat> ActiveChats { get; set; }
+
+        UserInfo ServerNotificationUser { get; set; }
 
         public ServerMessenger Messenger { get; set; }
 
@@ -32,16 +36,13 @@ namespace AmChat.Server
 
             ConnectedClients = new List<ServerMessenger>();
 
-            UsersChats = new List<UserChat>();
-        }
+            ActiveChats = new List<UserChat>();
 
-        public TcpServer(string ip, int port)
-        {
-            TcpSettings = new TcpSettings(ip, port);
-
-            ConnectedClients = new List<ServerMessenger>();
-
-            UsersChats = new List<UserChat>();
+            ServerNotificationUser = new UserInfo()
+            {
+                Id = Guid.NewGuid(),
+                Login = "Server Notification",
+            };
         }
 
         public void StartServer()
@@ -79,10 +80,10 @@ namespace AmChat.Server
 
         private void AddClient(TcpClient tcpClient)
         {
-            var client = new ServerMessenger(tcpClient, ConnectedClients);
+            var client = new ServerMessenger(tcpClient);
             client.UserChats.CollectionChanged += AddChat;
             client.ClientDisconnected += DeleteDisconnectedClient;
-            client.NewChatIsCreated += SendNotificationsAboutNewChat;
+            client.NewChatIsCreated += AddChatsForUsers;
 
             ConnectedClients.Add(client);
 
@@ -92,30 +93,79 @@ namespace AmChat.Server
             Console.WriteLine("client is connected");
         }
 
-        private void SendNotificationsAboutNewChat(UserChat chat)
+        private void AddChatsForUsers(UserChat chat)
         {
             foreach (var user in chat.UsersInChat)
             {
-                var message = new MessageToChat()
-                {
-                    ToChat = chat,
-                    Text = "New chat is created"
-                };
-
-                SendMessageToCertainUser(user, message);
+                AddChatToClientAndServerMessengers(chat, user);
+                SendNotificationAboutNewChat(chat, user);
             }
         }
 
+        private void SendNotificationAboutNewChat(UserChat chat, UserInfo user)
+        {
+            var message = new MessageToChat()
+            {
+                FromUser = ServerNotificationUser,
+                ToChatId = chat.Id,
+                Text = "New chat is created"
+            };
+
+            SendMessageToCertainUser(user, message);
+        }
+
+        private void AddChatToClientAndServerMessengers(UserChat chat, UserInfo user)
+        {
+            var serverChat = ConnectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
+
+            var isChatAlreadyInUserChats = serverChat.UserChats.Contains(chat);
+            if(!isChatAlreadyInUserChats)
+            {
+                serverChat.UserChats.Add(chat);
+            }
+
+            var chatJson = JsonParser<UserChat>.OneObjectToJson(chat);
+            var command = CommandConverter.CreateJsonMessageCommand("/chatisadded", chatJson);
+            SendCommandToCertainUser(user, command);
+        }
+
         private void AddChat(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    AddActiveChat(sender, e);
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+        }
+
+        private void AddActiveChat(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (!(e.NewItems[0] is UserChat chat))
             {
                 return;
             }
 
-            if (!UsersChats.Contains(chat))
+            if (ActiveChats.Contains(chat))
             {
-                UsersChats.Add(chat);
+                if (!(sender is ObservableCollection<UserChat> chatsCollection))
+                {
+                    return;
+                }
+
+                var existingChat = ActiveChats.Where(c => c.Equals(chat)).FirstOrDefault();
+
+                var i = chatsCollection.IndexOf(chat);
+                chatsCollection[i] = existingChat;
+            }
+            else
+            {
+                chat.ChatMessages = new ObservableCollection<MessageToChat>();
+                ActiveChats.Add(chat);
                 chat.ChatMessages.CollectionChanged += SendMessagesToUser;
             }
         }
@@ -127,7 +177,7 @@ namespace AmChat.Server
                 return;
             }
 
-            var chat = UsersChats.Where(c => c.Equals(messageToChat.ToChat)).FirstOrDefault();
+            var chat = ActiveChats.Where(c => c.Id ==messageToChat.ToChatId).FirstOrDefault();
 
             var usersToSend = chat.UsersInChat.Where(u => !u.Equals(messageToChat.FromUser)).ToList();
 
@@ -142,9 +192,20 @@ namespace AmChat.Server
             ConnectedClients.Remove(client);
         }
 
+
+
+        private void SendCommandToCertainUser(UserInfo userToSend, string command)
+        {
+            var clientToSend = ConnectedClients.Where(c => c.User.Equals(userToSend)).FirstOrDefault();
+
+            if (clientToSend != null)
+            {
+                clientToSend.SendMessage(command);
+            }
+        }
+
         private void SendMessageToCertainUser(UserInfo userToSend, MessageToChat messageToChat)
         {
-
             var clientToSend = ConnectedClients.Where(c => c.User.Equals(userToSend)).FirstOrDefault();
 
             if (clientToSend == null)
@@ -153,10 +214,6 @@ namespace AmChat.Server
             }
             else
             {
-                if (!clientToSend.UserChats.Contains(messageToChat.ToChat))
-                {
-                    clientToSend.UserChats.Add(messageToChat.ToChat);
-                }
                 clientToSend.SendMessageToExistingChat(messageToChat);
             }
         }

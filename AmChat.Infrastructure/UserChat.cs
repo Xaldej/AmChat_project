@@ -20,8 +20,6 @@ namespace AmChat.Infrastructure
         public UserChat()
         {
             UsersInChat = new List<UserInfo>();
-
-            ChatMessages = new ObservableCollection<MessageToChat>();
         }
 
         public override bool Equals(object obj)
