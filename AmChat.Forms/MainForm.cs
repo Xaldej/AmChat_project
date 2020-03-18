@@ -53,12 +53,6 @@ namespace AmChat.Forms
             Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.AppendText(message + "\n")));
         }
 
-        private void AddNewContactWithNewMessage(MessageToChat messageToShow)
-        {
-            AddContactToContactPanel(messageToShow.ToChat);
-            ShowUnreadMessages(messageToShow);
-        }
-
         private void ChangeContact(ContactControl contactControl)
         {
             var previousChosenControls = Contacts_panel.Controls.OfType<ContactControl>().Where(c => c.BackColor == Color.Silver);
@@ -83,12 +77,11 @@ namespace AmChat.Forms
             var tcpSettings = new TcpSettings(ip, port);
 
             MessengerService = new ClientMessengerService(tcpSettings);
-            MessengerService.ContactsReceived += UpdateContacts;
             MessengerService.ContactAdded += AddContactToContactPanel;
             MessengerService.ErrorIsGotten += ShowErrorToUser;
-            MessengerService.MessageForCurrentContactIsGotten += ShowMessageFromUser;
+            MessengerService.MessageForCurrentContactIsGotten += ShowMessageFromOtherUser;
             MessengerService.MessageForOtherContactIsGotten += ShowUnreadMessages;
-            MessengerService.MessageFromNewContactIsGotten += AddNewContactWithNewMessage;
+            MessengerService.MessageCorretlySend += ShowMessageToOtherUser;
 
             var thread = new Thread(MessengerService.Process);
             thread.Start();
@@ -110,17 +103,15 @@ namespace AmChat.Forms
             MessengerService.Login();
         }
 
-        private void ShowMessageFromUser(string message)
+        private void ShowMessageFromOtherUser(string message)
         {
             AddMessageToChat(message, HorizontalAlignment.Left);
-            ChatHistoryServise.SaveHistory(MessengerService.ChosenChat, message, false);
         }
 
-        private void ShowMessageToUser(string message)
+        private void ShowMessageToOtherUser(string message)
         {
             AddMessageToChat(message, HorizontalAlignment.Right);
             InputMessage_textBox.Clear();
-            ChatHistoryServise.SaveHistory(MessengerService.ChosenChat, message, true);
         }
 
         private void ShowUnreadMessages(MessageToChat messageToShow)
@@ -128,8 +119,6 @@ namespace AmChat.Forms
             var fromChat = messageToShow.ToChat;
 
             var contactControl = ContactsControls.Where(c => c.Chat.Equals(fromChat)).FirstOrDefault();
-
-            ChatHistoryServise.SaveHistory(fromChat, messageToShow.Text, false);
 
             contactControl.ShowUnreadMessagesNotification();
         }
@@ -151,19 +140,20 @@ namespace AmChat.Forms
 
             if (isUserInputCorrect)
             {
-                ShowMessageToUser(userInput);
-                try
-                {
-                    MessengerService.SendMessageToChat(userInput);
-                }
-                catch
-                {
+                MessengerService.SendMessageToChat(userInput);
+                //ShowMessageToUser(userInput);
+                //try
+                //{
+                //    MessengerService.SendMessageToChat(userInput);
+                //}
+                //catch (Exception e)
+                //{
 
-                    Chat_richTextBox.SelectionAlignment = HorizontalAlignment.Center;
-                    Chat_richTextBox.AppendText("------NO CONNECTION TO SERVER------\n" +
-                                                       "message is not sent\n" +
-                                                       "try to reconnect\n");
-                }
+                //    Chat_richTextBox.SelectionAlignment = HorizontalAlignment.Center;
+                //    Chat_richTextBox.AppendText("------NO CONNECTION TO SERVER------\n" +
+                //                                       "message is not sent\n" +
+                //                                       "try to reconnect\n");
+                //}
             }
         }
 
@@ -171,7 +161,7 @@ namespace AmChat.Forms
         {
             Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.Clear()));
 
-            var messagesHistory = ChatHistoryServise.GetHistory(MessengerService.ChosenChat);
+            var messagesHistory = ChatHistoryServise.GetHistory(MessengerService.ChosenChat, MessengerService);
 
             foreach (var historyMessage in messagesHistory)
             {
@@ -187,16 +177,6 @@ namespace AmChat.Forms
                 }
 
                 AddMessageToChat(historyMessage.Message, alignment);
-            }
-        }
-
-        private void UpdateContacts(ObservableCollection<UserChat> contacts)
-        {
-            Contacts_panel.Invoke(new Action(() => Contacts_panel.Controls.Clear()));
-
-            foreach (var contact in contacts)
-            {
-                AddContactToContactPanel(contact);
             }
         }
 

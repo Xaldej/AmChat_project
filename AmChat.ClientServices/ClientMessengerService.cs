@@ -5,6 +5,7 @@ using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -28,17 +29,15 @@ namespace AmChat.ClientServices
 
         public UserChat ChosenChat { get; set; }
 
+        public Action<UserChat> ContactAdded;
+
         public Action<string> MessageForCurrentContactIsGotten;
+
+        public Action<MessageToChat> MessageForOtherContactIsGotten;
 
         public Action<string, bool> ErrorIsGotten;
 
-        public Action<ObservableCollection<UserChat>> ContactsReceived;
-
-        public Action<UserChat> ContactAdded;
-
-        public Action<MessageToChat> MessageFromNewContactIsGotten;
-
-        public Action<MessageToChat> MessageForOtherContactIsGotten;
+        public Action<string> MessageCorretlySend;
 
 
         ClientMessengerService()
@@ -51,9 +50,21 @@ namespace AmChat.ClientServices
             User = new UserInfo();
 
             UserChats = new ObservableCollection<UserChat>();
+            UserChats.CollectionChanged += AddChatToContactList;
 
             Commands = new List<Command>();
             InitializeCommands();
+        }
+
+        private void AddChatToContactList(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (!(e.NewItems[0] is UserChat newChat))
+            {
+                return;
+            }
+
+            newChat.ChatMessages.CollectionChanged += ShowNewMessage;
+            ContactAdded(newChat);
         }
 
         public void AddContact(string userName)
@@ -120,6 +131,8 @@ namespace AmChat.ClientServices
             var command = CommandConverter.CreateJsonMessageCommand("/sendmessagetochat", messageToUserJson);
 
             SendMessage(command);
+
+            ChosenChat.ChatMessages.Add(messageToChat);
         }
 
         public void SendMessage(string message)
@@ -131,22 +144,13 @@ namespace AmChat.ClientServices
 
         private void InitializeCommands()
         {
-            var correctAddingContact = new CorrectAddingContact();
-            correctAddingContact.ContactIsGotten += AddOneContact;
-
-            var correctContactList = new CorrectContactList();
-            correctContactList.ContactListIsUpdated += UpdateContacts;
-
-            var messageFromContact = new MessageToCertainChat();
-            messageFromContact.NewMessageIsGotten += ShowNewMessage;
-
             var serverError = new ServerError();
             serverError.SendError += ShowError;
-
-            Commands.Add(correctAddingContact);
-            Commands.Add(correctContactList);
+            
+            Commands.Add(new CorrectAddingContact());
+            Commands.Add(new CorrectContactList());
             Commands.Add(new CorrectLogin());
-            Commands.Add(messageFromContact);
+            Commands.Add(new MessageToCertainChat());
             Commands.Add(serverError);
         }
 
@@ -175,24 +179,31 @@ namespace AmChat.ClientServices
             ErrorIsGotten(errorText, false);
         }
 
-        private void ShowNewMessage(MessageToChat messageToShow)
-        {
-            if (ChosenChat == null || !ChosenChat.Equals(messageToShow.ToChat)) 
-            {
-                var userToShowMessage = UserChats.Where(u => u.Equals(messageToShow.ToChat)).FirstOrDefault();
 
-                if (userToShowMessage == null)
-                {
-                    MessageFromNewContactIsGotten(messageToShow);
-                }
-                else
-                {
-                    MessageForOtherContactIsGotten(messageToShow);
-                }
+        private void ShowNewMessage(object sender, NotifyCollectionChangedEventArgs e)
+        {
+
+            if (!(e.NewItems[0] is MessageToChat messageToShow))
+            {
+                return;
+            }
+
+            if(messageToShow.FromUser.Equals(User))
+            {
+                MessageCorretlySend(messageToShow.Text);
             }
             else
             {
-                MessageForCurrentContactIsGotten(messageToShow.Text);
+                if (ChosenChat == null || !ChosenChat.Equals(messageToShow.ToChat))
+                {
+                    var userToShowMessage = UserChats.Where(u => u.Equals(messageToShow.ToChat)).FirstOrDefault();
+
+                    MessageForOtherContactIsGotten(messageToShow);
+                }
+                else
+                {
+                    MessageForCurrentContactIsGotten(messageToShow.Text);
+                }
             }
         }
 
@@ -206,11 +217,6 @@ namespace AmChat.ClientServices
             {
                 command.Execute(this, commandMessage.CommandData);
             }
-        }
-
-        private void UpdateContacts()
-        {
-            ContactsReceived(UserChats);
         }
     }
 }

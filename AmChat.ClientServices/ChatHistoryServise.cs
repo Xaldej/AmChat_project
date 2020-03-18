@@ -16,44 +16,28 @@ namespace AmChat.ClientServices
             UsersChatHistory = new Dictionary<UserChat, List<ChatHistoryMessage>>();
         }
 
-        public List<ChatHistoryMessage> GetHistory(UserChat chat)
+        public List<ChatHistoryMessage> GetHistory(UserChat chat, ClientMessengerService messenger)
         {
-            List<ChatHistoryMessage> history;
-
-            if (UsersChatHistory.ContainsKey(chat))
+            if (chat.ChatMessages.Count() == 0)
             {
-                history = UsersChatHistory[chat];
-
-                if (history.Count() == 0)
-                {
-                    history = GetHistoryFromServer(chat);
-                }
+                GetHistoryFromServer(chat);
             }
-            else
-            {
-                history = GetHistoryFromServer(chat);
+            var history = new List<ChatHistoryMessage>();
 
-                UsersChatHistory.Add(chat, history);
+            foreach (var message in chat.ChatMessages)
+            {
+                bool isMyMessage = message.FromUser.Equals(messenger.User);
+                var historyMessage = new ChatHistoryMessage(isMyMessage, message.Text);
+
+                history.Add(historyMessage);
             }
 
             return history;
         }
 
-        public void SaveHistory(UserChat chat, string message, bool isMyMessage)
-        {
-            if(!UsersChatHistory.ContainsKey(chat))
-            {
-                UsersChatHistory.Add(chat, new List<ChatHistoryMessage>());
-            }
-
-            UsersChatHistory[chat].Add(new ChatHistoryMessage(isMyMessage, message));
-        }
-
-        private List<ChatHistoryMessage> GetHistoryFromServer(UserChat user)
+        private void GetHistoryFromServer(UserChat user)
         {
             //TO DO
-
-            return new List<ChatHistoryMessage>();
         }
     }
 }

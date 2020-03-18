@@ -11,15 +11,14 @@ namespace AmChat.ClientServices.Commands
 {
     class MessageToCertainChat : Command
     {
-        public Action<MessageToChat> NewMessageIsGotten;
-
         public override string Name => "MessageToCertainChat";
 
         public override void Execute(IMessengerService messenger, string data)
         {
             var message = JsonParser<MessageToChat>.JsonToOneObject(data);
 
-            NewMessageIsGotten(message);
+            var chat = messenger.UserChats.Where(c => c.Equals(message.ToChat)).FirstOrDefault();
+            chat.ChatMessages.Add(message);
         }
     }
 }

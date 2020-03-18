@@ -12,15 +12,21 @@ namespace AmChat.ClientServices.Commands
 {
     public class CorrectContactList : Command
     {
-        public Action ContactListIsUpdated;
-
         public override string Name => "CorrectContactList";
 
         public override void Execute(IMessengerService messenger, string data)
         {   
             var chats = new ObservableCollection<UserChat>(JsonParser<IEnumerable<UserChat>>.JsonToOneObject(data));
-            messenger.UserChats = chats;
-            ContactListIsUpdated();
+
+            foreach (var chat in chats)
+            {
+                if(chat.ChatMessages==null)
+                {
+                    chat.ChatMessages = new ObservableCollection<MessageToChat>();
+                }
+
+                messenger.UserChats.Add(chat);
+            }
         }
     }
 }
