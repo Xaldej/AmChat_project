@@ -1,9 +1,7 @@
 ﻿using AmChat.Infrastructure;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AmChat.ClientServices
 {
@@ -18,10 +16,6 @@ namespace AmChat.ClientServices
 
         public List<ChatHistoryMessage> GetHistory(UserChat chat, ClientMessengerService messenger)
         {
-            if (chat.ChatMessages.Count() == 0)
-            {
-                GetHistoryFromServer(chat);
-            }
             var history = new List<ChatHistoryMessage>();
 
             foreach (var message in chat.ChatMessages)
@@ -33,11 +27,6 @@ namespace AmChat.ClientServices
             }
 
             return history;
-        }
-
-        private void GetHistoryFromServer(UserChat user)
-        {
-            //TO DO
         }
     }
 }

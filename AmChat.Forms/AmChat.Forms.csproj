@@ -53,6 +53,12 @@
     <Compile Include="AddContactForm.Designer.cs">
       <DependentUpon>AddContactForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ChatInfoWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChatInfoWindow.Designer.cs">
+      <DependentUpon>ChatInfoWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="LoginForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -75,6 +81,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="AddContactForm.resx">
       <DependentUpon>AddContactForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChatInfoWindow.resx">
+      <DependentUpon>ChatInfoWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>

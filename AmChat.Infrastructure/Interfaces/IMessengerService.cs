@@ -14,8 +14,6 @@ namespace AmChat.Infrastructure.Interfaces
 
         ObservableCollection<UserChat> UserChats { get; set; }
 
-        TcpClient TcpClient { get; set; }
-
         void ListenMessages();
 
         void SendMessage(string message);

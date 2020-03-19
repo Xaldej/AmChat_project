@@ -3,7 +3,6 @@ using AmChat.Forms.MyControls;
 using AmChat.Infrastructure;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data;
 using System.Drawing;
@@ -22,8 +21,6 @@ namespace AmChat.Forms
 
         List<ContactControl> ContactsControls { get; set; }
 
-        string UserLogin { get; set; }
-
         public MainForm()
         {
             InitializeComponent();
@@ -38,7 +35,7 @@ namespace AmChat.Forms
 
         private void AddContactToContactPanel(UserChat chat)
         {
-            var contactControl = new ContactControl(chat, UserLogin) { Dock = DockStyle.Top };
+            var contactControl = new ContactControl(chat) { Dock = DockStyle.Top };
 
             contactControl.ContactChosen += ChangeContact;
 
@@ -76,7 +73,7 @@ namespace AmChat.Forms
 
             var tcpSettings = new TcpSettings(ip, port);
 
-            MessengerService = new ClientMessengerService(tcpSettings);
+            MessengerService = new ClientMessengerService();
             MessengerService.ContactAdded += AddContactToContactPanel;
             MessengerService.ErrorIsGotten += ShowErrorToUser;
             MessengerService.MessageForCurrentContactIsGotten += ShowMessageFromOtherUser;
@@ -84,7 +81,7 @@ namespace AmChat.Forms
             MessengerService.MessageCorretlySend += ShowMessageToOtherUser;
             MessengerService.NewUnreadNotification += ShowUnreadNotification;
 
-            var thread = new Thread(MessengerService.Process);
+            var thread = new Thread(() => MessengerService.Process(tcpSettings));
             thread.Start();
         }
 
@@ -99,7 +96,6 @@ namespace AmChat.Forms
 
         private void Login(string userLogin)
         {
-            UserLogin = userLogin;
             MessengerService.User.Login = userLogin;
             MessengerService.Login();
         }

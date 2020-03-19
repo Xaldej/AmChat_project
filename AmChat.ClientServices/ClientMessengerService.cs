@@ -9,7 +9,6 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AmChat.ClientServices
 {
@@ -20,8 +19,6 @@ namespace AmChat.ClientServices
         public ObservableCollection<UserChat> UserChats { get; set; }
 
         public TcpClient TcpClient { get; set; }
-
-        public TcpSettings TcpSettings { get; set; }
 
         public List<Command> Commands { get; }
 
@@ -42,13 +39,8 @@ namespace AmChat.ClientServices
         public Action<Guid> NewUnreadNotification;
 
 
-        ClientMessengerService()
+        public ClientMessengerService()
         {
-        }
-
-        public ClientMessengerService(TcpSettings tcpSettings)
-        {
-            TcpSettings = tcpSettings;
             User = new UserInfo();
 
             UserChats = new ObservableCollection<UserChat>();
@@ -71,7 +63,13 @@ namespace AmChat.ClientServices
 
         public void AddContact(string userName)
         {
-            var command = CommandConverter.CreateJsonMessageCommand("/addcontact", userName);
+            var userLogins = new List<string>()
+            {
+                userName,
+            };
+            var newChat = new NewChatInfo(userName, userLogins);
+            var newChatJson = JsonParser<NewChatInfo>.OneObjectToJson(newChat);
+            var command = CommandConverter.CreateJsonMessageCommand("/addnewchat", newChatJson);
             SendMessage(command);
         }
 
@@ -107,9 +105,9 @@ namespace AmChat.ClientServices
             SendMessage(command);
         }
 
-        public void Process()
+        public void Process(TcpSettings tcpSettings)
         {
-            ConnectToServer();
+            ConnectToServer(tcpSettings);
 
             using (Stream = TcpClient.GetStream())
             {
@@ -150,7 +148,7 @@ namespace AmChat.ClientServices
             serverError.SendError += ShowError;
 
             var unreadMessagesInChat = new UnreadMessagesInChat();
-            unreadMessagesInChat.NewUnreadNotification += onNewUnreadNotification;
+            unreadMessagesInChat.NewUnreadNotification += OnNewUnreadNotification;
 
 
             Commands.Add(new ChatIsAdded());
@@ -161,18 +159,18 @@ namespace AmChat.ClientServices
             Commands.Add(unreadMessagesInChat);
         }
 
-        private void onNewUnreadNotification(Guid chatId)
+        private void OnNewUnreadNotification(Guid chatId)
         {
             NewUnreadNotification(chatId);
         }
 
-        private void ConnectToServer()
+        private void ConnectToServer(TcpSettings tcpSettings)
         {
             TcpClient = new TcpClient();
 
             try
             {
-                TcpClient.Connect(TcpSettings.EndPoint);
+                TcpClient.Connect(tcpSettings.EndPoint);
             }
             catch
             {

@@ -10,8 +10,6 @@ namespace AmChat.Data.Entitites
     {
         public string Name { get; set; }
 
-        public bool IsMultipleUsersChat { get; set; }
-
         public ICollection<UserInChat> UsersInChat { get; set; }
     }
 }

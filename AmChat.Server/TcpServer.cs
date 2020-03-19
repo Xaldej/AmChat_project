@@ -1,8 +1,5 @@
 ﻿using AlexeyMelentyevProject_ChatServer;
-using AmChat.Data;
-using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
-using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -10,7 +7,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -138,6 +134,8 @@ namespace AmChat.Server
         {
             var clientToRemove = ConnectedClients.Where(c => c.Equals(client)).FirstOrDefault();
             ConnectedClients.Remove(clientToRemove);
+
+            //TO DO: check if server should delete any of active chat and save its messages to DB
         }
     }
 }
