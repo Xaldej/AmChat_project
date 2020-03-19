@@ -3,6 +3,7 @@ using AmChat.Data;
 using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
+using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -82,6 +83,7 @@ namespace AmChat.Server
             client.UserChats.CollectionChanged += OnUserChatsChanged;
             client.ClientDisconnected += DeleteDisconnectedClient;
             client.NewChatIsCreated += ChatsMaintenanceService.AddChatsForUsers;
+            client.UnreadMessagesAreAsked += ChatsMaintenanceService.SendUnreadMessages;
 
             ConnectedClients.Add(client);
 
@@ -128,13 +130,14 @@ namespace AmChat.Server
             {
                 chat.ChatMessages = new ObservableCollection<MessageToChat>();
                 ActiveChats.Add(chat);
-                chat.ChatMessages.CollectionChanged += ChatsMaintenanceService.SendMessagesToUser;
+                chat.ChatMessages.CollectionChanged += ChatsMaintenanceService.SendNewMessageToUsers;
             }
         }
 
-        private void DeleteDisconnectedClient(ServerMessenger client)
+        private void DeleteDisconnectedClient(IMessengerService client)
         {
-            ConnectedClients.Remove(client);
+            var clientToRemove = ConnectedClients.Where(c => c.Equals(client)).FirstOrDefault();
+            ConnectedClients.Remove(clientToRemove);
         }
     }
 }

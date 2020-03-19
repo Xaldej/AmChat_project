@@ -18,7 +18,7 @@ namespace AmChat.Server
 
         UserInfo ServerNotificationUser { get; set; }
 
-        List<MessageToChat> UnreadMessages { get; set; }
+        List<UnreadNotification> UnreadNotifications { get; set; }
 
         public ChatsMaintenanceService(List<UserChat> activeChats, List<ServerMessenger> connectedClients)
         {
@@ -26,7 +26,7 @@ namespace AmChat.Server
             
             ConnectedClients = connectedClients;
 
-            UnreadMessages = new List<MessageToChat>();
+            UnreadNotifications = new List<UnreadNotification>();
 
             ServerNotificationUser = new UserInfo()
             {
@@ -47,6 +47,11 @@ namespace AmChat.Server
         public void AddChatToClientAndServerMessengers(UserChat chat, UserInfo user)
         {
             var serverChat = ConnectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
+
+            if(serverChat==null)
+            {
+                return;
+            }
 
             var isChatAlreadyInUserChats = serverChat.UserChats.Contains(chat);
             if (!isChatAlreadyInUserChats)
@@ -69,19 +74,43 @@ namespace AmChat.Server
             }
         }
 
+        
+
         public void SendMessageToCertainUser(UserInfo userToSend, MessageToChat messageToChat)
         {
             var clientToSend = ConnectedClients.Where(c => c.User.Equals(userToSend)).FirstOrDefault();
 
             if (clientToSend == null)
             {
-                UnreadMessages.Add(messageToChat);
-                //TO DO: save messages to DB if thera too many messages
+                var unreadNotification = new UnreadNotification(userToSend, messageToChat.ToChatId);
+
+                UnreadNotifications.Add(unreadNotification);
             }
             else
             {
                 clientToSend.SendMessageToExistingChat(messageToChat);
             }
+        }
+
+        public void SendUnreadMessages(UserInfo user)
+        {
+            var unreadNotificationForUser = UnreadNotifications.Where(m => m.ForUser.Equals(user));
+
+            foreach (var unreadNotification in unreadNotificationForUser)
+            {
+                unreadNotification.IsSent = true;
+                try
+                {
+                    var command = CommandConverter.CreateJsonMessageCommand("/unreadmessagesinchat", unreadNotification.ToChatId.ToString());
+                    SendCommandToCertainUser(user, command);
+                }
+                catch
+                {
+                    unreadNotification.IsSent = false;
+                }
+            }
+
+            UnreadNotifications.RemoveAll(m => m.IsSent);
         }
 
         public void SendNotificationAboutNewChat(UserChat chat, UserInfo user)
@@ -96,7 +125,7 @@ namespace AmChat.Server
             SendMessageToCertainUser(user, message);
         }
 
-        public void SendMessagesToUser(object sender, NotifyCollectionChangedEventArgs e)
+        public void SendNewMessageToUsers(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (!(e.NewItems[0] is MessageToChat messageToChat))
             {

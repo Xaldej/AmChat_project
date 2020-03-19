@@ -23,9 +23,11 @@ namespace AlexeyMelentyevProject_ChatServer
 
         public List<Command> Commands { get; }
 
-        public Action<ServerMessenger> ClientDisconnected;
+        public Action<IMessengerService> ClientDisconnected;
 
         public Action<UserChat> NewChatIsCreated;
+
+        public Action<UserInfo> UnreadMessagesAreAsked;
 
 
         ServerMessenger()
@@ -98,10 +100,28 @@ namespace AlexeyMelentyevProject_ChatServer
             var addContact = new AddContact();
             addContact.NewChatIsCreated += OnNewChatIsCreated;
 
+            var closeConnection = new CloseConnection();
+            closeConnection.ConnectionIsClosed += DisconnectClient;
+
+            var getUnreadMessages = new GetUnreadMessages();
+            getUnreadMessages.UnreadMessagesAreAsked += OnUnreadMessagesAreAsked;
+
             Commands.Add(addContact);
+            Commands.Add(closeConnection);
             Commands.Add(new GetChats());
             Commands.Add(new Login());
             Commands.Add(new SendMessageToChat());
+            Commands.Add(getUnreadMessages);
+        }
+
+        private void DisconnectClient(IMessengerService messenger)
+        {
+            ClientDisconnected(messenger);
+        }
+
+        private void OnUnreadMessagesAreAsked(UserInfo user)
+        {
+            UnreadMessagesAreAsked(user);
         }
 
         private void OnNewChatIsCreated(UserChat chat)
@@ -122,6 +142,11 @@ namespace AlexeyMelentyevProject_ChatServer
                 return;
             }
 
+            if(commandMessage == null)
+            {
+                //TO DO: log errors
+                return;
+            }
             var commandsToExecute = Commands.Where(c => c.CheckIsCalled(commandMessage.CommandName));
 
             if (commandsToExecute.Count() == 0)

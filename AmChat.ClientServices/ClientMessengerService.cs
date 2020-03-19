@@ -39,6 +39,8 @@ namespace AmChat.ClientServices
 
         public Action<string> MessageCorretlySend;
 
+        public Action<Guid> NewUnreadNotification;
+
 
         ClientMessengerService()
         {
@@ -146,12 +148,22 @@ namespace AmChat.ClientServices
         {
             var serverError = new ServerError();
             serverError.SendError += ShowError;
-            
+
+            var unreadMessagesInChat = new UnreadMessagesInChat();
+            unreadMessagesInChat.NewUnreadNotification += onNewUnreadNotification;
+
+
             Commands.Add(new ChatIsAdded());
             Commands.Add(new CorrectContactList());
             Commands.Add(new CorrectLogin());
             Commands.Add(new MessageToCertainChat());
             Commands.Add(serverError);
+            Commands.Add(unreadMessagesInChat);
+        }
+
+        private void onNewUnreadNotification(Guid chatId)
+        {
+            NewUnreadNotification(chatId);
         }
 
         private void ConnectToServer()
@@ -213,6 +225,12 @@ namespace AmChat.ClientServices
             {
                 command.Execute(this, commandMessage.CommandData);
             }
+        }
+
+        public void CloseConnection()
+        {
+            var command = CommandConverter.CreateJsonMessageCommand("/closeconnection", string.Empty);
+            SendMessage(command);
         }
     }
 }

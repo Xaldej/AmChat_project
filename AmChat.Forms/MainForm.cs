@@ -82,6 +82,7 @@ namespace AmChat.Forms
             MessengerService.MessageForCurrentContactIsGotten += ShowMessageFromOtherUser;
             MessengerService.MessageForOtherContactIsGotten += ShowUnreadMessages;
             MessengerService.MessageCorretlySend += ShowMessageToOtherUser;
+            MessengerService.NewUnreadNotification += ShowUnreadNotification;
 
             var thread = new Thread(MessengerService.Process);
             thread.Start();
@@ -121,6 +122,13 @@ namespace AmChat.Forms
             contactControl.ShowUnreadMessagesNotification();
         }
 
+        private void ShowUnreadNotification(Guid chatId)
+        {
+            var contactControl = ContactsControls.Where(c => c.Chat.Id == chatId).FirstOrDefault();
+
+            contactControl.ShowUnreadMessagesNotification();
+        }
+
         private void ShowErrorToUser(string errorText, bool exitApp)
         {
             MessageBox.Show(errorText, "Error");
@@ -139,19 +147,6 @@ namespace AmChat.Forms
             if (isUserInputCorrect)
             {
                 MessengerService.SendMessageToChat(userInput);
-                //ShowMessageToUser(userInput);
-                //try
-                //{
-                //    MessengerService.SendMessageToChat(userInput);
-                //}
-                //catch (Exception e)
-                //{
-
-                //    Chat_richTextBox.SelectionAlignment = HorizontalAlignment.Center;
-                //    Chat_richTextBox.AppendText("------NO CONNECTION TO SERVER------\n" +
-                //                                       "message is not sent\n" +
-                //                                       "try to reconnect\n");
-                //}
             }
         }
 
@@ -219,6 +214,7 @@ namespace AmChat.Forms
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            MessengerService.CloseConnection();
             //TO DO: stop all threads
         }
 

@@ -27,6 +27,9 @@ namespace AmChat.ClientServices.Commands
 
                 messenger.UserChats.Add(chat);
             }
+
+            var command = CommandConverter.CreateJsonMessageCommand("/getunreadmessages", string.Empty);
+            messenger.SendMessage(command);
         }
     }
 }
