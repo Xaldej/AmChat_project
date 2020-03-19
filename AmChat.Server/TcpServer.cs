@@ -12,6 +12,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace AmChat.Server
 {
@@ -60,9 +61,9 @@ namespace AmChat.Server
                 while (true)
                 {
                     TcpClient tcpClient = server.AcceptTcpClient();
-
-                    // async?
-                    AddClient(tcpClient);
+                    
+                    Task.Run(()=>AddClient(tcpClient));
+                    
                 }
             }
             catch (Exception e)

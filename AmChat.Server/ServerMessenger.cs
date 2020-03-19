@@ -121,12 +121,7 @@ namespace AlexeyMelentyevProject_ChatServer
                 //TO DO: log errors
                 return;
             }
-            
-            if(commandMessage==null)
-            {
-                return;
-                //TO DO: log errors
-            }
+
             var commandsToExecute = Commands.Where(c => c.CheckIsCalled(commandMessage.CommandName));
 
             if (commandsToExecute.Count() == 0)
