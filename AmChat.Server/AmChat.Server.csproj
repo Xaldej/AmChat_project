@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChatsMaintenanceService.cs" />
     <Compile Include="Commands\AddContact.cs" />
     <Compile Include="Commands\GetChats.cs" />
     <Compile Include="Commands\Login.cs" />

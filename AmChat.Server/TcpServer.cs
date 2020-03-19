@@ -18,11 +18,11 @@ namespace AmChat.Server
 {
     public class TcpServer
     {
-        public List<ServerMessenger> ConnectedClients { get; set; }
-
         List<UserChat> ActiveChats { get; set; }
 
-        UserInfo ServerNotificationUser { get; set; }
+        public List<ServerMessenger> ConnectedClients { get; set; }
+
+        ChatsMaintenanceService ChatsMaintenanceService { get; set; }
 
         public ServerMessenger Messenger { get; set; }
 
@@ -39,11 +39,7 @@ namespace AmChat.Server
 
             ActiveChats = new List<UserChat>();
 
-            ServerNotificationUser = new UserInfo()
-            {
-                Id = Guid.NewGuid(),
-                Login = "Server Notification",
-            };
+            ChatsMaintenanceService = new ChatsMaintenanceService(ActiveChats, ConnectedClients);
         }
 
         public void StartServer()
@@ -79,12 +75,13 @@ namespace AmChat.Server
             }
         }
 
+
         private void AddClient(TcpClient tcpClient)
         {
             var client = new ServerMessenger(tcpClient);
-            client.UserChats.CollectionChanged += AddChat;
+            client.UserChats.CollectionChanged += OnUserChatsChanged;
             client.ClientDisconnected += DeleteDisconnectedClient;
-            client.NewChatIsCreated += AddChatsForUsers;
+            client.NewChatIsCreated += ChatsMaintenanceService.AddChatsForUsers;
 
             ConnectedClients.Add(client);
 
@@ -94,43 +91,7 @@ namespace AmChat.Server
             Console.WriteLine("client is connected");
         }
 
-        private void AddChatsForUsers(UserChat chat)
-        {
-            foreach (var user in chat.UsersInChat)
-            {
-                AddChatToClientAndServerMessengers(chat, user);
-                SendNotificationAboutNewChat(chat, user);
-            }
-        }
-
-        private void SendNotificationAboutNewChat(UserChat chat, UserInfo user)
-        {
-            var message = new MessageToChat()
-            {
-                FromUser = ServerNotificationUser,
-                ToChatId = chat.Id,
-                Text = "New chat is created"
-            };
-
-            SendMessageToCertainUser(user, message);
-        }
-
-        private void AddChatToClientAndServerMessengers(UserChat chat, UserInfo user)
-        {
-            var serverChat = ConnectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
-
-            var isChatAlreadyInUserChats = serverChat.UserChats.Contains(chat);
-            if(!isChatAlreadyInUserChats)
-            {
-                serverChat.UserChats.Add(chat);
-            }
-
-            var chatJson = JsonParser<UserChat>.OneObjectToJson(chat);
-            var command = CommandConverter.CreateJsonMessageCommand("/chatisadded", chatJson);
-            SendCommandToCertainUser(user, command);
-        }
-
-        private void AddChat(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnUserChatsChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -167,56 +128,13 @@ namespace AmChat.Server
             {
                 chat.ChatMessages = new ObservableCollection<MessageToChat>();
                 ActiveChats.Add(chat);
-                chat.ChatMessages.CollectionChanged += SendMessagesToUser;
-            }
-        }
-
-        private void SendMessagesToUser(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (!(e.NewItems[0] is MessageToChat messageToChat))
-            {
-                return;
-            }
-
-            var chat = ActiveChats.Where(c => c.Id ==messageToChat.ToChatId).FirstOrDefault();
-
-            var usersToSend = chat.UsersInChat.Where(u => !u.Equals(messageToChat.FromUser)).ToList();
-
-            foreach(var user in usersToSend)
-            {
-                SendMessageToCertainUser(user, messageToChat);
+                chat.ChatMessages.CollectionChanged += ChatsMaintenanceService.SendMessagesToUser;
             }
         }
 
         private void DeleteDisconnectedClient(ServerMessenger client)
         {
             ConnectedClients.Remove(client);
-        }
-
-
-
-        private void SendCommandToCertainUser(UserInfo userToSend, string command)
-        {
-            var clientToSend = ConnectedClients.Where(c => c.User.Equals(userToSend)).FirstOrDefault();
-
-            if (clientToSend != null)
-            {
-                clientToSend.SendMessage(command);
-            }
-        }
-
-        private void SendMessageToCertainUser(UserInfo userToSend, MessageToChat messageToChat)
-        {
-            var clientToSend = ConnectedClients.Where(c => c.User.Equals(userToSend)).FirstOrDefault();
-
-            if (clientToSend == null)
-            {
-                //TO DO: save to DB
-            }
-            else
-            {
-                clientToSend.SendMessageToExistingChat(messageToChat);
-            }
         }
     }
 }
