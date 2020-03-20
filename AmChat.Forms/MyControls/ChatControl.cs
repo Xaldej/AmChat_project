@@ -1,38 +1,44 @@
 ﻿using AmChat.Infrastructure;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Data;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace AmChat.Forms.MyControls
 {
-    public partial class ContactControl : UserControl
+    public partial class ChatControl : UserControl
     {
         public ChatInfoWindow ChatInfoWindow { get; set; }
 
         public UserChat Chat { get; set; }
 
-        public Action<ContactControl> ContactChosen;
+        public Action<ChatControl> ChatChosen;
 
-        public ContactControl(UserChat chat)
+        public Action<UserChat, List<string>> NewChatLoginsEntered;
+
+        public ChatControl(UserChat chat)
         {
             Chat = chat;
 
             InitializeComponent();
 
             ChatInfoWindow = new ChatInfoWindow(Chat);
+            ChatInfoWindow.NewChatLoginsEntered += OnNewChatLoginsEntered;
 
             ContactLogin_label.Text = chat.Name;
         }
 
+        private void OnNewChatLoginsEntered(List<string> loginsToAdd)
+        {
+            NewChatLoginsEntered(Chat, loginsToAdd);
+        }
+
         private void ContactControl_Click(object sender, EventArgs e)
         {
-            ContactChosen(this);
+            ChatChosen(this);
             BackColor = Color.Silver;
             ContactLogin_label.Font = new Font(FontFamily.GenericSansSerif, 12, FontStyle.Regular);
         }

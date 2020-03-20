@@ -19,40 +19,46 @@ namespace AmChat.Forms
 
         private ChatHistoryServise ChatHistoryServise { get; set; }
 
-        List<ContactControl> ContactsControls { get; set; }
+        List<ChatControl> ChatsControls { get; set; }
 
         public MainForm()
         {
             InitializeComponent();
 
-            ContactsControls = new List<ContactControl>();
+            ChatsControls = new List<ChatControl>();
         }
 
-        private void AddContact(string userName)
+        private void AddChat(string chatName, List<string> userLoginsToAdd)
         {
-            MessengerService.AddContact(userName);
+            MessengerService.AddChat(chatName, userLoginsToAdd);
         }
 
-        private void AddContactToContactPanel(UserChat chat)
+        private void AddChatToContactPanel(UserChat chat)
         {
-            var contactControl = new ContactControl(chat) { Dock = DockStyle.Top };
+            var chatControl = new ChatControl(chat) { Dock = DockStyle.Top };
 
-            contactControl.ContactChosen += ChangeContact;
+            chatControl.ChatChosen += ChangeChat;
+            chatControl.NewChatLoginsEntered += AddUsersToChat;
 
-            Contacts_panel.Invoke(new Action(() => Contacts_panel.Controls.Add(contactControl)));
+            Chats_panel.Invoke(new Action(() => Chats_panel.Controls.Add(chatControl)));
 
-            ContactsControls.Add(contactControl);
+            ChatsControls.Add(chatControl);
+        }
+
+        private void AddUsersToChat(UserChat chat, List<string> userLoginsToAdd)
+        {
+            MessengerService.AddUsersToChat(chat, userLoginsToAdd);
         }
 
         private void AddMessageToChat(string message, HorizontalAlignment alignment)
         {
             Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.SelectionAlignment = alignment));
-            Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.AppendText(message + "\n")));
+            Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.AppendText(message + "\n\n")));
         }
 
-        private void ChangeContact(ContactControl contactControl)
+        private void ChangeChat(ChatControl chatControl)
         {
-            var previousChosenControls = Contacts_panel.Controls.OfType<ContactControl>().Where(c => c.BackColor == Color.Silver);
+            var previousChosenControls = Chats_panel.Controls.OfType<ChatControl>().Where(c => c.BackColor == Color.Silver);
 
             foreach (var control in previousChosenControls)
             {
@@ -61,7 +67,7 @@ namespace AmChat.Forms
 
             Chat_panel.Enabled = true;
 
-            MessengerService.ChosenChat = contactControl.Chat;
+            MessengerService.ChosenChat = chatControl.Chat;
 
             UpdateChatHistory();
         }
@@ -74,10 +80,10 @@ namespace AmChat.Forms
             var tcpSettings = new TcpSettings(ip, port);
 
             MessengerService = new ClientMessengerService();
-            MessengerService.ContactAdded += AddContactToContactPanel;
+            MessengerService.ChatAdded += AddChatToContactPanel;
             MessengerService.ErrorIsGotten += ShowErrorToUser;
-            MessengerService.MessageForCurrentContactIsGotten += ShowMessageFromOtherUser;
-            MessengerService.MessageForOtherContactIsGotten += ShowUnreadMessages;
+            MessengerService.MessageToCurrentChatIsGotten += ShowMessageFromOtherUser;
+            MessengerService.MessageToOtherChatIsGotten += ShowUnreadMessages;
             MessengerService.MessageCorretlySend += ShowMessageToOtherUser;
             MessengerService.NewUnreadNotification += ShowUnreadNotification;
 
@@ -113,16 +119,16 @@ namespace AmChat.Forms
 
         private void ShowUnreadMessages(MessageToChat messageToShow)
         {
-            var contactControl = ContactsControls.Where(c => c.Chat.Id == messageToShow.ToChatId).FirstOrDefault();
+            var chatControl = ChatsControls.Where(c => c.Chat.Id == messageToShow.ToChatId).FirstOrDefault();
 
-            contactControl.ShowUnreadMessagesNotification();
+            chatControl.ShowUnreadMessagesNotification();
         }
 
         private void ShowUnreadNotification(Guid chatId)
         {
-            var contactControl = ContactsControls.Where(c => c.Chat.Id == chatId).FirstOrDefault();
+            var chatControl = ChatsControls.Where(c => c.Chat.Id == chatId).FirstOrDefault();
 
-            contactControl.ShowUnreadMessagesNotification();
+            chatControl.ShowUnreadMessagesNotification();
         }
 
         private void ShowErrorToUser(string errorText, bool exitApp)
@@ -182,13 +188,13 @@ namespace AmChat.Forms
         }
 
 
-        private void AddContact_button_Click(object sender, EventArgs e)
+        private void AddChat_button_Click(object sender, EventArgs e)
         {
-            var addContactForm = new AddContactForm();
+            var addChatForm = new AddChatAdnUsersForm();
 
-            addContactForm.LoginToAddIsEntered += AddContact;
+            addChatForm.NewChatInfoEntered += AddChat;
 
-            addContactForm.ShowDialog();
+            addChatForm.ShowDialog();
         }
 
         private void AM_Chat_Load(object sender, EventArgs e)

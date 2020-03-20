@@ -1,6 +1,6 @@
 ﻿namespace AmChat.Forms.MyControls
 {
-    partial class ContactControl
+    partial class ChatControl
     {
         /// <summary> 
         /// Required designer variable.

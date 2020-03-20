@@ -47,11 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddContactForm.cs">
+    <Compile Include="AddChatAdnUsersForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AddContactForm.Designer.cs">
-      <DependentUpon>AddContactForm.cs</DependentUpon>
+    <Compile Include="AddChatAdnUsersForm.Designer.cs">
+      <DependentUpon>AddChatAdnUsersForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ChatInfoWindow.cs">
       <SubType>Form</SubType>
@@ -71,16 +71,16 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MyControls\ContactControl.cs">
+    <Compile Include="MyControls\ChatControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MyControls\ContactControl.Designer.cs">
-      <DependentUpon>ContactControl.cs</DependentUpon>
+    <Compile Include="MyControls\ChatControl.Designer.cs">
+      <DependentUpon>ChatControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="AddContactForm.resx">
-      <DependentUpon>AddContactForm.cs</DependentUpon>
+    <EmbeddedResource Include="AddChatAdnUsersForm.resx">
+      <DependentUpon>AddChatAdnUsersForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ChatInfoWindow.resx">
       <DependentUpon>ChatInfoWindow.cs</DependentUpon>
@@ -91,8 +91,8 @@
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MyControls\ContactControl.resx">
-      <DependentUpon>ContactControl.cs</DependentUpon>
+    <EmbeddedResource Include="MyControls\ChatControl.resx">
+      <DependentUpon>ChatControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

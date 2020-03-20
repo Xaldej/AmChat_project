@@ -26,11 +26,11 @@ namespace AmChat.ClientServices
 
         public UserChat ChosenChat { get; set; }
 
-        public Action<UserChat> ContactAdded;
+        public Action<UserChat> ChatAdded;
 
-        public Action<string> MessageForCurrentContactIsGotten;
+        public Action<string> MessageToCurrentChatIsGotten;
 
-        public Action<MessageToChat> MessageForOtherContactIsGotten;
+        public Action<MessageToChat> MessageToOtherChatIsGotten;
 
         public Action<string, bool> ErrorIsGotten;
 
@@ -58,16 +58,23 @@ namespace AmChat.ClientServices
             }
 
             newChat.ChatMessages.CollectionChanged += ShowNewMessage;
-            ContactAdded(newChat);
+            ChatAdded(newChat);
         }
 
-        public void AddContact(string userName)
+        public void AddUsersToChat(UserChat chat, List<string> userLoginsToAdd)
         {
-            var userLogins = new List<string>()
+            var newChatInfo = new NewChatInfo()
             {
-                userName,
+                Id = chat.Id,
+                LoginsToAdd = userLoginsToAdd,
             };
-            var newChat = new NewChatInfo(userName, userLogins);
+            var newChatInfoJsont = JsonParser<NewChatInfo>.OneObjectToJson(newChatInfo);
+            var command = CommandConverter.CreateJsonMessageCommand("/adduserstochat", newChatInfoJsont);
+        }
+
+        public void AddChat(string chatName, List<string> userLoginsToAdd)
+        {
+            var newChat = new NewChatInfo(chatName, userLoginsToAdd);
             var newChatJson = JsonParser<NewChatInfo>.OneObjectToJson(newChat);
             var command = CommandConverter.CreateJsonMessageCommand("/addnewchat", newChatJson);
             SendMessage(command);
@@ -188,27 +195,30 @@ namespace AmChat.ClientServices
         private void ShowNewMessage(object sender, NotifyCollectionChangedEventArgs e)
         {
 
-            if (!(e.NewItems[0] is MessageToChat messageToShow))
+            if (!(e.NewItems[0] is MessageToChat message))
             {
                 return;
             }
 
-            if(messageToShow.FromUser.Equals(User))
+            
+
+            if(message.FromUser.Equals(User))
             {
-                MessageCorretlySend(messageToShow.Text);
+                MessageCorretlySend(message.Text);
             }
             else
             {
                 
-                if (ChosenChat == null || ChosenChat.Id != messageToShow.ToChatId)
+                if (ChosenChat == null || ChosenChat.Id != message.ToChatId)
                 {
-                    var chatToShowMessage = UserChats.Where(c => c.Id == messageToShow.ToChatId).FirstOrDefault();
+                    var chatToShowMessage = UserChats.Where(c => c.Id == message.ToChatId).FirstOrDefault();
 
-                    MessageForOtherContactIsGotten(messageToShow);
+                    MessageToOtherChatIsGotten(message);
                 }
                 else
                 {
-                    MessageForCurrentContactIsGotten(messageToShow.Text);
+                    var messageToShow = message.FromUser.Login + ":\n" + message.Text;
+                    MessageToCurrentChatIsGotten(messageToShow);
                 }
             }
         }

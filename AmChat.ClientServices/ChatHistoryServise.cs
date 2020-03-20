@@ -20,8 +20,17 @@ namespace AmChat.ClientServices
 
             foreach (var message in chat.ChatMessages)
             {
+                string messageToShow;
                 bool isMyMessage = message.FromUser.Equals(messenger.User);
-                var historyMessage = new ChatHistoryMessage(isMyMessage, message.Text);
+                if(isMyMessage)
+                {
+                    messageToShow = message.Text;
+                }
+                else
+                {
+                    messageToShow = message.FromUser.Login + ":\n" + message.Text; ;
+                }
+                var historyMessage = new ChatHistoryMessage(isMyMessage, messageToShow);
 
                 history.Add(historyMessage);
             }

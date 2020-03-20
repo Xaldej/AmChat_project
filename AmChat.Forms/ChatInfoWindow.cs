@@ -15,6 +15,8 @@ namespace AmChat.Forms
     {
         public UserChat Chat { get; set; }
 
+        public Action<List<string>> NewChatLoginsEntered;
+
         public ChatInfoWindow(UserChat chat)
         {
             Chat = chat;
@@ -34,6 +36,25 @@ namespace AmChat.Forms
             }
 
             UsersInChat_label.Text = usersInChat;
+        }
+
+        private void AddUsersToChat_button_Click(object sender, EventArgs e)
+        {
+            var addUsersWindow = new AddChatAdnUsersForm()
+            {
+                Text = "Add Users"
+            };
+
+            addUsersWindow.DisableChatName(Chat.Name);
+
+            addUsersWindow.NewChatInfoEntered += AddUsersToChat;
+
+            addUsersWindow.ShowDialog();
+        }
+
+        private void AddUsersToChat(string chatName, List<string> userLogins)
+        {
+            NewChatLoginsEntered(userLogins);
         }
     }
 }

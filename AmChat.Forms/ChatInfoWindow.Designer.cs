@@ -30,8 +30,8 @@
         {
             this.ChatInfo_groupBox = new System.Windows.Forms.GroupBox();
             this.UsersInChat_groupBox = new System.Windows.Forms.GroupBox();
-            this.AddUsersToChat_button = new System.Windows.Forms.Button();
             this.UsersInChat_label = new System.Windows.Forms.Label();
+            this.AddUsersToChat_button = new System.Windows.Forms.Button();
             this.UsersInChat_groupBox.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -55,15 +55,6 @@
             this.UsersInChat_groupBox.TabStop = false;
             this.UsersInChat_groupBox.Text = "Users In Chat";
             // 
-            // AddUsersToChat_button
-            // 
-            this.AddUsersToChat_button.Location = new System.Drawing.Point(79, 145);
-            this.AddUsersToChat_button.Name = "AddUsersToChat_button";
-            this.AddUsersToChat_button.Size = new System.Drawing.Size(75, 23);
-            this.AddUsersToChat_button.TabIndex = 0;
-            this.AddUsersToChat_button.Text = "Add Users";
-            this.AddUsersToChat_button.UseVisualStyleBackColor = true;
-            // 
             // UsersInChat_label
             // 
             this.UsersInChat_label.AutoSize = true;
@@ -72,6 +63,16 @@
             this.UsersInChat_label.Size = new System.Drawing.Size(35, 13);
             this.UsersInChat_label.TabIndex = 1;
             this.UsersInChat_label.Text = "label1";
+            // 
+            // AddUsersToChat_button
+            // 
+            this.AddUsersToChat_button.Location = new System.Drawing.Point(79, 145);
+            this.AddUsersToChat_button.Name = "AddUsersToChat_button";
+            this.AddUsersToChat_button.Size = new System.Drawing.Size(75, 23);
+            this.AddUsersToChat_button.TabIndex = 0;
+            this.AddUsersToChat_button.Text = "Add Users";
+            this.AddUsersToChat_button.UseVisualStyleBackColor = true;
+            this.AddUsersToChat_button.Click += new System.EventHandler(this.AddUsersToChat_button_Click);
             // 
             // ChatInfoWindow
             // 

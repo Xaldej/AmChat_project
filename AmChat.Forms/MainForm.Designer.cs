@@ -32,8 +32,8 @@
             this.InputMessage_textBox = new System.Windows.Forms.TextBox();
             this.Send_button = new System.Windows.Forms.Button();
             this.Chat_richTextBox = new System.Windows.Forms.RichTextBox();
-            this.Contacts_panel = new System.Windows.Forms.Panel();
-            this.AddContact_button = new System.Windows.Forms.Button();
+            this.Chats_panel = new System.Windows.Forms.Panel();
+            this.AddChat_button = new System.Windows.Forms.Button();
             this.Chat_panel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -78,28 +78,28 @@
             // 
             // Contacts_panel
             // 
-            this.Contacts_panel.Location = new System.Drawing.Point(326, 1);
-            this.Contacts_panel.Name = "Contacts_panel";
-            this.Contacts_panel.Size = new System.Drawing.Size(155, 529);
-            this.Contacts_panel.TabIndex = 1;
+            this.Chats_panel.Location = new System.Drawing.Point(326, 1);
+            this.Chats_panel.Name = "Contacts_panel";
+            this.Chats_panel.Size = new System.Drawing.Size(155, 529);
+            this.Chats_panel.TabIndex = 1;
             // 
-            // AddContact_button
+            // AddChat_button
             // 
-            this.AddContact_button.Location = new System.Drawing.Point(333, 534);
-            this.AddContact_button.Name = "AddContact_button";
-            this.AddContact_button.Size = new System.Drawing.Size(148, 23);
-            this.AddContact_button.TabIndex = 0;
-            this.AddContact_button.Text = "Add Contact";
-            this.AddContact_button.UseVisualStyleBackColor = true;
-            this.AddContact_button.Click += new System.EventHandler(this.AddContact_button_Click);
+            this.AddChat_button.Location = new System.Drawing.Point(333, 534);
+            this.AddChat_button.Name = "AddChat_button";
+            this.AddChat_button.Size = new System.Drawing.Size(148, 23);
+            this.AddChat_button.TabIndex = 0;
+            this.AddChat_button.Text = "Add Chat";
+            this.AddChat_button.UseVisualStyleBackColor = true;
+            this.AddChat_button.Click += new System.EventHandler(this.AddChat_button_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(484, 561);
-            this.Controls.Add(this.AddContact_button);
-            this.Controls.Add(this.Contacts_panel);
+            this.Controls.Add(this.AddChat_button);
+            this.Controls.Add(this.Chats_panel);
             this.Controls.Add(this.Chat_panel);
             this.Name = "MainForm";
             this.Text = "AmChat";
@@ -113,11 +113,11 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel Contacts_panel;
+        private System.Windows.Forms.Panel Chats_panel;
         private System.Windows.Forms.Panel Chat_panel;
         private System.Windows.Forms.TextBox InputMessage_textBox;
         private System.Windows.Forms.Button Send_button;
         private System.Windows.Forms.RichTextBox Chat_richTextBox;
-        private System.Windows.Forms.Button AddContact_button;
+        private System.Windows.Forms.Button AddChat_button;
     }
 }

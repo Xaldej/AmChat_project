@@ -44,7 +44,10 @@ namespace AmChat.Server.Commands
             foreach (var userToAdd in usersToAdd)
             {
                 var user = UserToUserInfo(userToAdd);
-                usersInfoToAdd.Add(user);
+                if(!usersInfoToAdd.Contains(user))
+                {
+                    usersInfoToAdd.Add(user);
+                }
             }
 
             var chat = AddChatAndRelationshipsToDb(messenger, usersInfoToAdd);
