@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="ChatsMaintenanceService.cs" />
     <Compile Include="Commands\AddNewChat.cs" />
+    <Compile Include="Commands\AddUsersToChat.cs" />
     <Compile Include="Commands\CloseConnection.cs" />
     <Compile Include="Commands\GetChats.cs" />
     <Compile Include="Commands\GetUnreadMessages.cs" />

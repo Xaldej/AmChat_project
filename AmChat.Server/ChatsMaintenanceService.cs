@@ -3,6 +3,7 @@ using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
@@ -124,6 +125,13 @@ namespace AmChat.Server
             SendMessageToCertainUser(user, message);
         }
 
+        internal ObservableCollection<MessageToChat> GetChatHistory(UserChat chat)
+        {
+            //TO DO
+
+            return new ObservableCollection<MessageToChat>();
+        }
+
         public void SendNewMessageToUsers(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (!(e.NewItems[0] is MessageToChat messageToChat))
@@ -139,6 +147,11 @@ namespace AmChat.Server
             {
                 SendMessageToCertainUser(user, messageToChat);
             }
+        }
+
+        internal void SaveChatHistory(UserChat chat)
+        {
+            //TO DO:
         }
     }
 

@@ -17,6 +17,8 @@ namespace AmChat.Server
     {
         List<UserChat> ActiveChats { get; set; }
 
+        Dictionary<UserChat, int> ChatListenersAmount { get; set; }
+
         public List<ServerMessenger> ConnectedClients { get; set; }
 
         ChatsMaintenanceService ChatsMaintenanceService { get; set; }
@@ -35,6 +37,8 @@ namespace AmChat.Server
             ConnectedClients = new List<ServerMessenger>();
 
             ActiveChats = new List<UserChat>();
+
+            ChatListenersAmount = new Dictionary<UserChat, int>();
 
             ChatsMaintenanceService = new ChatsMaintenanceService(ActiveChats, ConnectedClients);
         }
@@ -121,12 +125,14 @@ namespace AmChat.Server
 
                 var i = chatsCollection.IndexOf(chat);
                 chatsCollection[i] = existingChat;
+                ChatListenersAmount[existingChat]++;
             }
             else
             {
-                chat.ChatMessages = new ObservableCollection<MessageToChat>();
+                chat.ChatMessages = ChatsMaintenanceService.GetChatHistory(chat);
                 ActiveChats.Add(chat);
                 chat.ChatMessages.CollectionChanged += ChatsMaintenanceService.SendNewMessageToUsers;
+                ChatListenersAmount[chat] = 1;
             }
         }
 
@@ -135,7 +141,26 @@ namespace AmChat.Server
             var clientToRemove = ConnectedClients.Where(c => c.Equals(client)).FirstOrDefault();
             ConnectedClients.Remove(clientToRemove);
 
-            //TO DO: check if server should delete any of active chat and save its messages to DB
+            ChangeChatListenersAmount(client);
+        }
+
+        private void ChangeChatListenersAmount(IMessengerService client)
+        {
+            foreach (var chat in client.UserChats)
+            {
+                ChatListenersAmount[chat]--;
+                if(ChatListenersAmount[chat]==0)
+                {
+                    Task.Run(()=>RemoveInactiveChat(chat));
+                }
+            }
+        }
+
+        private void RemoveInactiveChat(UserChat chat)
+        {
+            ChatsMaintenanceService.SaveChatHistory(chat);
+            ActiveChats.Remove(chat);
+            ChatListenersAmount.Remove(chat);
         }
     }
 }
