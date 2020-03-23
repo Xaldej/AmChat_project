@@ -17,7 +17,7 @@ namespace AmChat.Server.Commands
 
         public NewChatInfo NewChatInfo { get; set; }
 
-        public Action<UserChat> NewChatIsCreated;
+        public Action<Chat> NewChatIsCreated;
 
         public override void Execute(IMessengerService messenger, string data)
         {
@@ -38,7 +38,7 @@ namespace AmChat.Server.Commands
         {
             var usersToAdd = GetUsersFromDB(NewChatInfo.LoginsToAdd);
 
-            var usersInfoToAdd = new List<UserInfo>();
+            var usersInfoToAdd = new List<User>();
             usersInfoToAdd.Add(messenger.User);
 
             foreach (var userToAdd in usersToAdd)
@@ -56,7 +56,7 @@ namespace AmChat.Server.Commands
             NewChatIsCreated(userChat);
         }
 
-        private Chat AddChatAndRelationshipsToDb(IMessengerService messenger, List<UserInfo> usersInfoToAdd)
+        private DBChat AddChatAndRelationshipsToDb(IMessengerService messenger, List<User> usersInfoToAdd)
         {
             using (var context = new AmChatContext())
             {
@@ -72,7 +72,7 @@ namespace AmChat.Server.Commands
             }
         }
 
-        private void AddUsersInChat(AmChatContext context, List<UserInfo> usersToAdd, Chat chat)
+        private void AddUsersInChat(AmChatContext context, List<User> usersToAdd, DBChat chat)
         {
             foreach (var user in usersToAdd)
             {
@@ -86,7 +86,7 @@ namespace AmChat.Server.Commands
             }
         }
 
-        private void AddChatsToDbForUsers(List<UserInfo> users, Chat chat)
+        private void AddChatsToDbForUsers(List<User> users, DBChat chat)
         {
             using (var context = new AmChatContext())
             {
@@ -105,7 +105,7 @@ namespace AmChat.Server.Commands
             }
         }
 
-        private Chat AddChatToDb(AmChatContext context, List<UserInfo> usersToAdd)
+        private DBChat AddChatToDb(AmChatContext context, List<User> usersToAdd)
         {
             var id = Guid.NewGuid();
             var userIds = new List<Guid>();
@@ -114,7 +114,7 @@ namespace AmChat.Server.Commands
             {   
                 userIds.Add(user.Id);
             }
-            var chat = new Chat()
+            var chat = new DBChat()
             {
                 Id = id,
                 Name = NewChatInfo.Name,
@@ -125,9 +125,9 @@ namespace AmChat.Server.Commands
             return chat;
         }
 
-        private List<User> GetUsersFromDB(List<string> logins)
+        private List<DBUser> GetUsersFromDB(List<string> logins)
         {
-            var users = new List<User>();
+            var users = new List<DBUser>();
 
             foreach (var login in logins)
             {
@@ -144,10 +144,10 @@ namespace AmChat.Server.Commands
             return users;
         }
 
-        private UserChat ChatToUserChat(Chat chat, IMessengerService messenger, List<UserInfo> usersToAdd)
+        private Chat ChatToUserChat(DBChat chat, IMessengerService messenger, List<User> usersToAdd)
         {
             
-            return new UserChat()
+            return new Chat()
             {
                 Id = chat.Id,
                 Name = chat.Name,
@@ -155,9 +155,9 @@ namespace AmChat.Server.Commands
             };
         }
 
-        private UserInfo UserToUserInfo(User user)
+        private User UserToUserInfo(DBUser user)
         {
-            return new UserInfo()
+            return new User()
             {
                 Id = user.Id,
                 Login = user.Login

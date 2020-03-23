@@ -15,9 +15,9 @@ namespace AmChat.Server
 {
     public class TcpServer
     {
-        List<UserChat> ActiveChats { get; set; }
+        List<Chat> ActiveChats { get; set; }
 
-        Dictionary<UserChat, int> ChatListenersAmount { get; set; }
+        Dictionary<Chat, int> ChatListenersAmount { get; set; }
 
         public List<ServerMessenger> ConnectedClients { get; set; }
 
@@ -36,9 +36,9 @@ namespace AmChat.Server
 
             ConnectedClients = new List<ServerMessenger>();
 
-            ActiveChats = new List<UserChat>();
+            ActiveChats = new List<Chat>();
 
-            ChatListenersAmount = new Dictionary<UserChat, int>();
+            ChatListenersAmount = new Dictionary<Chat, int>();
 
             ChatsMaintenanceService = new ChatsMaintenanceService(ActiveChats, ConnectedClients);
         }
@@ -109,14 +109,14 @@ namespace AmChat.Server
 
         private void AddActiveChat(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (!(e.NewItems[0] is UserChat chat))
+            if (!(e.NewItems[0] is Chat chat))
             {
                 return;
             }
 
             if (ActiveChats.Contains(chat))
             {
-                if (!(sender is ObservableCollection<UserChat> chatsCollection))
+                if (!(sender is ObservableCollection<Chat> chatsCollection))
                 {
                     return;
                 }
@@ -156,7 +156,7 @@ namespace AmChat.Server
             }
         }
 
-        private void RemoveInactiveChat(UserChat chat)
+        private void RemoveInactiveChat(Chat chat)
         {
             ChatsMaintenanceService.SaveChatHistory(chat);
             ActiveChats.Remove(chat);

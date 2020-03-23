@@ -11,7 +11,7 @@ namespace AmChat.Server.Commands
 {
     public class GetUnreadMessages : Command
     {
-        public Action<UserInfo> UnreadMessagesAreAsked;
+        public Action<User> UnreadMessagesAreAsked;
         public override string Name => "GetUnreadMessages";
 
         public override void Execute(IMessengerService messenger, string data)

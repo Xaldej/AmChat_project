@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.Data.Entitites
 {
-    public class User : BaseEntity
+    public class DBUser : BaseEntity
     {
         [Required]
         [MaxLength(255)]

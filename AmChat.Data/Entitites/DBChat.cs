@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.Data.Entitites
 {
-    public class Chat : BaseEntity
+    public class DBChat : BaseEntity
     {
         public string Name { get; set; }
 

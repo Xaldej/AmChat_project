@@ -11,7 +11,7 @@ namespace AmChat.Data.Entitites
     {
         public int Id { get; set; }
 
-        public User User { get; set; }
+        public DBUser User { get; set; }
 
         [Required]
         public Guid UserId { get; set; }

@@ -16,7 +16,7 @@ namespace AmChat.ClientServices.Commands
 
         public override void Execute(IMessengerService messenger, string data)
         {   
-            var chats = new ObservableCollection<UserChat>(JsonParser<IEnumerable<UserChat>>.JsonToOneObject(data));
+            var chats = new ObservableCollection<Chat>(JsonParser<IEnumerable<Chat>>.JsonToOneObject(data));
 
             foreach (var chat in chats)
             {

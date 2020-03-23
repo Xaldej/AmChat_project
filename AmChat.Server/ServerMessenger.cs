@@ -13,9 +13,9 @@ namespace AlexeyMelentyevProject_ChatServer
 {
     public class ServerMessenger : IMessengerService
     {
-        public UserInfo User { get; set; }
+        public User User { get; set; }
 
-        public ObservableCollection<UserChat> UserChats { get; set; }
+        public ObservableCollection<Chat> UserChats { get; set; }
 
         public TcpClient TcpClient { get; set; }
 
@@ -25,9 +25,9 @@ namespace AlexeyMelentyevProject_ChatServer
 
         public Action<IMessengerService> ClientDisconnected;
 
-        public Action<UserChat> NewChatIsCreated;
+        public Action<Chat> NewChatIsCreated;
 
-        public Action<UserInfo> UnreadMessagesAreAsked;
+        public Action<User> UnreadMessagesAreAsked;
 
 
         ServerMessenger()
@@ -39,9 +39,9 @@ namespace AlexeyMelentyevProject_ChatServer
         {
             TcpClient = tcpClient;
 
-            User = new UserInfo();
+            User = new User();
 
-            UserChats = new ObservableCollection<UserChat>();
+            UserChats = new ObservableCollection<Chat>();
 
             Commands = new List<Command>();
 
@@ -119,12 +119,12 @@ namespace AlexeyMelentyevProject_ChatServer
             ClientDisconnected(messenger);
         }
 
-        private void OnUnreadMessagesAreAsked(UserInfo user)
+        private void OnUnreadMessagesAreAsked(User user)
         {
             UnreadMessagesAreAsked(user);
         }
 
-        private void OnNewChatIsCreated(UserChat chat)
+        private void OnNewChatIsCreated(Chat chat)
         {
             NewChatIsCreated(chat);
         }

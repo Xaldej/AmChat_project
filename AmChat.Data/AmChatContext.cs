@@ -15,9 +15,9 @@ namespace AmChat.Data
             Database.SetInitializer(new CreateDatabaseIfNotExists<AmChatContext>());
         }
 
-        public DbSet<Chat> Chats { get; set; }
+        public DbSet<DBChat> Chats { get; set; }
 
-        public DbSet<User> Users { get; set; }
+        public DbSet<DBUser> Users { get; set; }
 
         public DbSet<UsersChat> UsersChats { get; set; }
 

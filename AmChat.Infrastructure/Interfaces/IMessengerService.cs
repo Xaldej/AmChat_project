@@ -10,9 +10,9 @@ namespace AmChat.Infrastructure.Interfaces
 {
     public interface IMessengerService
     {
-        UserInfo User { get; set; }
+        User User { get; set; }
 
-        ObservableCollection<UserChat> UserChats { get; set; }
+        ObservableCollection<Chat> UserChats { get; set; }
 
         void ListenMessages();
 

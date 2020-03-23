@@ -9,13 +9,13 @@ namespace AmChat.Server
 {
     public class UnreadNotification
     {
-        public UserInfo ForUser { get; set; }
+        public User ForUser { get; set; }
 
         public Guid ToChatId { get; set; }
 
         public bool IsSent { get; set; }
 
-        public UnreadNotification(UserInfo forUser, Guid toChatId)
+        public UnreadNotification(User forUser, Guid toChatId)
         {
             ForUser = forUser;
             ToChatId = toChatId;

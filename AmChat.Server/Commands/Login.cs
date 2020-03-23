@@ -33,9 +33,9 @@ namespace AmChat.Server.Commands
             }
         }
 
-        private UserInfo GetUserFromDB(string userLogin)
+        private User GetUserFromDB(string userLogin)
         {
-            User user;
+            DBUser user;
 
             using (var context = new AmChatContext())
             {
@@ -43,7 +43,7 @@ namespace AmChat.Server.Commands
 
                 if (user == null)
                 {
-                    user = new User()
+                    user = new DBUser()
                     {
                         Id = Guid.NewGuid(),
                         Login = userLogin,
@@ -61,14 +61,14 @@ namespace AmChat.Server.Commands
                 }
             }
 
-            UserInfo userInfo = UserToUserInfo(user);
+            User userInfo = UserToUserInfo(user);
 
             return userInfo;
         }
 
-        private UserInfo UserToUserInfo(User user)
+        private User UserToUserInfo(DBUser user)
         {
-            return new UserInfo()
+            return new User()
             {
                 Id = user.Id,
                 Login = user.Login

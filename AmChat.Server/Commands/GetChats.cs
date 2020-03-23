@@ -18,7 +18,7 @@ namespace AmChat.Server.Commands
 
         public override void Execute(IMessengerService messenger, string data)
         {
-            List<Chat> chats = new List<Chat>();
+            List<DBChat> chats = new List<DBChat>();
             try
             {
                 chats = GetChatsFromDb(messenger.User);
@@ -37,16 +37,16 @@ namespace AmChat.Server.Commands
                     messenger.UserChats.Add(userChat);
                 }
 
-                var chatsJson = JsonParser<UserChat>.ManyObjectsToJson(messenger.UserChats);
+                var chatsJson = JsonParser<Chat>.ManyObjectsToJson(messenger.UserChats);
 
                 var command = CommandConverter.CreateJsonMessageCommand("/correctcontactlist", chatsJson);
                 messenger.SendMessage(command);
             }
         }
 
-        private List<Chat> GetChatsFromDb(UserInfo forUser)
+        private List<DBChat> GetChatsFromDb(User forUser)
         {
-            var chats = new List<Chat>();
+            var chats = new List<DBChat>();
 
             using (var context = new AmChatContext())
             {
@@ -62,11 +62,11 @@ namespace AmChat.Server.Commands
             return chats;
         }
 
-        private UserChat ChatToUserChat(Chat chat)
+        private Chat ChatToUserChat(DBChat chat)
         {
-            List<UserInfo> usersInChat = GetUsersInChat(chat);
+            List<User> usersInChat = GetUsersInChat(chat);
 
-            return new UserChat()
+            return new Chat()
             {
                 Id = chat.Id,
                 Name = chat.Name,
@@ -74,9 +74,9 @@ namespace AmChat.Server.Commands
             };
         }
 
-        private List<UserInfo> GetUsersInChat(Chat chat)
+        private List<User> GetUsersInChat(DBChat chat)
         {
-            List<UserInfo> users = new List<UserInfo>();
+            List<User> users = new List<User>();
             using (var context = new AmChatContext())
             {
                 var userIds = context.UsersInChat.Where(uinc => uinc.ChatId == chat.Id).Select(uinc => uinc.UserId).ToList();
@@ -91,9 +91,9 @@ namespace AmChat.Server.Commands
             return users;
         }
 
-        private UserInfo UserToUserInfo(User user)
+        private User UserToUserInfo(DBUser user)
         {
-            return new UserInfo()
+            return new User()
             {
                 Id = user.Id,
                 Login = user.Login,

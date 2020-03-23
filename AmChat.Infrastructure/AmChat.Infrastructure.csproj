@@ -44,7 +44,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChatHistoryMessage.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\CommandConverter.cs" />
     <Compile Include="Commands\CommandMessage.cs" />
@@ -54,8 +53,8 @@
     <Compile Include="NewChatInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TcpSettings.cs" />
-    <Compile Include="UserChat.cs" />
-    <Compile Include="UserInfo.cs" />
+    <Compile Include="Chat.cs" />
+    <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

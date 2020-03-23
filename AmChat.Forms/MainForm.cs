@@ -33,7 +33,7 @@ namespace AmChat.Forms
             MessengerService.AddChat(chatName, userLoginsToAdd);
         }
 
-        private void AddChatToContactPanel(UserChat chat)
+        private void AddChatToContactPanel(Chat chat)
         {
             var chatControl = new ChatControl(chat) { Dock = DockStyle.Top };
 
@@ -45,7 +45,7 @@ namespace AmChat.Forms
             ChatsControls.Add(chatControl);
         }
 
-        private void AddUsersToChat(UserChat chat, List<string> userLoginsToAdd)
+        private void AddUsersToChat(Chat chat, List<string> userLoginsToAdd)
         {
             MessengerService.AddUsersToChat(chat, userLoginsToAdd);
         }
@@ -156,22 +156,23 @@ namespace AmChat.Forms
         {
             Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.Clear()));
 
-            var messagesHistory = ChatHistoryServise.GetHistory(MessengerService.ChosenChat, MessengerService);
-
-            foreach (var historyMessage in messagesHistory)
+            foreach (var message in MessengerService.ChosenChat.ChatMessages)
             {
+                string messageToShow;
                 HorizontalAlignment alignment;
 
-                if (historyMessage.IsMyMessage == true)
+                if (message.FromUser.Equals(MessengerService.User))
                 {
                     alignment = HorizontalAlignment.Right;
+                    messageToShow = message.Text;
                 }
                 else
                 {
                     alignment = HorizontalAlignment.Left;
+                    messageToShow = message.FromUser.Login + ":\n" + message.Text;
                 }
 
-                AddMessageToChat(historyMessage.Message, alignment);
+                AddMessageToChat(messageToShow, alignment);
             }
         }
 

@@ -14,9 +14,9 @@ namespace AmChat.ClientServices
 {
     public class ClientMessengerService : IMessengerService
     {
-        public UserInfo User { get; set; }
+        public User User { get; set; }
 
-        public ObservableCollection<UserChat> UserChats { get; set; }
+        public ObservableCollection<Chat> UserChats { get; set; }
 
         public TcpClient TcpClient { get; set; }
 
@@ -24,9 +24,9 @@ namespace AmChat.ClientServices
 
         NetworkStream Stream { get; set; }
 
-        public UserChat ChosenChat { get; set; }
+        public Chat ChosenChat { get; set; }
 
-        public Action<UserChat> ChatAdded;
+        public Action<Chat> ChatAdded;
 
         public Action<string> MessageToCurrentChatIsGotten;
 
@@ -41,9 +41,9 @@ namespace AmChat.ClientServices
 
         public ClientMessengerService()
         {
-            User = new UserInfo();
+            User = new User();
 
-            UserChats = new ObservableCollection<UserChat>();
+            UserChats = new ObservableCollection<Chat>();
             UserChats.CollectionChanged += AddChatToContactList;
 
             Commands = new List<Command>();
@@ -52,7 +52,7 @@ namespace AmChat.ClientServices
 
         private void AddChatToContactList(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (!(e.NewItems[0] is UserChat newChat))
+            if (!(e.NewItems[0] is Chat newChat))
             {
                 return;
             }
@@ -61,7 +61,7 @@ namespace AmChat.ClientServices
             ChatAdded(newChat);
         }
 
-        public void AddUsersToChat(UserChat chat, List<string> userLoginsToAdd)
+        public void AddUsersToChat(Chat chat, List<string> userLoginsToAdd)
         {
             var newChatInfo = new NewChatInfo()
             {

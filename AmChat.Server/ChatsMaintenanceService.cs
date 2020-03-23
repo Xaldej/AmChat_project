@@ -12,15 +12,15 @@ namespace AmChat.Server
 {
     public class ChatsMaintenanceService
     {
-        List<UserChat> ActiveChats { get; set; }
+        List<Chat> ActiveChats { get; set; }
 
         public List<ServerMessenger> ConnectedClients { get; set; }
 
-        UserInfo ServerNotificationUser { get; set; }
+        User ServerNotificationUser { get; set; }
 
         List<UnreadNotification> UnreadNotifications { get; set; }
 
-        public ChatsMaintenanceService(List<UserChat> activeChats, List<ServerMessenger> connectedClients)
+        public ChatsMaintenanceService(List<Chat> activeChats, List<ServerMessenger> connectedClients)
         {
             ActiveChats = activeChats;
             
@@ -28,14 +28,14 @@ namespace AmChat.Server
 
             UnreadNotifications = new List<UnreadNotification>();
 
-            ServerNotificationUser = new UserInfo()
+            ServerNotificationUser = new User()
             {
                 Id = Guid.NewGuid(),
                 Login = "Server Notification",
             };
         }
 
-        public void AddChatsForUsers(UserChat chat)
+        public void AddChatsForUsers(Chat chat)
         {
             foreach (var user in chat.UsersInChat)
             {
@@ -44,7 +44,7 @@ namespace AmChat.Server
             }
         }
 
-        public void AddChatToClientAndServerMessengers(UserChat chat, UserInfo user)
+        public void AddChatToClientAndServerMessengers(Chat chat, User user)
         {
             var serverChat = ConnectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
 
@@ -59,12 +59,12 @@ namespace AmChat.Server
                 serverChat.UserChats.Add(chat);
             }
 
-            var chatJson = JsonParser<UserChat>.OneObjectToJson(chat);
+            var chatJson = JsonParser<Chat>.OneObjectToJson(chat);
             var command = CommandConverter.CreateJsonMessageCommand("/chatisadded", chatJson);
             SendCommandToCertainUser(user, command);
         }
 
-        public void SendCommandToCertainUser(UserInfo userToSend, string command)
+        public void SendCommandToCertainUser(User userToSend, string command)
         {
             var clientToSend = ConnectedClients.Where(c => c.User.Equals(userToSend)).FirstOrDefault();
 
@@ -76,7 +76,7 @@ namespace AmChat.Server
 
         
 
-        public void SendMessageToCertainUser(UserInfo userToSend, MessageToChat messageToChat)
+        public void SendMessageToCertainUser(User userToSend, MessageToChat messageToChat)
         {
             var clientToSend = ConnectedClients.Where(c => c.User.Equals(userToSend)).FirstOrDefault();
 
@@ -92,7 +92,7 @@ namespace AmChat.Server
             }
         }
 
-        public void SendUnreadMessages(UserInfo user)
+        public void SendUnreadMessages(User user)
         {
             var unreadNotificationForUser = UnreadNotifications.Where(m => m.ForUser.Equals(user));
 
@@ -113,7 +113,7 @@ namespace AmChat.Server
             UnreadNotifications.RemoveAll(m => m.IsSent);
         }
 
-        public void SendNotificationAboutNewChat(UserChat chat, UserInfo user)
+        public void SendNotificationAboutNewChat(Chat chat, User user)
         {
             var message = new MessageToChat()
             {
@@ -125,7 +125,7 @@ namespace AmChat.Server
             SendMessageToCertainUser(user, message);
         }
 
-        internal ObservableCollection<MessageToChat> GetChatHistory(UserChat chat)
+        internal ObservableCollection<MessageToChat> GetChatHistory(Chat chat)
         {
             //TO DO
 
@@ -149,7 +149,7 @@ namespace AmChat.Server
             }
         }
 
-        internal void SaveChatHistory(UserChat chat)
+        internal void SaveChatHistory(Chat chat)
         {
             //TO DO:
         }

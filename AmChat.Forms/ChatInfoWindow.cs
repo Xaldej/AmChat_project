@@ -13,11 +13,11 @@ namespace AmChat.Forms
 {
     public partial class ChatInfoWindow : Form
     {
-        public UserChat Chat { get; set; }
+        public Chat Chat { get; set; }
 
         public Action<List<string>> NewChatLoginsEntered;
 
-        public ChatInfoWindow(UserChat chat)
+        public ChatInfoWindow(Chat chat)
         {
             Chat = chat;
 
