@@ -13,13 +13,13 @@ namespace AmChat.Infrastructure
 
         public string Name { get; set; }
 
-        public List<User> UsersInChat;
+        public ObservableCollection<User> UsersInChat;
 
         public ObservableCollection<MessageToChat> ChatMessages;
 
         public Chat()
         {
-            UsersInChat = new List<User>();
+            UsersInChat = new ObservableCollection<User>();
         }
 
         public override bool Equals(object obj)
@@ -37,7 +37,7 @@ namespace AmChat.Infrastructure
             var hashCode = -1118474401;
             hashCode = hashCode * -1521134295 + EqualityComparer<Guid>.Default.GetHashCode(Id);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
-            hashCode = hashCode * -1521134295 + EqualityComparer<List<User>>.Default.GetHashCode(UsersInChat);
+            hashCode = hashCode * -1521134295 + EqualityComparer<ObservableCollection<User>>.Default.GetHashCode(UsersInChat);
             hashCode = hashCode * -1521134295 + EqualityComparer<ObservableCollection<MessageToChat>>.Default.GetHashCode(ChatMessages);
             return hashCode;
         }

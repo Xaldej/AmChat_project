@@ -70,7 +70,7 @@ namespace AmChat.Server.Commands
             {
                 Id = chat.Id,
                 Name = chat.Name,
-                UsersInChat = usersInChat,
+                UsersInChat = new ObservableCollection<User>(usersInChat),
             };
         }
 

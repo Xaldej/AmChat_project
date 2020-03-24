@@ -5,6 +5,7 @@ using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,27 +37,27 @@ namespace AmChat.Server.Commands
 
         private void CreateChat(IMessengerService messenger)
         {
-            var usersToAdd = GetUsersFromDB(NewChatInfo.LoginsToAdd);
+            var dbUsersToAdd = GetUsersFromDB(NewChatInfo.LoginsToAdd);
 
-            var usersInfoToAdd = new List<User>();
-            usersInfoToAdd.Add(messenger.User);
+            var usersToAdd = new List<User>();
+            usersToAdd.Add(messenger.User);
 
-            foreach (var userToAdd in usersToAdd)
+            foreach (var userToAdd in dbUsersToAdd)
             {
                 var user = UserToUserInfo(userToAdd);
-                if(!usersInfoToAdd.Contains(user))
+                if(!usersToAdd.Contains(user))
                 {
-                    usersInfoToAdd.Add(user);
+                    usersToAdd.Add(user);
                 }
             }
 
-            var chat = AddChatAndRelationshipsToDb(messenger, usersInfoToAdd);
-            var userChat = ChatToUserChat(chat, messenger, usersInfoToAdd);
+            var chat = AddChatAndRelationshipsToDb(usersToAdd);
+            var userChat = DbChatToChat(chat, usersToAdd);
             messenger.UserChats.Add(userChat);
             NewChatIsCreated(userChat);
         }
 
-        private DBChat AddChatAndRelationshipsToDb(IMessengerService messenger, List<User> usersInfoToAdd)
+        private DBChat AddChatAndRelationshipsToDb(List<User> usersInfoToAdd)
         {
             using (var context = new AmChatContext())
             {
@@ -144,14 +145,14 @@ namespace AmChat.Server.Commands
             return users;
         }
 
-        private Chat ChatToUserChat(DBChat chat, IMessengerService messenger, List<User> usersToAdd)
+        private Chat DbChatToChat(DBChat chat, List<User> usersToAdd)
         {
             
             return new Chat()
             {
                 Id = chat.Id,
                 Name = chat.Name,
-                UsersInChat = usersToAdd,
+                UsersInChat = new ObservableCollection<User>(usersToAdd),
             };
         }
 
