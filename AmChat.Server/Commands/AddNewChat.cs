@@ -77,7 +77,7 @@ namespace AmChat.Server.Commands
         {
             foreach (var user in usersToAdd)
             {
-                var userInChat = new UserInChat()
+                var userInChat = new ChatUser()
                 {
                     Chat = chat,
                     UserId = user.Id,
@@ -93,7 +93,7 @@ namespace AmChat.Server.Commands
             {
                 foreach (var user in users)
                 {
-                    var usersChat = new UsersChat()
+                    var usersChat = new UserChat()
                     {
                         UserId = user.Id,
                         ChatId = chat.Id,

@@ -16,7 +16,8 @@ namespace AmChat.ClientServices.Commands
 
         public override void Execute(IMessengerService messenger, string data)
         {   
-            var chats = new ObservableCollection<Chat>(JsonParser<IEnumerable<Chat>>.JsonToOneObject(data));
+            var chatsInfo = new ObservableCollection<ChatInfo>(JsonParser<IEnumerable<ChatInfo>>.JsonToOneObject(data));
+            var chats = ChatsIonfoToChats(chatsInfo);
 
             foreach (var chat in chats)
             {
@@ -27,9 +28,25 @@ namespace AmChat.ClientServices.Commands
 
                 messenger.UserChats.Add(chat);
             }
+        }
 
-            var command = CommandConverter.CreateJsonMessageCommand("/getunreadmessages", string.Empty);
-            messenger.SendMessage(command);
+        private ObservableCollection<Chat> ChatsIonfoToChats(ObservableCollection<ChatInfo> chatsInfo)
+        {
+            var chats = new ObservableCollection<Chat>();
+
+            foreach (var chatInfo in chatsInfo)
+            {
+                var chat = new Chat()
+                {
+                    Id = chatInfo.Id,
+                    Name = chatInfo.Name,
+                    UsersInChat = chatInfo.UsersInChat,
+                    ChatMessages = chatInfo.ChatMessages,
+                };
+                chats.Add(chat);
+            }
+
+            return chats;
         }
     }
 }

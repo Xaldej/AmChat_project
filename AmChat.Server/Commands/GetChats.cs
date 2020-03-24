@@ -37,11 +37,25 @@ namespace AmChat.Server.Commands
                     messenger.UserChats.Add(userChat);
                 }
 
-                var chatsJson = JsonParser<Chat>.ManyObjectsToJson(messenger.UserChats);
+                var chatsInfo = ChatsToChatsInfo(messenger.UserChats);
+                var chatsInfoJson = JsonParser<ChatInfo>.ManyObjectsToJson(chatsInfo);
 
-                var command = CommandConverter.CreateJsonMessageCommand("/correctcontactlist", chatsJson);
+                var command = CommandConverter.CreateJsonMessageCommand("/correctcontactlist", chatsInfoJson);
                 messenger.SendMessage(command);
             }
+        }
+
+        private ObservableCollection<ChatInfo> ChatsToChatsInfo(ObservableCollection<Chat> chats)
+        {
+            var chatsInfo = new ObservableCollection<ChatInfo>();
+
+            foreach (var chat in chats)
+            {
+                var chatInfo = chat as ChatInfo;
+                chatsInfo.Add(chatInfo);
+            }
+
+            return chatsInfo;
         }
 
         private List<DBChat> GetChatsFromDb(User forUser)

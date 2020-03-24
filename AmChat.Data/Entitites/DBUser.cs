@@ -15,6 +15,6 @@ namespace AmChat.Data.Entitites
         [Index(IsUnique = true)]
         public string Login { get; set; }
 
-        public ICollection<UsersChat> UsersChats { get; set; }
+        public ICollection<UserChat> UsersChats { get; set; }
     }
 }

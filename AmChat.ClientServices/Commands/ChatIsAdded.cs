@@ -16,7 +16,9 @@ namespace AmChat.ClientServices.Commands
 
         public override void Execute(IMessengerService messenger, string data)
         {
-            var chatToAdd = JsonParser<Chat>.JsonToOneObject(data);
+            var chatInfo = JsonParser<ChatInfo>.JsonToOneObject(data);
+
+            var chatToAdd = ChatInfoToChat(chatInfo);
 
             if(chatToAdd.ChatMessages==null)
             {
@@ -24,6 +26,17 @@ namespace AmChat.ClientServices.Commands
             }
 
             messenger.UserChats.Add(chatToAdd);
+        }
+
+        private Chat ChatInfoToChat(ChatInfo chatInfo)
+        {
+            return new Chat()
+            {
+                Id = chatInfo.Id,
+                Name = chatInfo.Name,
+                UsersInChat = chatInfo.UsersInChat,
+                ChatMessages = chatInfo.ChatMessages,
+            };
         }
     }
 }

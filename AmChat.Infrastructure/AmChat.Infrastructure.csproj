@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChatInfo.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\CommandConverter.cs" />
     <Compile Include="Commands\CommandMessage.cs" />

@@ -59,8 +59,9 @@ namespace AmChat.Server
                 serverChat.UserChats.Add(chat);
             }
 
-            var chatJson = JsonParser<Chat>.OneObjectToJson(chat);
-            var command = CommandConverter.CreateJsonMessageCommand("/chatisadded", chatJson);
+            var chatInfo = chat as ChatInfo;
+            var chatInfoJson = JsonParser<ChatInfo>.OneObjectToJson(chatInfo);
+            var command = CommandConverter.CreateJsonMessageCommand("/chatisadded", chatInfoJson);
             SendCommandToCertainUser(user, command);
         }
 

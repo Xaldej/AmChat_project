@@ -1,45 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure
 {
-    public class Chat
+    public class Chat : ChatInfo
     {
-        public Guid Id { get; set; }
-
-        public string Name { get; set; }
-
-        public ObservableCollection<User> UsersInChat;
-
-        public ObservableCollection<MessageToChat> ChatMessages;
+        public Action<User, Chat> NewUserInChat;
 
         public Chat()
         {
             UsersInChat = new ObservableCollection<User>();
+
+            UsersInChat.CollectionChanged += OnUsersInChatChanged;
         }
 
-        public override bool Equals(object obj)
+        private void OnUsersInChatChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (!(obj is Chat chatToCompare))
+            if(e.Action == NotifyCollectionChangedAction.Add)
             {
-                return false;
+                if (!(e.NewItems[0] is User newUser))
+                {
+                    return;
+                }
+                NewUserInChat(newUser, this);
             }
-
-            return Id == chatToCompare.Id;
-        }
-
-        public override int GetHashCode()
-        {
-            var hashCode = -1118474401;
-            hashCode = hashCode * -1521134295 + EqualityComparer<Guid>.Default.GetHashCode(Id);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
-            hashCode = hashCode * -1521134295 + EqualityComparer<ObservableCollection<User>>.Default.GetHashCode(UsersInChat);
-            hashCode = hashCode * -1521134295 + EqualityComparer<ObservableCollection<MessageToChat>>.Default.GetHashCode(ChatMessages);
-            return hashCode;
         }
     }
 }
