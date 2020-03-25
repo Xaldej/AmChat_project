@@ -63,11 +63,7 @@ namespace AmChat.ClientServices
 
         public void AddUsersToChat(Chat chat, List<string> userLoginsToAdd)
         {
-            var newChatInfo = new NewChatInfo()
-            {
-                Id = chat.Id,
-                LoginsToAdd = userLoginsToAdd,
-            };
+            var newChatInfo = new NewChatInfo(chat.Id, userLoginsToAdd);
             var newChatInfoJsont = JsonParser<NewChatInfo>.OneObjectToJson(newChatInfo);
             var command = CommandConverter.CreateJsonMessageCommand("/addorupdatechat", newChatInfoJsont);
             SendMessage(command);
@@ -75,9 +71,9 @@ namespace AmChat.ClientServices
 
         public void AddChat(string chatName, List<string> userLoginsToAdd)
         {
-            var newChat = new NewChatInfo(chatName, userLoginsToAdd);
-            var newChatJson = JsonParser<NewChatInfo>.OneObjectToJson(newChat);
-            var command = CommandConverter.CreateJsonMessageCommand("/addorupdatechat", newChatJson);
+            var newInfoChat = new NewChatInfo(chatName, userLoginsToAdd);
+            var newChatInfoJson = JsonParser<NewChatInfo>.OneObjectToJson(newInfoChat);
+            var command = CommandConverter.CreateJsonMessageCommand("/addorupdatechat", newChatInfoJson);
             SendMessage(command);
         }
 

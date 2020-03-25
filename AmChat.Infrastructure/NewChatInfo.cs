@@ -24,5 +24,11 @@ namespace AmChat.Infrastructure
             Name = name;
             LoginsToAdd = loginsToAdd;
         }
+
+        public NewChatInfo(Guid id, List<string> loginsToAdd)
+        {
+            Id = id;
+            LoginsToAdd = loginsToAdd;
+        }
     }
 }

@@ -18,7 +18,7 @@ namespace AmChat.Server.Commands
 
         public NewChatInfo NewChatInfo { get; set; }
 
-        public Action<Chat> NewChatIsCreated;
+        //public Action<Chat> NewChatIsCreated;
 
         bool CreateNewChat { get; set; }
 
@@ -38,7 +38,7 @@ namespace AmChat.Server.Commands
             {
                 ProcessNewChatInfo(messenger);
             }
-            catch (Exception exeption)
+            catch (Exception eeeeee)
             {
                 var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Error adding chat try again");
                 messenger.SendMessage(error);
@@ -47,46 +47,51 @@ namespace AmChat.Server.Commands
 
         private void ProcessNewChatInfo(IMessengerService messenger)
         {
-            DBChat chat;
+            DBChat dbChat;
 
             var dbUsersToAdd = GetUsersFromDB(NewChatInfo.LoginsToAdd);
 
-            List<User> usersToAdd = RemoveDuplicateUsers(dbUsersToAdd);
+            List<User> usersToAdd = GetUserToAdd(dbUsersToAdd);
 
             if (CreateNewChat)
             {
-                chat = AddChatToDb();
-                usersToAdd.Add(messenger.User);
+                dbChat = AddChatToDb();
+                if(!usersToAdd.Contains(messenger.User))
+                {
+                    usersToAdd.Add(messenger.User);
+                }
             }
             else
             {
-                chat = GetChatFromDB(NewChatInfo.Id);
-                ChooseNewChatUsers(usersToAdd, chat);
+                dbChat = GetChatFromDB(NewChatInfo.Id);
+                ChooseNewChatUsers(usersToAdd, dbChat);
             }
 
-            AddUsersToChatInDB(usersToAdd, chat);
+            AddUsersToChatInDB(usersToAdd, dbChat);
 
-            AddChatsForUsersInDb(usersToAdd, chat);
+            AddChatsForUsersInDb(usersToAdd, dbChat);
 
+            Chat chat;
             if(CreateNewChat)
             {
-                var userChat = DbChatToChat(chat, usersToAdd);
-                messenger.UserChats.Add(userChat);
-                NewChatIsCreated(userChat);
+                chat = DbChatToChat(dbChat, usersToAdd);
+                messenger.UserChats.Add(chat);
+                //NewChatIsCreated(chat);
             }
             else
             {
-                var chatToAddUsers = messenger.UserChats.Where(uc => uc.Id == chat.Id).FirstOrDefault();
-                AddNewUserToMessengerChat(usersToAdd, chatToAddUsers);
+                chat = messenger.UserChats.Where(uc => uc.Id == dbChat.Id).FirstOrDefault();                
             }
             
+            AddNewUserToMessengerChat(usersToAdd, chat);
         }
 
-        private void AddNewUserToMessengerChat(List<User> users, Chat chat)
-        {
+        private async void AddNewUserToMessengerChat(List<User> users, Chat chat)
+        {   
             foreach (var user in users)
-            {
+            {   
                 chat.UsersInChat.Add(user);
+                await Task.Delay(500);
             }
         }
 
@@ -102,7 +107,7 @@ namespace AmChat.Server.Commands
             return chat;
         }
 
-        private List<User> RemoveDuplicateUsers(List<DBUser> dbUsersToAdd)
+        private List<User> GetUserToAdd(List<DBUser> dbUsersToAdd)
         {
             var usersToAdd = new List<User>();
 
@@ -219,7 +224,6 @@ namespace AmChat.Server.Commands
             {
                 Id = chat.Id,
                 Name = chat.Name,
-                UsersInChat = new ObservableCollection<User>(usersToAdd),
             };
         }
 

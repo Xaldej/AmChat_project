@@ -23,11 +23,11 @@ namespace AmChat.Forms
         {
             if (e.KeyCode == Keys.Enter)
             {
-                CreateChat();
+                CreateNewChatInfo();
             }
         }
 
-        private void CreateChat()
+        private void CreateNewChatInfo()
         {
             var chatName = ChatName_textBox.Text;
 
@@ -68,7 +68,7 @@ namespace AmChat.Forms
 
         private void CreateChat_button_Click(object sender, EventArgs e)
         {
-            CreateChat();
+            CreateNewChatInfo();
         }
 
         private void AddMoreLogins_button_Click(object sender, EventArgs e)

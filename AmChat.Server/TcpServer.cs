@@ -82,8 +82,8 @@ namespace AmChat.Server
             var client = new ServerMessenger(tcpClient);
             client.UserChats.CollectionChanged += OnUserChatsChanged;
             client.ClientDisconnected += DeleteDisconnectedClient;
-            client.NewChatIsCreated += ChatsMaintenanceService.AddChatsForUsers;
-            client.UnreadMessagesAreAsked += ChatsMaintenanceService.SendUnreadMessages;
+            //client.NewChatIsCreated += ChatsMaintenanceService.AddChatsForUsers;
+            //client.UnreadMessagesAreAsked += ChatsMaintenanceService.SendUnreadMessages;
 
             ConnectedClients.Add(client);
 
@@ -131,8 +131,9 @@ namespace AmChat.Server
             {
                 chat.ChatMessages = ChatsMaintenanceService.GetChatHistory(chat);
                 ActiveChats.Add(chat);
+                
                 chat.ChatMessages.CollectionChanged += ChatsMaintenanceService.SendNewMessageToUsers;
-                //chat.NewUserInChat+=
+                chat.NewUserInChat += ChatsMaintenanceService.AddChatToClientAndServer;
                 ChatListenersAmount[chat] = 1;
             }
         }

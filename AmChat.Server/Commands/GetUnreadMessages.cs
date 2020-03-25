@@ -16,7 +16,7 @@ namespace AmChat.Server.Commands
 
         public override void Execute(IMessengerService messenger, string data)
         {
-            UnreadMessagesAreAsked(messenger.User);
+            //TO DO: delete class
         }
     }
 }

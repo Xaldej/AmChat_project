@@ -31,38 +31,33 @@ namespace AmChat.Server
             ServerNotificationUser = new User()
             {
                 Id = Guid.NewGuid(),
-                Login = "Server Notification",
+                Login = "Chat Notification",
             };
         }
 
-        public void AddChatsForUsers(Chat chat)
+        //public void AddChatsForUsers(Chat chat)
+        //{
+        //    string notification = "New chat is created"
+        //                + "\nUsers in Chat: ";
+
+        //    foreach (var user in chat.UsersInChat)
+        //    {
+        //        AddChatToClientAndServerMessengers(chat, user);
+        //        notification += user.Login + ", ";
+        //    }
+
+        //    SendNotificationToChat(chat, notification);
+        //}
+
+        private ChatInfo ChatToChatInfo(Chat chat)
         {
-            foreach (var user in chat.UsersInChat)
+            return new ChatInfo()
             {
-                AddChatToClientAndServerMessengers(chat, user);
-                SendNotificationAboutNewChat(chat, user);
-            }
-        }
-
-        public void AddChatToClientAndServerMessengers(Chat chat, User user)
-        {
-            var serverChat = ConnectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
-
-            if(serverChat==null)
-            {
-                return;
-            }
-
-            var isChatAlreadyInUserChats = serverChat.UserChats.Contains(chat);
-            if (!isChatAlreadyInUserChats)
-            {
-                serverChat.UserChats.Add(chat);
-            }
-
-            var chatInfo = chat as ChatInfo;
-            var chatInfoJson = JsonParser<ChatInfo>.OneObjectToJson(chatInfo);
-            var command = CommandConverter.CreateJsonMessageCommand("/chatisadded", chatInfoJson);
-            SendCommandToCertainUser(user, command);
+                Id = chat.Id,
+                Name = chat.Name,
+                ChatMessages = chat.ChatMessages,
+                UsersInChat = chat.UsersInChat,
+            };
         }
 
         public void SendCommandToCertainUser(User userToSend, string command)
@@ -114,16 +109,49 @@ namespace AmChat.Server
             UnreadNotifications.RemoveAll(m => m.IsSent);
         }
 
-        public void SendNotificationAboutNewChat(Chat chat, User user)
+        public void AddChatToClientAndServer(User newUser, Chat chat)
+        {
+            AddChatToServer(newUser, chat);
+            AddChatToClient(newUser, chat);
+
+            string notification = $"{newUser.Login} is added";
+            SendNotificationToChat(chat, notification);
+        }
+
+        public void SendNotificationToChat(Chat chat, string notification)
         {
             var message = new MessageToChat()
             {
                 FromUser = ServerNotificationUser,
                 ToChatId = chat.Id,
-                Text = "New chat is created"
+                Text = notification,
             };
 
-            SendMessageToCertainUser(user, message);
+            chat.ChatMessages.Add(message);
+        }
+
+        private void AddChatToClient(User newUser, Chat chat)
+        {
+            var chatInfo = ChatToChatInfo(chat);
+            var chatInfoJson = JsonParser<ChatInfo>.OneObjectToJson(chatInfo);
+            var command = CommandConverter.CreateJsonMessageCommand("/chatisadded", chatInfoJson);
+            SendCommandToCertainUser(newUser, command);
+        }
+
+        private void AddChatToServer(User user, Chat chat)
+        {
+            var serverChat = ConnectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
+
+            if (serverChat == null)
+            {
+                return;
+            }
+
+            var isChatAlreadyInUserChats = serverChat.UserChats.Contains(chat);
+            if (!isChatAlreadyInUserChats)
+            {
+                serverChat.UserChats.Add(chat);
+            }
         }
 
         internal ObservableCollection<MessageToChat> GetChatHistory(Chat chat)

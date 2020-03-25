@@ -51,7 +51,13 @@ namespace AmChat.Server.Commands
 
             foreach (var chat in chats)
             {
-                var chatInfo = chat as ChatInfo;
+                var chatInfo = new ChatInfo()
+                {
+                    Id = chat.Id,
+                    Name = chat.Name,
+                    ChatMessages = chat.ChatMessages,
+                    UsersInChat = chat.UsersInChat,
+                };
                 chatsInfo.Add(chatInfo);
             }
 
