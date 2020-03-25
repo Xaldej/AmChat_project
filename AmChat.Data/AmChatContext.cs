@@ -22,5 +22,7 @@ namespace AmChat.Data
         public DbSet<UserChat> UserChats { get; set; }
 
         public DbSet<ChatUser> ChatUsers { get; set; }
+
+        public DbSet<DBChatMessage> ChatMessages { get; set; }
     }
 }

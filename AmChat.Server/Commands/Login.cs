@@ -25,7 +25,7 @@ namespace AmChat.Server.Commands
                 var command = CommandConverter.CreateJsonMessageCommand("/correctlogin", id.ToString());
                 messenger.SendMessage(command);
             }
-            catch
+            catch (Exception eeee)
             {
                 Console.WriteLine("User is not logged in");
                 var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Login problems. Try to reconnect");
@@ -33,7 +33,7 @@ namespace AmChat.Server.Commands
             }
         }
 
-        private User GetUserFromDB(string userLogin)
+        private UserInfo GetUserFromDB(string userLogin)
         {
             DBUser user;
 
@@ -61,14 +61,14 @@ namespace AmChat.Server.Commands
                 }
             }
 
-            User userInfo = UserToUserInfo(user);
+            UserInfo userInfo = UserToUserInfo(user);
 
             return userInfo;
         }
 
-        private User UserToUserInfo(DBUser user)
+        private UserInfo UserToUserInfo(DBUser user)
         {
-            return new User()
+            return new UserInfo()
             {
                 Id = user.Id,
                 Login = user.Login

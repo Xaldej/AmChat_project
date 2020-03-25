@@ -10,11 +10,11 @@ namespace AmChat.Infrastructure
 {
     public class Chat : ChatInfo
     {
-        public Action<User, Chat> NewUserInChat;
+        public Action<UserInfo, Chat> NewUserInChat;
 
         public Chat()
         {
-            UsersInChat = new ObservableCollection<User>();
+            UsersInChat = new ObservableCollection<UserInfo>();
 
             UsersInChat.CollectionChanged += OnUsersInChatChanged;
         }
@@ -23,7 +23,7 @@ namespace AmChat.Infrastructure
         {
             if(e.Action == NotifyCollectionChangedAction.Add)
             {
-                if (!(e.NewItems[0] is User newUser))
+                if (!(e.NewItems[0] is UserInfo newUser))
                 {
                     return;
                 }

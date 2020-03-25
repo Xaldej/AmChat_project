@@ -13,7 +13,7 @@ namespace AlexeyMelentyevProject_ChatServer
 {
     public class ServerMessenger : IMessengerService
     {
-        public User User { get; set; }
+        public UserInfo User { get; set; }
 
         public ObservableCollection<Chat> UserChats { get; set; }
 
@@ -25,8 +25,6 @@ namespace AlexeyMelentyevProject_ChatServer
 
         public Action<IMessengerService> ClientDisconnected;
 
-        //public Action<Chat> NewChatIsCreated;
-
 
         ServerMessenger()
         {
@@ -37,7 +35,7 @@ namespace AlexeyMelentyevProject_ChatServer
         {
             TcpClient = tcpClient;
 
-            User = new User();
+            User = new UserInfo();
 
             UserChats = new ObservableCollection<Chat>();
 
@@ -85,9 +83,9 @@ namespace AlexeyMelentyevProject_ChatServer
             Stream.Write(data, 0, data.Length);
         }
 
-        public void SendMessageToExistingChat(MessageToChat message)
+        public void SendMessageToExistingChat(ChatMessage message)
         {
-            var messageToUser = JsonParser<MessageToChat>.OneObjectToJson(message);
+            var messageToUser = JsonParser<ChatMessage>.OneObjectToJson(message);
             var command = CommandConverter.CreateJsonMessageCommand("/messagetocertainchat", messageToUser);
             SendMessage(command);
         }
@@ -95,29 +93,20 @@ namespace AlexeyMelentyevProject_ChatServer
 
         private void InitializeCommands()
         {
-            var addContact = new AddOrUpdateChat();
-            //addContact.NewChatIsCreated += OnNewChatIsCreated;
-
             var closeConnection = new CloseConnection();
             closeConnection.ConnectionIsClosed += DisconnectClient;
 
-            Commands.Add(addContact);
+            Commands.Add(new AddOrUpdateChat());
             Commands.Add(closeConnection);
             Commands.Add(new GetChats());
             Commands.Add(new Login());
             Commands.Add(new SendMessageToChat());
-            Commands.Add(new GetUnreadMessages());
         }
 
         private void DisconnectClient(IMessengerService messenger)
         {
             ClientDisconnected(messenger);
         }
-
-        //private void OnNewChatIsCreated(Chat chat)
-        //{
-        //    NewChatIsCreated(chat);
-        //}
 
         private void ProcessMessage(string message)
         {

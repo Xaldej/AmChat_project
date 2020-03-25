@@ -23,7 +23,7 @@ namespace AmChat.ClientServices.Commands
             {
                 if(chat.ChatMessages==null)
                 {
-                    chat.ChatMessages = new ObservableCollection<MessageToChat>();
+                    chat.ChatMessages = new ObservableCollection<ChatMessage>();
                 }
 
                 messenger.UserChats.Add(chat);

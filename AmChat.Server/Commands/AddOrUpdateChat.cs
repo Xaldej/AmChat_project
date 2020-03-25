@@ -38,7 +38,7 @@ namespace AmChat.Server.Commands
             {
                 ProcessNewChatInfo(messenger);
             }
-            catch (Exception eeeeee)
+            catch
             {
                 var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Error adding chat try again");
                 messenger.SendMessage(error);
@@ -51,7 +51,7 @@ namespace AmChat.Server.Commands
 
             var dbUsersToAdd = GetUsersFromDB(NewChatInfo.LoginsToAdd);
 
-            List<User> usersToAdd = GetUserToAdd(dbUsersToAdd);
+            List<UserInfo> usersToAdd = GetUserToAdd(dbUsersToAdd);
 
             if (CreateNewChat)
             {
@@ -86,7 +86,7 @@ namespace AmChat.Server.Commands
             AddNewUserToMessengerChat(usersToAdd, chat);
         }
 
-        private async void AddNewUserToMessengerChat(List<User> users, Chat chat)
+        private async void AddNewUserToMessengerChat(List<UserInfo> users, Chat chat)
         {   
             foreach (var user in users)
             {   
@@ -107,9 +107,9 @@ namespace AmChat.Server.Commands
             return chat;
         }
 
-        private List<User> GetUserToAdd(List<DBUser> dbUsersToAdd)
+        private List<UserInfo> GetUserToAdd(List<DBUser> dbUsersToAdd)
         {
-            var usersToAdd = new List<User>();
+            var usersToAdd = new List<UserInfo>();
 
             foreach (var userToAdd in dbUsersToAdd)
             {
@@ -123,7 +123,7 @@ namespace AmChat.Server.Commands
             return usersToAdd;
         }
 
-        private void AddUsersToChatInDB(List<User> usersToAdd, DBChat chat)
+        private void AddUsersToChatInDB(List<UserInfo> usersToAdd, DBChat chat)
         {
             using (var context = new AmChatContext())
             {
@@ -141,7 +141,7 @@ namespace AmChat.Server.Commands
             }
         }
 
-        private void ChooseNewChatUsers(List<User> users, DBChat chat)
+        private void ChooseNewChatUsers(List<UserInfo> users, DBChat chat)
         {
             List<Guid> usersIdInChat;
             using (var context = new AmChatContext())
@@ -158,7 +158,7 @@ namespace AmChat.Server.Commands
             }
         }
 
-        private void AddChatsForUsersInDb(List<User> users, DBChat chat)
+        private void AddChatsForUsersInDb(List<UserInfo> users, DBChat chat)
         {
             using (var context = new AmChatContext())
             {
@@ -218,7 +218,7 @@ namespace AmChat.Server.Commands
             return users;
         }
 
-        private Chat DbChatToChat(DBChat chat, List<User> usersToAdd)
+        private Chat DbChatToChat(DBChat chat, List<UserInfo> usersToAdd)
         {
             return new Chat()
             {
@@ -227,9 +227,9 @@ namespace AmChat.Server.Commands
             };
         }
 
-        private User UserToUserInfo(DBUser user)
+        private UserInfo UserToUserInfo(DBUser user)
         {
-            return new User()
+            return new UserInfo()
             {
                 Id = user.Id,
                 Login = user.Login

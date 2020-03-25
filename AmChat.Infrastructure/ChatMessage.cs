@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure
 {
-    public class MessageToChat
+    public class ChatMessage
     {
-        public User FromUser { get; set; }
+        public UserInfo FromUser { get; set; }
 
         public Guid ToChatId { get; set; }
 

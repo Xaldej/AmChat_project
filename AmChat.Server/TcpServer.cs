@@ -1,6 +1,7 @@
 ﻿using AlexeyMelentyevProject_ChatServer;
 using AmChat.Infrastructure;
 using AmChat.Infrastructure.Interfaces;
+using AmChat.ServerServices;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,6 +24,8 @@ namespace AmChat.Server
 
         ChatsMaintenanceService ChatsMaintenanceService { get; set; }
 
+        ChatHistoryService ChatHistoryService { get; set; }
+
         public ServerMessenger Messenger { get; set; }
 
         public TcpSettings TcpSettings { get; set; }
@@ -41,6 +44,8 @@ namespace AmChat.Server
             ChatListenersAmount = new Dictionary<Chat, int>();
 
             ChatsMaintenanceService = new ChatsMaintenanceService(ActiveChats, ConnectedClients);
+
+            ChatHistoryService = new ChatHistoryService();
         }
 
         public void StartServer()
@@ -82,8 +87,6 @@ namespace AmChat.Server
             var client = new ServerMessenger(tcpClient);
             client.UserChats.CollectionChanged += OnUserChatsChanged;
             client.ClientDisconnected += DeleteDisconnectedClient;
-            //client.NewChatIsCreated += ChatsMaintenanceService.AddChatsForUsers;
-            //client.UnreadMessagesAreAsked += ChatsMaintenanceService.SendUnreadMessages;
 
             ConnectedClients.Add(client);
 
@@ -129,7 +132,7 @@ namespace AmChat.Server
             }
             else
             {
-                chat.ChatMessages = ChatsMaintenanceService.GetChatHistory(chat);
+                chat.ChatMessages = ChatHistoryService.GetChatHistory(chat);
                 ActiveChats.Add(chat);
                 
                 chat.ChatMessages.CollectionChanged += ChatsMaintenanceService.SendNewMessageToUsers;
@@ -160,7 +163,7 @@ namespace AmChat.Server
 
         private void RemoveInactiveChat(Chat chat)
         {
-            ChatsMaintenanceService.SaveChatHistory(chat);
+            Task.Run(()=>ChatHistoryService.SaveChatHistory(chat));
             ActiveChats.Remove(chat);
             ChatListenersAmount.Remove(chat);
         }

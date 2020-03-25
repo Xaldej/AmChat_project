@@ -14,7 +14,7 @@ namespace AmChat.ClientServices
 {
     public class ClientMessengerService : IMessengerService
     {
-        public User User { get; set; }
+        public UserInfo User { get; set; }
 
         public ObservableCollection<Chat> UserChats { get; set; }
 
@@ -30,7 +30,7 @@ namespace AmChat.ClientServices
 
         public Action<string> MessageToCurrentChatIsGotten;
 
-        public Action<MessageToChat> MessageToOtherChatIsGotten;
+        public Action<ChatMessage> MessageToOtherChatIsGotten;
 
         public Action<string, bool> ErrorIsGotten;
 
@@ -41,7 +41,7 @@ namespace AmChat.ClientServices
 
         public ClientMessengerService()
         {
-            User = new User();
+            User = new UserInfo();
 
             UserChats = new ObservableCollection<Chat>();
             UserChats.CollectionChanged += AddChatToContactList;
@@ -124,14 +124,14 @@ namespace AmChat.ClientServices
 
         public void SendMessageToChat(string message)
         {
-            var messageToChat = new MessageToChat()
+            var messageToChat = new ChatMessage()
             {
                 FromUser = User,
                 ToChatId = ChosenChat.Id,
                 Text = message,
             };
 
-            var messageToUserJson = JsonParser<MessageToChat>.OneObjectToJson(messageToChat);
+            var messageToUserJson = JsonParser<ChatMessage>.OneObjectToJson(messageToChat);
             var command = CommandConverter.CreateJsonMessageCommand("/sendmessagetochat", messageToUserJson);
 
             SendMessage(command);
@@ -192,7 +192,7 @@ namespace AmChat.ClientServices
         private void ShowNewMessage(object sender, NotifyCollectionChangedEventArgs e)
         {
 
-            if (!(e.NewItems[0] is MessageToChat message))
+            if (!(e.NewItems[0] is ChatMessage message))
             {
                 return;
             }

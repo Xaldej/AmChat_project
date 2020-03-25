@@ -64,7 +64,7 @@ namespace AmChat.Server.Commands
             return chatsInfo;
         }
 
-        private List<DBChat> GetChatsFromDb(User forUser)
+        private List<DBChat> GetChatsFromDb(UserInfo forUser)
         {
             var chats = new List<DBChat>();
 
@@ -84,19 +84,19 @@ namespace AmChat.Server.Commands
 
         private Chat ChatToUserChat(DBChat chat)
         {
-            List<User> usersInChat = GetUsersInChat(chat);
+            List<UserInfo> usersInChat = GetUsersInChat(chat);
 
             return new Chat()
             {
                 Id = chat.Id,
                 Name = chat.Name,
-                UsersInChat = new ObservableCollection<User>(usersInChat),
+                UsersInChat = new ObservableCollection<UserInfo>(usersInChat),
             };
         }
 
-        private List<User> GetUsersInChat(DBChat chat)
+        private List<UserInfo> GetUsersInChat(DBChat chat)
         {
-            List<User> users = new List<User>();
+            List<UserInfo> users = new List<UserInfo>();
             using (var context = new AmChatContext())
             {
                 var userIds = context.ChatUsers.Where(uinc => uinc.ChatId == chat.Id).Select(uinc => uinc.UserId).ToList();
@@ -111,9 +111,9 @@ namespace AmChat.Server.Commands
             return users;
         }
 
-        private User UserToUserInfo(DBUser user)
+        private UserInfo UserToUserInfo(DBUser user)
         {
-            return new User()
+            return new UserInfo()
             {
                 Id = user.Id,
                 Login = user.Login,

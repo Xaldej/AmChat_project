@@ -117,7 +117,7 @@ namespace AmChat.Forms
             InputMessage_textBox.Clear();
         }
 
-        private void ShowUnreadMessages(MessageToChat messageToShow)
+        private void ShowUnreadMessages(ChatMessage messageToShow)
         {
             var chatControl = ChatsControls.Where(c => c.Chat.Id == messageToShow.ToChatId).FirstOrDefault();
 

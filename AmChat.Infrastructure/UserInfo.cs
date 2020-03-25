@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure
 {
-    public class User
+    public class UserInfo
     {
         public Guid Id { get; set; }
 
@@ -14,7 +14,7 @@ namespace AmChat.Infrastructure
 
         public override bool Equals(object obj)
         {
-            if (!(obj is User userToCompare))
+            if (!(obj is UserInfo userToCompare))
             {
                 return false;
             }

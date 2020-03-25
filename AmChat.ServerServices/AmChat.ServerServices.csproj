@@ -5,19 +5,19 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8E776D0E-526D-4916-AEB3-93711BCB7A6F}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>AmChat.Server</RootNamespace>
-    <AssemblyName>AmChat.Server</AssemblyName>
+    <ProjectGuid>{D0A2FBA3-BC56-46CD-9566-385CC7D54943}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AmChat.ServerServices</RootNamespace>
+    <AssemblyName>AmChat.ServerServices</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -27,7 +27,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -44,7 +43,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -54,22 +52,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChatsMaintenanceService.cs" />
-    <Compile Include="Commands\AddOrUpdateChat.cs" />
-    <Compile Include="Commands\AddUsersToChat.cs" />
-    <Compile Include="Commands\CloseConnection.cs" />
-    <Compile Include="Commands\GetChats.cs" />
-    <Compile Include="Commands\Login.cs" />
-    <Compile Include="Commands\SendMessageToChat.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="ChatHistoryService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerMessenger.cs" />
-    <Compile Include="TcpServer.cs" />
-    <Compile Include="UnreadNotification.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AmChat.Data\AmChat.Data.csproj">
@@ -80,12 +64,11 @@
       <Project>{ca26f251-409c-45cb-beed-e21943a72c00}</Project>
       <Name>AmChat.Infrastructure</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AmChat.ServerServices\AmChat.ServerServices.csproj">
-      <Project>{d0a2fba3-bc56-46cd-9566-385cc7d54943}</Project>
-      <Name>AmChat.ServerServices</Name>
-    </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
