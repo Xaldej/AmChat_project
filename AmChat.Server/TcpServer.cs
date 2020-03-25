@@ -132,6 +132,7 @@ namespace AmChat.Server
                 chat.ChatMessages = ChatsMaintenanceService.GetChatHistory(chat);
                 ActiveChats.Add(chat);
                 chat.ChatMessages.CollectionChanged += ChatsMaintenanceService.SendNewMessageToUsers;
+                //chat.NewUserInChat+=
                 ChatListenersAmount[chat] = 1;
             }
         }

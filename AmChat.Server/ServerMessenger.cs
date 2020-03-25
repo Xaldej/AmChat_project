@@ -97,7 +97,7 @@ namespace AlexeyMelentyevProject_ChatServer
 
         private void InitializeCommands()
         {
-            var addContact = new AddNewChat();
+            var addContact = new AddOrUpdateChat();
             addContact.NewChatIsCreated += OnNewChatIsCreated;
 
             var closeConnection = new CloseConnection();

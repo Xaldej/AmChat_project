@@ -47,11 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddChatAdnUsersForm.cs">
+    <Compile Include="AddChatAndUsersForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AddChatAdnUsersForm.Designer.cs">
-      <DependentUpon>AddChatAdnUsersForm.cs</DependentUpon>
+    <Compile Include="AddChatAndUsersForm.Designer.cs">
+      <DependentUpon>AddChatAndUsersForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ChatInfoWindow.cs">
       <SubType>Form</SubType>
@@ -79,8 +79,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="AddChatAdnUsersForm.resx">
-      <DependentUpon>AddChatAdnUsersForm.cs</DependentUpon>
+    <EmbeddedResource Include="AddChatAndUsersForm.resx">
+      <DependentUpon>AddChatAndUsersForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ChatInfoWindow.resx">
       <DependentUpon>ChatInfoWindow.cs</DependentUpon>

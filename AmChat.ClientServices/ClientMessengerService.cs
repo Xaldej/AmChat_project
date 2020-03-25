@@ -69,14 +69,15 @@ namespace AmChat.ClientServices
                 LoginsToAdd = userLoginsToAdd,
             };
             var newChatInfoJsont = JsonParser<NewChatInfo>.OneObjectToJson(newChatInfo);
-            var command = CommandConverter.CreateJsonMessageCommand("/adduserstochat", newChatInfoJsont);
+            var command = CommandConverter.CreateJsonMessageCommand("/addorupdatechat", newChatInfoJsont);
+            SendMessage(command);
         }
 
         public void AddChat(string chatName, List<string> userLoginsToAdd)
         {
             var newChat = new NewChatInfo(chatName, userLoginsToAdd);
             var newChatJson = JsonParser<NewChatInfo>.OneObjectToJson(newChat);
-            var command = CommandConverter.CreateJsonMessageCommand("/addnewchat", newChatJson);
+            var command = CommandConverter.CreateJsonMessageCommand("/addorupdatechat", newChatJson);
             SendMessage(command);
         }
 

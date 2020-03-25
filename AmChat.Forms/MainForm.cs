@@ -191,7 +191,7 @@ namespace AmChat.Forms
 
         private void AddChat_button_Click(object sender, EventArgs e)
         {
-            var addChatForm = new AddChatAdnUsersForm();
+            var addChatForm = new AddChatAndUsersForm();
 
             addChatForm.NewChatInfoEntered += AddChat;
 

@@ -10,11 +10,11 @@ using System.Windows.Forms;
 
 namespace AmChat.Forms
 {
-    public partial class AddChatAdnUsersForm : Form
+    public partial class AddChatAndUsersForm : Form
     {
         public Action<string, List<string>> NewChatInfoEntered;
 
-        public AddChatAdnUsersForm()
+        public AddChatAndUsersForm()
         {
             InitializeComponent();
         }

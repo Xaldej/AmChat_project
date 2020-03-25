@@ -1,6 +1,6 @@
 ﻿namespace AmChat.Forms
 {
-    partial class AddChatAdnUsersForm
+    partial class AddChatAndUsersForm
     {
         /// <summary>
         /// Required designer variable.
@@ -30,7 +30,7 @@
         {
             this.CahtName_label = new System.Windows.Forms.Label();
             this.ChatName_textBox = new System.Windows.Forms.TextBox();
-            this.CreateChat_button = new System.Windows.Forms.Button();
+            this.AddNewChatInfo_button = new System.Windows.Forms.Button();
             this.AddLogins_groupBox = new System.Windows.Forms.GroupBox();
             this.ListOfLoginsToAdd_panel = new System.Windows.Forms.Panel();
             this.textBox1 = new System.Windows.Forms.TextBox();
@@ -56,15 +56,15 @@
             this.ChatName_textBox.TabIndex = 1;
             this.ChatName_textBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.AddContact_textBox_KeyDown);
             // 
-            // CreateChat_button
+            // AddNewChatInfo_button
             // 
-            this.CreateChat_button.Location = new System.Drawing.Point(167, 268);
-            this.CreateChat_button.Name = "CreateChat_button";
-            this.CreateChat_button.Size = new System.Drawing.Size(75, 23);
-            this.CreateChat_button.TabIndex = 2;
-            this.CreateChat_button.Text = "Create Chat";
-            this.CreateChat_button.UseVisualStyleBackColor = true;
-            this.CreateChat_button.Click += new System.EventHandler(this.CreateChat_button_Click);
+            this.AddNewChatInfo_button.Location = new System.Drawing.Point(167, 268);
+            this.AddNewChatInfo_button.Name = "AddNewChatInfo_button";
+            this.AddNewChatInfo_button.Size = new System.Drawing.Size(75, 23);
+            this.AddNewChatInfo_button.TabIndex = 2;
+            this.AddNewChatInfo_button.Text = "Add";
+            this.AddNewChatInfo_button.UseVisualStyleBackColor = true;
+            this.AddNewChatInfo_button.Click += new System.EventHandler(this.CreateChat_button_Click);
             // 
             // AddLogins_groupBox
             // 
@@ -105,16 +105,16 @@
             this.AddMoreLogins_button.UseVisualStyleBackColor = true;
             this.AddMoreLogins_button.Click += new System.EventHandler(this.AddMoreLogins_button_Click);
             // 
-            // AddChatAdnUsersForm
+            // AddChatAndUsersForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(254, 303);
             this.Controls.Add(this.AddLogins_groupBox);
-            this.Controls.Add(this.CreateChat_button);
+            this.Controls.Add(this.AddNewChatInfo_button);
             this.Controls.Add(this.ChatName_textBox);
             this.Controls.Add(this.CahtName_label);
-            this.Name = "AddChatAdnUsersForm";
+            this.Name = "AddChatAndUsersForm";
             this.Text = "Add Chat";
             this.AddLogins_groupBox.ResumeLayout(false);
             this.ListOfLoginsToAdd_panel.ResumeLayout(false);
@@ -126,7 +126,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Button CreateChat_button;
+        private System.Windows.Forms.Button AddNewChatInfo_button;
         private System.Windows.Forms.TextBox ChatName_textBox;
         private System.Windows.Forms.Label CahtName_label;
         private System.Windows.Forms.GroupBox AddLogins_groupBox;

@@ -40,7 +40,7 @@ namespace AmChat.Forms
 
         private void AddUsersToChat_button_Click(object sender, EventArgs e)
         {
-            var addUsersWindow = new AddChatAdnUsersForm()
+            var addUsersWindow = new AddChatAndUsersForm()
             {
                 Text = "Add Users"
             };

@@ -64,7 +64,7 @@ namespace AmChat.Server.Commands
 
             using (var context = new AmChatContext())
             {
-                var chatsIds = context.UsersChats.Where(uc => uc.UserId == forUser.Id).Select(uc => uc.ChatId).ToList();
+                var chatsIds = context.UserChats.Where(uc => uc.UserId == forUser.Id).Select(uc => uc.ChatId).ToList();
 
                 foreach (var id in chatsIds)
                 {
@@ -93,7 +93,7 @@ namespace AmChat.Server.Commands
             List<User> users = new List<User>();
             using (var context = new AmChatContext())
             {
-                var userIds = context.UsersInChat.Where(uinc => uinc.ChatId == chat.Id).Select(uinc => uinc.UserId).ToList();
+                var userIds = context.ChatUsers.Where(uinc => uinc.ChatId == chat.Id).Select(uinc => uinc.UserId).ToList();
 
                 foreach (var userId in userIds)
                 {
