@@ -12,6 +12,12 @@ namespace AmChat.ServerServices
 {
     public class ChatHistoryService
     {
+        public ChatHistoryService()
+        {
+
+        }
+
+
         public ObservableCollection<ChatMessage> GetChatHistory(Chat chat)
         {
             var dbChatMessage = new List<DBChatMessage>();
@@ -21,7 +27,7 @@ namespace AmChat.ServerServices
                 dbChatMessage = context.ChatMessages.Where(cm => cm.ChatId == chat.Id).ToList();
             }
 
-            var lastNMessages = GetLastNMessages(dbChatMessage, 2);
+            var lastNMessages = GetLastNMessages(dbChatMessage, 100);
 
             var chatHistory = DbMessagesToMessages(lastNMessages);
 
@@ -30,16 +36,17 @@ namespace AmChat.ServerServices
             return chatMessages;
         }
 
-        private List<DBChatMessage> GetLastNMessages(List<DBChatMessage> messages, int n)
+        public void SaveChatHistory(Chat chat)
         {
-            var lastNMessages = new List<DBChatMessage>();
+            var dbChatMessages = MessagesToDbMessages(chat.ChatMessages);
 
-            messages.Reverse();
-
-            lastNMessages = messages.Skip(Math.Max(0, messages.Count() - n)).ToList();
-
-            return lastNMessages;
+            using (var context = new AmChatContext())
+            {
+                context.ChatMessages.AddRange(dbChatMessages);
+                context.SaveChanges();
+            }
         }
+
 
         private List<ChatMessage> DbMessagesToMessages(List<DBChatMessage> dbMessages)
         {
@@ -55,8 +62,19 @@ namespace AmChat.ServerServices
                 };
                 messages.Add(message);
             }
-            
+
             return messages;
+        }
+
+        private List<DBChatMessage> GetLastNMessages(List<DBChatMessage> messages, int n)
+        {
+            var lastNMessages = new List<DBChatMessage>();
+
+            messages.Reverse();
+
+            lastNMessages = messages.Skip(Math.Max(0, messages.Count() - n)).ToList();
+
+            return lastNMessages;
         }
 
         private UserInfo GetUserFromDb(Guid id)
@@ -73,17 +91,6 @@ namespace AmChat.ServerServices
                 Id = dbUser.Id,
                 Login = dbUser.Login,
             };
-        }
-
-        public void SaveChatHistory(Chat chat)
-        {
-            var dbChatMessages = MessagesToDbMessages(chat.ChatMessages);
-
-            using (var context = new AmChatContext())
-            {
-                context.ChatMessages.AddRange(dbChatMessages);
-                context.SaveChanges();
-            }
         }
 
         private List<DBChatMessage> MessagesToDbMessages(ObservableCollection<ChatMessage> messages)
