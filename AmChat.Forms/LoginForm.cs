@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmChat.Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,9 +13,9 @@ namespace AmChat.Forms
 {
     public partial class LoginForm : Form
     {
-        public Action<string> LoginIsEntered;
+        public Action<LoginData> LoginDataIsEntered;
 
-        bool isClosedByUser = true;
+        public bool isClosedByUser = true;
 
         public LoginForm()
         {
@@ -23,7 +24,7 @@ namespace AmChat.Forms
 
         private void Login_button_Click(object sender, EventArgs e)
         {
-            LoginEntered();
+            LoginAdnPasswordEntered();
         }
 
         private void LoginForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -34,30 +35,42 @@ namespace AmChat.Forms
             }
         }
 
-        private void Login_textBox_KeyDown(object sender, KeyEventArgs e)
+        private void NewKeyPressed(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
-                LoginEntered();
+                LoginAdnPasswordEntered();
             }
         }
 
-        private void LoginEntered()
+        private void LoginAdnPasswordEntered()
         {
-            string userLogin = string.Empty;
+            var login = Login_textBox.Text;
+            var password = Password_textBox.Text;
 
-            userLogin = Login_textBox.Text;
+            
 
-            if (userLogin == string.Empty)
+            if (login == string.Empty || password == string.Empty)
             {
                 return;
             }
 
-            LoginIsEntered(userLogin);
+            var passwordHash = password.GetHashCode();
 
+            var loginData = new LoginData(login, passwordHash);
+
+            LoginDataIsEntered(loginData);
+        }
+
+        public void ShowIncorrectLoginMessage()
+        {
+            MessageBox.Show("Check login and password and try again", "Incorrect login");
+        }
+
+        public void CloseForm()
+        {
             isClosedByUser = false;
-
-            this.Close();
+            this.Invoke(new Action(() => this.Close()));
         }
     }
 }

@@ -12,8 +12,8 @@ namespace AmChat.Data.Entitites
     {
         public DBChat Chat { get; set; }
 
-        [Required]
-        [Index(IsUnique = false)]
+        [Index]
+        [Required]        
         public Guid ChatId { get; set; }
 
         [Required]

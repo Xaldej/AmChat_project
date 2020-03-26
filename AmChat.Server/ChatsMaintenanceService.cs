@@ -103,6 +103,7 @@ namespace AmChat.Server
             {
                 FromUser = ServerNotificationUser,
                 ToChatId = chat.Id,
+                DateAndTime = DateTime.Now,
                 Text = notification,
             };
 
@@ -137,22 +138,22 @@ namespace AmChat.Server
 
         public void SendNewMessageToUsers(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (!(e.NewItems[0] is ChatMessage messageToChat))
+            if(e.Action==NotifyCollectionChangedAction.Add)
             {
-                return;
-            }
+                if (!(e.NewItems[0] is ChatMessage messageToChat))
+                {
+                    return;
+                }
 
-            var chat = ActiveChats.Where(c => c.Id == messageToChat.ToChatId).FirstOrDefault();
+                var chat = ActiveChats.Where(c => c.Id == messageToChat.ToChatId).FirstOrDefault();
 
-            var usersToSend = chat.UsersInChat.Where(u => !u.Equals(messageToChat.FromUser)).ToList();
+                var usersToSend = chat.UsersInChat.Where(u => !u.Equals(messageToChat.FromUser)).ToList();
 
-            foreach (var user in usersToSend)
-            {
-                SendMessageToCertainUser(user, messageToChat);
+                foreach (var user in usersToSend)
+                {
+                    SendMessageToCertainUser(user, messageToChat);
+                }
             }
         }
-
     }
-
-
 }

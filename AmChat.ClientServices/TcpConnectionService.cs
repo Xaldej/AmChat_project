@@ -27,7 +27,7 @@ namespace AmChat.ClientServices
             {
                 TcpClient.Connect(TcpSettings.EndPoint);
             }
-            catch (Exception e)
+            catch
             {
                 var error = "Cannot connect to server. Check your interner connection and restart the app";
                 ErrorIsGotten(error, true);

@@ -38,6 +38,10 @@ namespace AmChat.ClientServices
 
         public Action<Guid> NewUnreadNotification;
 
+        public Action CorrectLogin;
+
+        public Action IncorrectLogin;
+
 
         public ClientMessengerService(TcpClient tcpClient)
         {
@@ -105,11 +109,6 @@ namespace AmChat.ClientServices
 
         }
 
-        public void Login()
-        {
-            var command = CommandConverter.CreateJsonMessageCommand("/login", User.Login);
-            SendMessage(command);
-        }
 
         public void Process()
         {
@@ -128,6 +127,7 @@ namespace AmChat.ClientServices
             {
                 FromUser = User,
                 ToChatId = ChosenChat.Id,
+                DateAndTime = DateTime.Now,
                 Text = message,
             };
 
@@ -145,9 +145,20 @@ namespace AmChat.ClientServices
             Stream.Write(data, 0, data.Length);
         }
 
+        public void GetChats()
+        {
+            var command = CommandConverter.CreateJsonMessageCommand("/getchats", string.Empty);
+            SendMessage(command);
+        }
 
         private void InitializeCommands()
         {
+            var correctLogin = new CorrectLogin();
+            correctLogin.UserIsLoggedIn += OnUserIsLoggedIn;
+
+            var incorrectLogin = new IncorrectLogin();
+            incorrectLogin.IncorrectLoginData += OnIncorrectLoginData;
+
             var serverError = new ServerError();
             serverError.SendError += ShowError;
 
@@ -157,10 +168,21 @@ namespace AmChat.ClientServices
 
             Commands.Add(new ChatIsAdded());
             Commands.Add(new CorrectContactList());
-            Commands.Add(new CorrectLogin());
+            Commands.Add(correctLogin);
+            Commands.Add(incorrectLogin);
             Commands.Add(new MessageToCertainChat());
             Commands.Add(serverError);
             Commands.Add(unreadMessagesInChat);
+        }
+
+        private void OnIncorrectLoginData()
+        {
+            IncorrectLogin();
+        }
+
+        private void OnUserIsLoggedIn()
+        {
+            CorrectLogin();
         }
 
         private void OnNewUnreadNotification(Guid chatId)
@@ -219,8 +241,15 @@ namespace AmChat.ClientServices
 
         public void CloseConnection()
         {
-            var command = CommandConverter.CreateJsonMessageCommand("/closeconnection", string.Empty);
-            SendMessage(command);
+            try
+            {
+                var command = CommandConverter.CreateJsonMessageCommand("/closeconnection", string.Empty);
+                SendMessage(command);
+            }
+            catch
+            {
+
+            }
         }
     }
 }

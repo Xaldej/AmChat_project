@@ -51,6 +51,7 @@
     <Compile Include="Interfaces\IMessengerService.cs" />
     <Compile Include="JsonParser.cs" />
     <Compile Include="ChatMessage.cs" />
+    <Compile Include="LoginData.cs" />
     <Compile Include="NewChatInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TcpSettings.cs" />

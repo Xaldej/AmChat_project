@@ -46,9 +46,11 @@
     <Compile Include="Commands\ChatIsAdded.cs" />
     <Compile Include="Commands\CorrectContactList.cs" />
     <Compile Include="Commands\CorrectLogin.cs" />
+    <Compile Include="Commands\IncorrectLogin.cs" />
     <Compile Include="Commands\MessageToCertainChat.cs" />
     <Compile Include="Commands\ServerError.cs" />
     <Compile Include="Commands\UnreadMessagesInChat.cs" />
+    <Compile Include="LoginService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TcpConnectionService.cs" />
   </ItemGroup>

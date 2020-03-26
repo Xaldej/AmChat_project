@@ -12,6 +12,25 @@ namespace AmChat.Infrastructure
 
         public Guid ToChatId { get; set; }
 
+        public DateTime DateAndTime { get; set; }
+
         public string Text { get; set; }
+
+        public override bool Equals(object obj)
+        {   
+            if (!(obj is ChatMessage messageToCompare))
+            {
+                return false;
+            }
+
+            return FromUser.Equals(messageToCompare.FromUser)
+                    &&ToChatId==messageToCompare.ToChatId
+                    &&Text==messageToCompare.Text;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

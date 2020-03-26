@@ -17,25 +17,44 @@ namespace AmChat.Server.Commands
 
         public override void Execute(IMessengerService messenger, string data)
         {
-            var userName = data;
+            var loginData = JsonParser<LoginData>.JsonToOneObject(data);
+            DBUser dbUser;
+
             try
             {
-                messenger.User = GetUserFromDB(userName);
-                var id = messenger.User.Id;
-                var command = CommandConverter.CreateJsonMessageCommand("/correctlogin", id.ToString());
-                messenger.SendMessage(command);
+                dbUser = GetUserFromDB(loginData);
             }
             catch
             {
                 Console.WriteLine("User is not logged in");
                 var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Login problems. Try to reconnect");
                 messenger.SendMessage(error);
+                return;
             }
+
+            if (loginData.PasswordHash == dbUser.PasswordHash)
+            {
+                UserInfo userInfo = UserToUserInfo(dbUser);
+                messenger.User = userInfo;
+
+                var userInfoJson = JsonParser<UserInfo>.OneObjectToJson(messenger.User);
+                var command = CommandConverter.CreateJsonMessageCommand("/correctlogin", userInfoJson);
+                Console.WriteLine("User is got from DB");
+                messenger.SendMessage(command);
+            }
+            else
+            {
+                var command = CommandConverter.CreateJsonMessageCommand("/incorrectlogin", string.Empty);
+                messenger.SendMessage(command);
+            }
+          
         }
 
-        private UserInfo GetUserFromDB(string userLogin)
+        private DBUser GetUserFromDB(LoginData loginData)
         {
             DBUser user;
+            var userLogin = loginData.Login;
+            var passwordHash = loginData.PasswordHash;
 
             using (var context = new AmChatContext())
             {
@@ -47,6 +66,7 @@ namespace AmChat.Server.Commands
                     {
                         Id = Guid.NewGuid(),
                         Login = userLogin,
+                        PasswordHash = passwordHash,
                     };
 
                     context.Users.Add(user);
@@ -55,15 +75,11 @@ namespace AmChat.Server.Commands
 
                     Console.WriteLine("User added to DB");
                 }
-                else
-                {
-                    Console.WriteLine("User is got from DB");
-                }
             }
 
-            UserInfo userInfo = UserToUserInfo(user);
+            
 
-            return userInfo;
+            return user;
         }
 
         private UserInfo UserToUserInfo(DBUser user)

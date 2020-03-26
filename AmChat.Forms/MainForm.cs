@@ -20,6 +20,8 @@ namespace AmChat.Forms
 
         List<ChatControl> ChatsControls { get; set; }
 
+        LoginForm LoginForm { get; set; }
+
         public MainForm()
         {
             InitializeComponent();
@@ -110,17 +112,21 @@ namespace AmChat.Forms
 
         private void GetLogin()
         {
-            var loginForm = new LoginForm();
+            LoginForm = new LoginForm();
 
-            loginForm.LoginIsEntered += Login;
+            var loginService = new LoginService(MessengerService);
+            loginService.CorrectLogin += OnCorrectLogin;
+            loginService.IncorrectLogin += LoginForm.ShowIncorrectLoginMessage;
 
-            loginForm.ShowDialog();
+            LoginForm.LoginDataIsEntered += loginService.Login;
+
+            LoginForm.ShowDialog();
         }
 
-        private void Login(string userLogin)
+        private void OnCorrectLogin()
         {
-            MessengerService.User.Login = userLogin;
-            MessengerService.Login();
+            LoginForm.CloseForm();
+            MessengerService.GetChats();
         }
 
         private void ShowMessageFromOtherUser(string message)
@@ -227,7 +233,11 @@ namespace AmChat.Forms
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            MessengerService.CloseConnection();
+            if(MessengerService!=null)
+            {
+                MessengerService.CloseConnection();
+            }
+            
             //TO DO: stop all threads
         }
 

@@ -13,13 +13,15 @@ namespace AmChat.ClientServices.Commands
     {
         public override string Name => "CorrectLogin";
 
+        public Action UserIsLoggedIn;
+
         public override void Execute(IMessengerService messenger, string data)
         {
-            messenger.User.Id = Guid.Parse(data);
+            var user = JsonParser<UserInfo>.JsonToOneObject(data);
+            messenger.User.Id = user.Id;
+            messenger.User.Login = user.Login;
 
-            var command = CommandConverter.CreateJsonMessageCommand("/getchats", data);
-
-            messenger.SendMessage(command);
+            UserIsLoggedIn();
         }
     }
 }
