@@ -25,7 +25,7 @@ namespace AmChat.Server.Commands
                 var command = CommandConverter.CreateJsonMessageCommand("/correctlogin", id.ToString());
                 messenger.SendMessage(command);
             }
-            catch (Exception eeee)
+            catch
             {
                 Console.WriteLine("User is not logged in");
                 var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Login problems. Try to reconnect");

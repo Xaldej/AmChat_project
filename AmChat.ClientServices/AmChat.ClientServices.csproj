@@ -50,6 +50,7 @@
     <Compile Include="Commands\ServerError.cs" />
     <Compile Include="Commands\UnreadMessagesInChat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TcpConnectionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AmChat.Infrastructure\AmChat.Infrastructure.csproj">

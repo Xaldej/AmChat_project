@@ -39,8 +39,10 @@ namespace AmChat.ClientServices
         public Action<Guid> NewUnreadNotification;
 
 
-        public ClientMessengerService()
+        public ClientMessengerService(TcpClient tcpClient)
         {
+            TcpClient = tcpClient;
+
             User = new UserInfo();
 
             UserChats = new ObservableCollection<Chat>();
@@ -109,10 +111,8 @@ namespace AmChat.ClientServices
             SendMessage(command);
         }
 
-        public void Process(TcpSettings tcpSettings)
+        public void Process()
         {
-            ConnectToServer(tcpSettings);
-
             using (Stream = TcpClient.GetStream())
             {
                 while (true)
@@ -166,21 +166,6 @@ namespace AmChat.ClientServices
         private void OnNewUnreadNotification(Guid chatId)
         {
             NewUnreadNotification(chatId);
-        }
-
-        private void ConnectToServer(TcpSettings tcpSettings)
-        {
-            TcpClient = new TcpClient();
-
-            try
-            {
-                TcpClient.Connect(tcpSettings.EndPoint);
-            }
-            catch
-            {
-                var error = "Cannot connect to server. Check your interner connection and restart the app";
-                ErrorIsGotten(error, true);
-            }
         }
 
         private void ShowError(string errorText)

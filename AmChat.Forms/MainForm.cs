@@ -7,6 +7,7 @@ using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -17,8 +18,6 @@ namespace AmChat.Forms
     {   
         private ClientMessengerService MessengerService { get; set; }
 
-        private ChatHistoryServise ChatHistoryServise { get; set; }
-
         List<ChatControl> ChatsControls { get; set; }
 
         public MainForm()
@@ -26,6 +25,27 @@ namespace AmChat.Forms
             InitializeComponent();
 
             ChatsControls = new List<ChatControl>();
+        }
+
+        private void AM_Chat_Load(object sender, EventArgs e)
+        {
+            CreateMessenger();
+
+            GetLogin();
+        }
+
+        private TcpClient ConnectToServer()
+        {
+            var ip = ConfigurationManager.AppSettings["ServerIP"];
+            var port = Int32.Parse(ConfigurationManager.AppSettings["ServerPort"]);
+
+            var tcpSettings = new TcpSettings(ip, port);
+
+            var tcpConnectionService = new TcpConnectionService(tcpSettings);
+            tcpConnectionService.ErrorIsGotten += ShowErrorToUser;
+
+            return tcpConnectionService.Connect();
+            
         }
 
         private void AddChat(string chatName, List<string> userLoginsToAdd)
@@ -74,12 +94,9 @@ namespace AmChat.Forms
 
         private void CreateMessenger()
         {
-            var ip = ConfigurationManager.AppSettings["ServerIP"];
-            var port = Int32.Parse(ConfigurationManager.AppSettings["ServerPort"]);
+            var tcpClient = ConnectToServer();
 
-            var tcpSettings = new TcpSettings(ip, port);
-
-            MessengerService = new ClientMessengerService();
+            MessengerService = new ClientMessengerService(tcpClient);
             MessengerService.ChatAdded += AddChatToContactPanel;
             MessengerService.ErrorIsGotten += ShowErrorToUser;
             MessengerService.MessageToCurrentChatIsGotten += ShowMessageFromOtherUser;
@@ -87,7 +104,7 @@ namespace AmChat.Forms
             MessengerService.MessageCorretlySend += ShowMessageToOtherUser;
             MessengerService.NewUnreadNotification += ShowUnreadNotification;
 
-            var thread = new Thread(() => MessengerService.Process(tcpSettings));
+            var thread = new Thread(() => MessengerService.Process());
             thread.Start();
         }
 
@@ -198,14 +215,7 @@ namespace AmChat.Forms
             addChatForm.ShowDialog();
         }
 
-        private void AM_Chat_Load(object sender, EventArgs e)
-        {
-            ChatHistoryServise = new ChatHistoryServise();
 
-            CreateMessenger();
-
-            GetLogin();
-        }
 
         private void InputMessage_textBox_KeyDown(object sender, KeyEventArgs e)
         {
