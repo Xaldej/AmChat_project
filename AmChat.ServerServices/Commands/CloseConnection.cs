@@ -6,15 +6,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmChat.Server.Commands
+namespace AmChat.ServerServices.Commands
 {
-    class AddUsersToChat : Command
+    public class CloseConnection : Command
     {
-        public override string Name => "AddUsersToChat";
+        public Action<IMessengerService> ConnectionIsClosed;
+
+        public override string Name => "CloseConnection";
 
         public override void Execute(IMessengerService messenger, string data)
         {
-            //TO DO
+            ConnectionIsClosed(messenger);
         }
     }
 }

@@ -1,17 +1,18 @@
 ﻿using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Interfaces;
-using AmChat.Server.Commands;
+using AmChat.ServerServices.Commands;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace AlexeyMelentyevProject_ChatServer
+namespace AmChat.ServerServices
 {
-    public class ServerMessenger : IMessengerService
+    public class ServerMessengerService : IMessengerService
     {
         public UserInfo User { get; set; }
 
@@ -26,12 +27,12 @@ namespace AlexeyMelentyevProject_ChatServer
         public Action<IMessengerService> ClientDisconnected;
 
 
-        ServerMessenger()
+        ServerMessengerService()
         {
 
         }
 
-        public ServerMessenger(TcpClient tcpClient)
+        public ServerMessengerService(TcpClient tcpClient)
         {
             TcpClient = tcpClient;
 
@@ -42,7 +43,7 @@ namespace AlexeyMelentyevProject_ChatServer
             Commands = new List<Command>();
 
             InitializeCommands();
-           
+
         }
 
         public void ListenMessages()
@@ -121,7 +122,7 @@ namespace AlexeyMelentyevProject_ChatServer
                 return;
             }
 
-            if(commandMessage == null)
+            if (commandMessage == null)
             {
                 //TO DO: log errors
                 return;

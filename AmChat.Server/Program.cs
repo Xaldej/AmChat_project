@@ -1,5 +1,7 @@
-﻿using System;
+﻿using AmChat.Infrastructure;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -12,7 +14,12 @@ namespace AmChat.Server
         {
             var tcpServer = new TcpServer();
 
-            var thread = new Thread(tcpServer.StartServer);
+            var ip = ConfigurationManager.AppSettings["ServerIP"];
+            var port = Int32.Parse(ConfigurationManager.AppSettings["ServerPort"]);
+
+            var tcpSettings = new TcpSettings(ip, port);
+
+            var thread = new Thread(()=>tcpServer.StartServer(tcpSettings));
             thread.Start();
         }
     }

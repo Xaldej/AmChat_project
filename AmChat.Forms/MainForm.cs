@@ -47,7 +47,6 @@ namespace AmChat.Forms
             tcpConnectionService.ErrorIsGotten += ShowErrorToUser;
 
             return tcpConnectionService.Connect();
-            
         }
 
         private void AddChat(string chatName, List<string> userLoginsToAdd)
@@ -163,7 +162,7 @@ namespace AmChat.Forms
             }
         }
 
-        private void TrySendMessage()
+        private void SendMessage()
         {
             var userInput = InputMessage_textBox.Text;
 
@@ -227,7 +226,7 @@ namespace AmChat.Forms
         {
             if (e.KeyCode == Keys.Enter)
             {
-                TrySendMessage();
+                SendMessage();
             }
         }
 
@@ -237,13 +236,11 @@ namespace AmChat.Forms
             {
                 MessengerService.CloseConnection();
             }
-            
-            //TO DO: stop all threads
         }
 
         private void Send_button_Click(object sender, EventArgs e)
         {
-            TrySendMessage();
+            SendMessage();
         }
     }
 }

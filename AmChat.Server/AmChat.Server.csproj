@@ -54,16 +54,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChatsMaintenanceService.cs" />
-    <Compile Include="Commands\AddOrUpdateChat.cs" />
-    <Compile Include="Commands\AddUsersToChat.cs" />
-    <Compile Include="Commands\CloseConnection.cs" />
-    <Compile Include="Commands\GetChats.cs" />
-    <Compile Include="Commands\Login.cs" />
-    <Compile Include="Commands\SendMessageToChat.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerMessenger.cs" />
     <Compile Include="TcpServer.cs" />
   </ItemGroup>
   <ItemGroup>
