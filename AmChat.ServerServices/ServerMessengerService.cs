@@ -24,7 +24,7 @@ namespace AmChat.ServerServices
 
         NetworkStream Stream { get; set; }
 
-        public Dictionary<string, ICommandHandler> CommandHandlers { get; }
+        public CommandHandlerService CommandHandler { get; set; }
 
         public Action<IMessengerService> ClientDisconnected;
 
@@ -42,11 +42,10 @@ namespace AmChat.ServerServices
 
             UserChats = new ObservableCollection<Chat>();
 
-            CommandHandlers = new Dictionary<string, ICommandHandler>();
-
-            InitializeCommandHandlers();
-
+            CommandHandler = new CommandHandlerService(this);
+            CommandHandler.ClientDisconnected += OnClientDisconnectd;
         }
+
 
         public void ListenMessages()
         {
@@ -75,7 +74,7 @@ namespace AmChat.ServerServices
 
                     string message = builder.ToString();
 
-                    ProcessMessage(message);
+                    CommandHandler.ProcessMessage(message);
                 }
             }
         }
@@ -86,67 +85,10 @@ namespace AmChat.ServerServices
             Stream.Write(data, 0, data.Length);
         }
 
-        public void SendMessageToExistingChat(ChatMessage message)
-        {
-            var messageToUserJson = JsonParser<ChatMessage>.OneObjectToJson(message);
 
-            var command = new MessageToCertainChat() { Data = messageToUserJson };
-            var commandJson = JsonParser<MessageToCertainChat>.OneObjectToJson(command);
-            
-            SendMessage(commandJson);
-        }
-
-
-        private void InitializeCommandHandlers()
-        {
-            var closeConnectionHandler = new CloseConnectionHandler();
-            closeConnectionHandler.ConnectionIsClosed += DisconnectClient;
-
-            CommandHandlers.Add(nameof(AddOrUpdateChat).ToLower(), new AddOrUpdateChatHandler());
-            CommandHandlers.Add(nameof(CloseConnection).ToLower(), closeConnectionHandler);
-            CommandHandlers.Add(nameof(GetChats).ToLower(), new GetChatsHandler());
-            CommandHandlers.Add(nameof(Login).ToLower(), new LoginHandler());
-            CommandHandlers.Add(nameof(SendMessageToChat).ToLower(), new SendMessageToChatHandler());
-        }
-
-        private void DisconnectClient(IMessengerService messenger)
+        private void OnClientDisconnectd(IMessengerService messenger)
         {
             ClientDisconnected(messenger);
-        }
-
-        private void ProcessMessage(string message)
-        {
-            var command = new Command();
-            try
-            {
-                command = JsonParser<Command>.JsonToOneObject(message);
-            }
-            catch
-            {
-                //TO DO: log errors
-                return;
-            }
-
-            if (command == null)
-            {
-                //TO DO: log errors
-                return;
-            }
-
-            ICommandHandler handler;
-            CommandHandlers.TryGetValue(command.Name, out handler);
-
-            if (handler == null)
-            {
-                var error = new ServerError() { Data = "Unknown command" };
-                var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
-
-                SendMessage(errorJson);
-
-                return;
-            }
-
-            handler.Execute(this, command.Data);
         }
     }
 }

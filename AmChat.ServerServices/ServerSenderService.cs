@@ -45,7 +45,7 @@ namespace AmChat.ServerServices
 
             if (clientToSend != null)
             {
-                clientToSend.SendMessageToExistingChat(messageToChat);
+                clientToSend.CommandHandler.SendMessageToExistingChat(messageToChat);
 
             }
         }

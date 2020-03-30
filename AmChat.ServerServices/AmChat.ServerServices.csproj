@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="ChatHistoryService.cs" />
     <Compile Include="ChatMaintenanceService.cs" />
+    <Compile Include="CommandHandlerService.cs" />
     <Compile Include="CommandHandlers\AddOrUpdateChatHandler.cs" />
     <Compile Include="CommandHandlers\CloseConnectionHandler.cs" />
     <Compile Include="CommandHandlers\GetChatsHandler.cs" />

@@ -21,8 +21,6 @@ namespace AmChat.ClientServices
 
         ClientMessengerService Messenger { get; set; }
 
-        public ObservableCollection<Chat> UserChats { get; set; }
-
         public Chat ChosenChat { get; set; }
 
 
@@ -42,15 +40,60 @@ namespace AmChat.ClientServices
 
         public Action<Guid> NewUnreadNotification;
 
+
         public CommandHandlerService(ClientMessengerService messenger)
         {
             Messenger = messenger;
-
-            UserChats = new ObservableCollection<Chat>();
-            UserChats.CollectionChanged += AddChatToContactList;
-            Messenger.UserChats = UserChats; // TEMPORARY
+            
+            Messenger.UserChats.CollectionChanged += AddChatToContactList;
 
             InitializeCommandsHandlers();
+        }
+
+
+        public void AddChat(string chatName, List<string> userLoginsToAdd)
+        {
+            var newInfoChat = new NewChatInfo(chatName, userLoginsToAdd);
+            var newChatInfoJson = JsonParser<NewChatInfo>.OneObjectToJson(newInfoChat);
+
+            var command = new AddOrUpdateChat() { Data = newChatInfoJson };
+            var commandJson = JsonParser<AddOrUpdateChat>.OneObjectToJson(command);
+
+            Messenger.SendMessage(commandJson);
+        }
+
+        public void AddUsersToChat(Chat chat, List<string> userLoginsToAdd)
+        {
+            var newChatInfo = new NewChatInfo(chat.Id, userLoginsToAdd);
+            var newChatInfoJson = JsonParser<NewChatInfo>.OneObjectToJson(newChatInfo);
+
+            var command = new AddOrUpdateChat() { Data = newChatInfoJson };
+            var commandJson = JsonParser<AddOrUpdateChat>.OneObjectToJson(command);
+
+            Messenger.SendMessage(commandJson);
+        }
+
+        public void CloseConnection()
+        {
+            try
+            {
+                var command = new CloseConnection() { Data = string.Empty };
+                var commandJson = JsonParser<CloseConnection>.OneObjectToJson(command);
+
+                Messenger.SendMessage(commandJson);
+            }
+            catch
+            {
+
+            }
+        }
+
+        public void GetChats()
+        {
+            var command = new GetChats() { Data = string.Empty };
+            var commandJson = JsonParser<GetChats>.OneObjectToJson(command);
+
+            Messenger.SendMessage(commandJson);
         }
 
         public void ProcessMessage(string message)
@@ -62,7 +105,37 @@ namespace AmChat.ClientServices
             handler.Execute(Messenger, command.Data);
         }
 
+        public void SendMessageToChat(string message)
+        {
+            var messageToChat = new ChatMessage()
+            {
+                FromUser = Messenger.User,
+                ToChatId = ChosenChat.Id,
+                DateAndTime = DateTime.Now,
+                Text = message,
+            };
 
+            var messageToUserJson = JsonParser<ChatMessage>.OneObjectToJson(messageToChat);
+
+            var command = new SendMessageToChat() { Data = messageToUserJson };
+            var commandJson = JsonParser<SendMessageToChat>.OneObjectToJson(command);
+
+            Messenger.SendMessage(commandJson);
+
+            ChosenChat.ChatMessages.Add(messageToChat);
+        }
+
+
+        private void AddChatToContactList(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (!(e.NewItems[0] is Chat newChat))
+            {
+                return;
+            }
+
+            newChat.ChatMessages.CollectionChanged += ShowNewMessage;
+            ChatAdded(newChat);
+        }
 
         private void InitializeCommandsHandlers()
         {
@@ -90,15 +163,9 @@ namespace AmChat.ClientServices
             CommandHandlers.Add(nameof(UnreadMessagesInChat).ToLower(), unreadMessagesInChatHandler);
         }
 
-
         private void OnIncorrectLoginData()
         {
             IncorrectLoginData();
-        }
-
-        private void OnUserIsLoggedIn()
-        {
-            CorrectLoginData();
         }
 
         private void OnNewUnreadNotification(Guid chatId)
@@ -106,46 +173,16 @@ namespace AmChat.ClientServices
             NewUnreadNotification(chatId);
         }
 
+        private void OnUserIsLoggedIn()
+        {
+            CorrectLoginData();
+        }
+
         private void ShowError(string errorText)
         {
             ErrorIsGotten(errorText, false);
         }
-
-
-        public void AddChat(string chatName, List<string> userLoginsToAdd)
-        {
-            var newInfoChat = new NewChatInfo(chatName, userLoginsToAdd);
-            var newChatInfoJson = JsonParser<NewChatInfo>.OneObjectToJson(newInfoChat);
-
-            var command = new AddOrUpdateChat() { Data = newChatInfoJson };
-            var commandJson = JsonParser<AddOrUpdateChat>.OneObjectToJson(command);
-
-            Messenger.SendMessage(commandJson);
-        }
-
-        public void AddUsersToChat(Chat chat, List<string> userLoginsToAdd)
-        {
-            var newChatInfo = new NewChatInfo(chat.Id, userLoginsToAdd);
-            var newChatInfoJson = JsonParser<NewChatInfo>.OneObjectToJson(newChatInfo);
-
-            var command = new AddOrUpdateChat() { Data = newChatInfoJson };
-            var commandJson = JsonParser<AddOrUpdateChat>.OneObjectToJson(command);
-            
-            Messenger.SendMessage(commandJson);
-        }
-
-
-        private void AddChatToContactList(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (!(e.NewItems[0] is Chat newChat))
-            {
-                return;
-            }
-
-            newChat.ChatMessages.CollectionChanged += ShowNewMessage;
-            ChatAdded(newChat);
-        }
-
+       
         private void ShowNewMessage(object sender, NotifyCollectionChangedEventArgs e)
         {
 
@@ -165,7 +202,7 @@ namespace AmChat.ClientServices
 
                 if (ChosenChat == null || ChosenChat.Id != message.ToChatId)
                 {
-                    var chatToShowMessage = UserChats.Where(c => c.Id == message.ToChatId).FirstOrDefault();
+                    var chatToShowMessage = Messenger.UserChats.Where(c => c.Id == message.ToChatId).FirstOrDefault();
 
                     MessageToOtherChatIsGotten(message);
                 }
@@ -175,49 +212,6 @@ namespace AmChat.ClientServices
                     MessageToCurrentChatIsGotten(messageToShow);
                 }
             }
-        }
-
-        public void SendMessageToChat(string message)
-        {
-            var messageToChat = new ChatMessage()
-            {
-                FromUser = Messenger.User,
-                ToChatId = ChosenChat.Id,
-                DateAndTime = DateTime.Now,
-                Text = message,
-            };
-
-            var messageToUserJson = JsonParser<ChatMessage>.OneObjectToJson(messageToChat);
-
-            var command = new SendMessageToChat() { Data = messageToUserJson };
-            var commandJson = JsonParser<SendMessageToChat>.OneObjectToJson(command);
-
-            Messenger.SendMessage(commandJson);
-
-            ChosenChat.ChatMessages.Add(messageToChat);
-        }
-
-        public void CloseConnection()
-        {
-            try
-            {
-                var command = new CloseConnection() { Data = string.Empty };
-                var commandJson = JsonParser<CloseConnection>.OneObjectToJson(command);
-                
-                Messenger.SendMessage(commandJson);
-            }
-            catch
-            {
-
-            }
-        }
-
-        public void GetChats()
-        {
-            var command = new GetChats() { Data = string.Empty };
-            var commandJson = JsonParser<GetChats>.OneObjectToJson(command);
-            
-            Messenger.SendMessage(commandJson);
         }
     }
 }

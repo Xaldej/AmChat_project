@@ -17,13 +17,11 @@ namespace AmChat.ClientServices
 
         public ObservableCollection<Chat> UserChats { get; set; }
 
+        public CommandHandlerService CommandHandler { get; set; }
+
         TcpClient TcpClient { get; set; }
 
         NetworkStream Stream { get; set; }
-
-        public Action<string> NewMessage;
-
-
 
 
         public ClientMessengerService(TcpClient tcpClient)
@@ -31,7 +29,10 @@ namespace AmChat.ClientServices
             TcpClient = tcpClient;
 
             User = new UserInfo();
-            
+
+            UserChats = new ObservableCollection<Chat>();
+
+            CommandHandler = new CommandHandlerService(this);
         }
 
 
@@ -57,7 +58,7 @@ namespace AmChat.ClientServices
 
             var message = builder.ToString();
 
-            NewMessage(message);
+            CommandHandler.ProcessMessage(message);
         }
 
 
@@ -72,13 +73,11 @@ namespace AmChat.ClientServices
             }
         }
 
-       
 
         public void SendMessage(string message)
         {
             byte[] data = Encoding.Unicode.GetBytes(message);
             Stream.Write(data, 0, data.Length);
         }
-        
     }
 }
