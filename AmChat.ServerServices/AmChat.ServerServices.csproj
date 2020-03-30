@@ -54,12 +54,11 @@
   <ItemGroup>
     <Compile Include="ChatHistoryService.cs" />
     <Compile Include="ChatMaintenanceService.cs" />
-    <Compile Include="Commands\AddOrUpdateChat.cs" />
-    <Compile Include="Commands\AddUsersToChat.cs" />
-    <Compile Include="Commands\CloseConnection.cs" />
-    <Compile Include="Commands\GetChats.cs" />
-    <Compile Include="Commands\Login.cs" />
-    <Compile Include="Commands\SendMessageToChat.cs" />
+    <Compile Include="CommandHandlers\AddOrUpdateChatHandler.cs" />
+    <Compile Include="CommandHandlers\CloseConnectionHandler.cs" />
+    <Compile Include="CommandHandlers\GetChatsHandler.cs" />
+    <Compile Include="CommandHandlers\LoginHandler.cs" />
+    <Compile Include="CommandHandlers\SendMessageToChatHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerMessengerService.cs" />
     <Compile Include="ServerSenderService.cs" />
@@ -78,6 +77,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

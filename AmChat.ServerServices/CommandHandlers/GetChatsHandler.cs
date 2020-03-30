@@ -2,6 +2,7 @@
 using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
+using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -10,13 +11,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmChat.ServerServices.Commands
+namespace AmChat.ServerServices.CommandHandlers
 {
-    public class GetChats : Command
+    public class GetChatsHandler : ICommandHandler
     {
-        public override string Name => "GetChats";
-
-        public override void Execute(IMessengerService messenger, string data)
+        public void Execute(IMessengerService messenger, string data)
         {
             List<DBChat> chats = new List<DBChat>();
             try
@@ -25,13 +24,15 @@ namespace AmChat.ServerServices.Commands
             }
             catch
             {
-                var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Cannot load contact list. Try to restart the app");
-                messenger.SendMessage(error);
+                var error = new ServerError() { Data = "Cannot load contact list. Try to restart the app" };
+                var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
+
+                messenger.SendMessage(errorJson);
             }
 
             if (chats.Count() > 0)
             {
-                foreach(var chat in chats)
+                foreach (var chat in chats)
                 {
                     var userChat = ChatToUserChat(chat);
                     messenger.UserChats.Add(userChat);
@@ -40,8 +41,10 @@ namespace AmChat.ServerServices.Commands
                 var chatsInfo = ChatsToChatsInfo(messenger.UserChats);
                 var chatsInfoJson = JsonParser<ChatInfo>.ManyObjectsToJson(chatsInfo);
 
-                var command = CommandConverter.CreateJsonMessageCommand("/correctcontactlist", chatsInfoJson);
-                messenger.SendMessage(command);
+                var command = new CorrectContactList() { Data = chatsInfoJson };
+                var commandJson = JsonParser<CorrectContactList>.OneObjectToJson(command);
+                
+                messenger.SendMessage(commandJson);
             }
         }
 

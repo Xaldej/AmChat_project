@@ -1,5 +1,6 @@
 ﻿using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
+using AmChat.Infrastructure.Commands.FromClienToServer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,25 +13,32 @@ namespace AmChat.ClientServices
     {
         public ClientMessengerService Messenger { get; set; }
 
+        CommandHandlerService CommandHandler { get; set; }
+
         public Action CorrectLogin;
 
         public Action IncorrectLogin;
 
-        public LoginService(ClientMessengerService messenger)
+        public LoginService(ClientMessengerService messenger, CommandHandlerService commandHandler)
         {
             Messenger = messenger;
 
-            Messenger.CorrectLogin += OnCorrectLogin;
+            CommandHandler = commandHandler;
 
-            Messenger.IncorrectLogin += OnIncorrectLogin;
+            CommandHandler.CorrectLoginData += OnCorrectLogin;
+
+            CommandHandler.IncorrectLoginData += OnIncorrectLogin;
         }
 
 
         public void Login(LoginData loginData)
         {
             var loginDataJson = JsonParser<LoginData>.OneObjectToJson(loginData);
-            var command = CommandConverter.CreateJsonMessageCommand("/login", loginDataJson);
-            Messenger.SendMessage(command);
+
+            var command = new Login() { Data = loginDataJson };
+            var commandJson = JsonParser<Login>.OneObjectToJson(command);
+            
+            Messenger.SendMessage(commandJson);
         }
 
 

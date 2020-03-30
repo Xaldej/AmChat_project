@@ -2,27 +2,23 @@
 using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
+using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmChat.ServerServices.Commands
+namespace AmChat.ServerServices.CommandHandlers
 {
-    public class AddOrUpdateChat : Command
+    public class AddOrUpdateChatHandler : ICommandHandler
     {
-        public override string Name => "AddOrUpdateChat";
-
         public NewChatInfo NewChatInfo { get; set; }
-
-        //public Action<Chat> NewChatIsCreated;
 
         bool CreateNewChat { get; set; }
 
-        public override void Execute(IMessengerService messenger, string data)
+        public void Execute(IMessengerService messenger, string data)
         {
             NewChatInfo = JsonParser<NewChatInfo>.JsonToOneObject(data);
             if (NewChatInfo.Id == null || NewChatInfo.Id == Guid.Empty)
@@ -40,8 +36,10 @@ namespace AmChat.ServerServices.Commands
             }
             catch
             {
-                var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Error adding chat try again");
-                messenger.SendMessage(error);
+                var error = new ServerError() { Data = "Error adding chat try again" };
+                var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
+                
+                messenger.SendMessage(errorJson);
             }
         }
 
@@ -56,7 +54,7 @@ namespace AmChat.ServerServices.Commands
             if (CreateNewChat)
             {
                 dbChat = AddChatToDb();
-                if(!usersToAdd.Contains(messenger.User))
+                if (!usersToAdd.Contains(messenger.User))
                 {
                     usersToAdd.Add(messenger.User);
                 }
@@ -72,24 +70,23 @@ namespace AmChat.ServerServices.Commands
             AddChatsForUsersInDb(usersToAdd, dbChat);
 
             Chat chat;
-            if(CreateNewChat)
+            if (CreateNewChat)
             {
                 chat = DbChatToChat(dbChat, usersToAdd);
                 messenger.UserChats.Add(chat);
-                //NewChatIsCreated(chat);
             }
             else
             {
-                chat = messenger.UserChats.Where(uc => uc.Id == dbChat.Id).FirstOrDefault();                
+                chat = messenger.UserChats.Where(uc => uc.Id == dbChat.Id).FirstOrDefault();
             }
-            
+
             AddNewUserToMessengerChat(usersToAdd, chat);
         }
 
         private async void AddNewUserToMessengerChat(List<UserInfo> users, Chat chat)
-        {   
+        {
             foreach (var user in users)
-            {   
+            {
                 chat.UsersInChat.Add(user);
                 await Task.Delay(500);
             }
@@ -151,7 +148,7 @@ namespace AmChat.ServerServices.Commands
 
             foreach (var user in users)
             {
-                if(usersIdInChat.Contains(user.Id))
+                if (usersIdInChat.Contains(user.Id))
                 {
                     users.Remove(user);
                 }
@@ -208,7 +205,7 @@ namespace AmChat.ServerServices.Commands
                 using (var context = new AmChatContext())
                 {
                     var user = context.Users.Where(u => u.Login == login).FirstOrDefault();
-                    if(user!=null)
+                    if (user != null)
                     {
                         users.Add(user);
                     }

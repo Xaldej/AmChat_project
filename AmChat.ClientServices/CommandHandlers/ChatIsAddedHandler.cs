@@ -1,5 +1,4 @@
 ﻿using AmChat.Infrastructure;
-using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -8,19 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmChat.ClientServices.Commands
+namespace AmChat.ClientServices.CommandHandlers
 {
-    public class ChatIsAdded : Command
+    public class ChatIsAddedHandler : ICommandHandler
     {
-        public override string Name => "ChatIsAdded";
-
-        public override void Execute(IMessengerService messenger, string data)
+        public void Execute(IMessengerService messenger, string data)
         {
             var chatInfo = JsonParser<ChatInfo>.JsonToOneObject(data);
 
             var chatToAdd = ChatInfoToChat(chatInfo);
 
-            if(chatToAdd.ChatMessages==null)
+            if (chatToAdd.ChatMessages == null)
             {
                 chatToAdd.ChatMessages = new ObservableCollection<ChatMessage>();
             }

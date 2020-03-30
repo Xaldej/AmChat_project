@@ -2,6 +2,7 @@
 using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
+using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -111,8 +112,11 @@ namespace AmChat.ServerServices
         {
             var chatInfo = ChatToChatInfo(chat);
             var chatInfoJson = JsonParser<ChatInfo>.OneObjectToJson(chatInfo);
-            var command = CommandConverter.CreateJsonMessageCommand("/chatisadded", chatInfoJson);
-            ServerSender.SendCommandToCertainUser(newUser, command);
+
+            var command = new ChatIsAdded() { Data = chatInfoJson };
+            var commandJson = JsonParser<ChatIsAdded>.OneObjectToJson(command);
+
+            ServerSender.SendCommandToCertainUser(newUser, commandJson);
         }
 
         private void AddChatToServer(UserInfo user, Chat chat)

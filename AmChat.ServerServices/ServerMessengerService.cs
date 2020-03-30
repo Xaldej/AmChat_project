@@ -1,7 +1,9 @@
 ﻿using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
+using AmChat.Infrastructure.Commands.FromClienToServer;
+using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
-using AmChat.ServerServices.Commands;
+using AmChat.ServerServices.CommandHandlers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,7 +24,7 @@ namespace AmChat.ServerServices
 
         NetworkStream Stream { get; set; }
 
-        public List<Command> Commands { get; }
+        public Dictionary<string, ICommandHandler> CommandHandlers { get; }
 
         public Action<IMessengerService> ClientDisconnected;
 
@@ -40,9 +42,9 @@ namespace AmChat.ServerServices
 
             UserChats = new ObservableCollection<Chat>();
 
-            Commands = new List<Command>();
+            CommandHandlers = new Dictionary<string, ICommandHandler>();
 
-            InitializeCommands();
+            InitializeCommandHandlers();
 
         }
 
@@ -86,22 +88,25 @@ namespace AmChat.ServerServices
 
         public void SendMessageToExistingChat(ChatMessage message)
         {
-            var messageToUser = JsonParser<ChatMessage>.OneObjectToJson(message);
-            var command = CommandConverter.CreateJsonMessageCommand("/messagetocertainchat", messageToUser);
-            SendMessage(command);
+            var messageToUserJson = JsonParser<ChatMessage>.OneObjectToJson(message);
+
+            var command = new MessageToCertainChat() { Data = messageToUserJson };
+            var commandJson = JsonParser<MessageToCertainChat>.OneObjectToJson(command);
+            
+            SendMessage(commandJson);
         }
 
 
-        private void InitializeCommands()
+        private void InitializeCommandHandlers()
         {
-            var closeConnection = new CloseConnection();
-            closeConnection.ConnectionIsClosed += DisconnectClient;
+            var closeConnectionHandler = new CloseConnectionHandler();
+            closeConnectionHandler.ConnectionIsClosed += DisconnectClient;
 
-            Commands.Add(new AddOrUpdateChat());
-            Commands.Add(closeConnection);
-            Commands.Add(new GetChats());
-            Commands.Add(new Login());
-            Commands.Add(new SendMessageToChat());
+            CommandHandlers.Add(nameof(AddOrUpdateChat).ToLower(), new AddOrUpdateChatHandler());
+            CommandHandlers.Add(nameof(CloseConnection).ToLower(), closeConnectionHandler);
+            CommandHandlers.Add(nameof(GetChats).ToLower(), new GetChatsHandler());
+            CommandHandlers.Add(nameof(Login).ToLower(), new LoginHandler());
+            CommandHandlers.Add(nameof(SendMessageToChat).ToLower(), new SendMessageToChatHandler());
         }
 
         private void DisconnectClient(IMessengerService messenger)
@@ -111,10 +116,10 @@ namespace AmChat.ServerServices
 
         private void ProcessMessage(string message)
         {
-            CommandMessage commandMessage = new CommandMessage("/EmptyCommand", string.Empty); ;
+            var command = new Command();
             try
             {
-                commandMessage = CommandConverter.GetCommandMessage(message);
+                command = JsonParser<Command>.JsonToOneObject(message);
             }
             catch
             {
@@ -122,24 +127,26 @@ namespace AmChat.ServerServices
                 return;
             }
 
-            if (commandMessage == null)
+            if (command == null)
             {
                 //TO DO: log errors
                 return;
             }
-            var commandsToExecute = Commands.Where(c => c.CheckIsCalled(commandMessage.CommandName));
 
-            if (commandsToExecute.Count() == 0)
+            ICommandHandler handler;
+            CommandHandlers.TryGetValue(command.Name, out handler);
+
+            if (handler == null)
             {
-                var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Unknown command");
-                SendMessage(error);
+                var error = new ServerError() { Data = "Unknown command" };
+                var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
+
+                SendMessage(errorJson);
+
                 return;
             }
 
-            foreach (var command in commandsToExecute)
-            {
-                command.Execute(this, commandMessage.CommandData);
-            }
+            handler.Execute(this, command.Data);
         }
     }
 }

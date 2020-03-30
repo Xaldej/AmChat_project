@@ -16,7 +16,9 @@ namespace AmChat.Forms
 {
     public partial class MainForm : Form
     {   
-        private ClientMessengerService MessengerService { get; set; }
+        CommandHandlerService CommandHandler { get; set; }
+        
+        ClientMessengerService Messenger { get; set; }
 
         List<ChatControl> ChatsControls { get; set; }
 
@@ -33,7 +35,22 @@ namespace AmChat.Forms
         {
             CreateMessenger();
 
+            CreateCommandHandler();
+
             GetLogin();
+        }
+
+        private void CreateCommandHandler()
+        {
+            CommandHandler = new CommandHandlerService(Messenger);
+            Messenger.NewMessage += CommandHandler.ProcessMessage;
+
+            CommandHandler.ChatAdded += AddChatToContactPanel;
+            CommandHandler.ErrorIsGotten += ShowErrorToUser;
+            CommandHandler.MessageToCurrentChatIsGotten += ShowMessageFromOtherUser;
+            CommandHandler.MessageToOtherChatIsGotten += ShowUnreadMessages;
+            CommandHandler.MessageCorretlySend += ShowMessageToOtherUser;
+            CommandHandler.NewUnreadNotification += ShowUnreadNotification;
         }
 
         private TcpClient ConnectToServer()
@@ -51,7 +68,7 @@ namespace AmChat.Forms
 
         private void AddChat(string chatName, List<string> userLoginsToAdd)
         {
-            MessengerService.AddChat(chatName, userLoginsToAdd);
+            CommandHandler.AddChat(chatName, userLoginsToAdd);
         }
 
         private void AddChatToContactPanel(Chat chat)
@@ -68,7 +85,7 @@ namespace AmChat.Forms
 
         private void AddUsersToChat(Chat chat, List<string> userLoginsToAdd)
         {
-            MessengerService.AddUsersToChat(chat, userLoginsToAdd);
+            CommandHandler.AddUsersToChat(chat, userLoginsToAdd);
         }
 
         private void AddMessageToChat(string message, HorizontalAlignment alignment)
@@ -88,7 +105,7 @@ namespace AmChat.Forms
 
             Chat_panel.Enabled = true;
 
-            MessengerService.ChosenChat = chatControl.Chat;
+            CommandHandler.ChosenChat = chatControl.Chat;
 
             UpdateChatHistory();
         }
@@ -97,15 +114,10 @@ namespace AmChat.Forms
         {
             var tcpClient = ConnectToServer();
 
-            MessengerService = new ClientMessengerService(tcpClient);
-            MessengerService.ChatAdded += AddChatToContactPanel;
-            MessengerService.ErrorIsGotten += ShowErrorToUser;
-            MessengerService.MessageToCurrentChatIsGotten += ShowMessageFromOtherUser;
-            MessengerService.MessageToOtherChatIsGotten += ShowUnreadMessages;
-            MessengerService.MessageCorretlySend += ShowMessageToOtherUser;
-            MessengerService.NewUnreadNotification += ShowUnreadNotification;
+            Messenger = new ClientMessengerService(tcpClient);
 
-            var thread = new Thread(() => MessengerService.Process());
+
+            var thread = new Thread(() => Messenger.Process());
             thread.Start();
         }
 
@@ -113,7 +125,7 @@ namespace AmChat.Forms
         {
             LoginForm = new LoginForm();
 
-            var loginService = new LoginService(MessengerService);
+            var loginService = new LoginService(Messenger, CommandHandler);
             loginService.CorrectLogin += OnCorrectLogin;
             loginService.IncorrectLogin += LoginForm.ShowIncorrectLoginMessage;
 
@@ -125,7 +137,7 @@ namespace AmChat.Forms
         private void OnCorrectLogin()
         {
             LoginForm.CloseForm();
-            MessengerService.GetChats();
+            CommandHandler.GetChats();
         }
 
         private void ShowMessageFromOtherUser(string message)
@@ -170,7 +182,7 @@ namespace AmChat.Forms
 
             if (isUserInputCorrect)
             {
-                MessengerService.SendMessageToChat(userInput);
+                CommandHandler.SendMessageToChat(userInput);
             }
         }
 
@@ -178,12 +190,12 @@ namespace AmChat.Forms
         {
             Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.Clear()));
 
-            foreach (var message in MessengerService.ChosenChat.ChatMessages)
+            foreach (var message in CommandHandler.ChosenChat.ChatMessages)
             {
                 string messageToShow;
                 HorizontalAlignment alignment;
 
-                if (message.FromUser.Equals(MessengerService.User))
+                if (message.FromUser.Equals(Messenger.User))
                 {
                     alignment = HorizontalAlignment.Right;
                     messageToShow = message.Text;
@@ -232,9 +244,9 @@ namespace AmChat.Forms
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if(MessengerService!=null)
+            if(Messenger!=null)
             {
-                MessengerService.CloseConnection();
+                CommandHandler.CloseConnection();
             }
         }
 

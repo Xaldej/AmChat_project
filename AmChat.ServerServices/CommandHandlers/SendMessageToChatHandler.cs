@@ -1,5 +1,4 @@
 ﻿using AmChat.Infrastructure;
-using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -7,13 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmChat.ServerServices.Commands
+namespace AmChat.ServerServices.CommandHandlers
 {
-    public class SendMessageToChat : Command
+    public class SendMessageToChatHandler : ICommandHandler
     {
-        public override string Name => "SendMessageToChat";
-
-        public override void Execute(IMessengerService messenger, string data)
+        public void Execute(IMessengerService messenger, string data)
         {
             var messageToChat = JsonParser<ChatMessage>.JsonToOneObject(data);
 

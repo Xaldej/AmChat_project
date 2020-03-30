@@ -3,8 +3,6 @@ using AmChat.Infrastructure.Interfaces;
 using AmChat.ServerServices;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading;

@@ -2,6 +2,7 @@
 using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
+using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -9,13 +10,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmChat.ServerServices.Commands
+namespace AmChat.ServerServices.CommandHandlers
 {
-    public class Login : Command
+    public class LoginHandler : ICommandHandler
     {
-        public override string Name => "Login";
-
-        public override void Execute(IMessengerService messenger, string data)
+        public void Execute(IMessengerService messenger, string data)
         {
             var loginData = JsonParser<LoginData>.JsonToOneObject(data);
             DBUser dbUser;
@@ -27,8 +26,12 @@ namespace AmChat.ServerServices.Commands
             catch
             {
                 Console.WriteLine("User is not logged in");
-                var error = CommandConverter.CreateJsonMessageCommand("/servererror", "Login problems. Try to reconnect");
-                messenger.SendMessage(error);
+
+                var error = new ServerError() { Data = "Login problems. Try to reconnect" };
+                var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
+                
+                messenger.SendMessage(errorJson);
+
                 return;
             }
 
@@ -38,16 +41,22 @@ namespace AmChat.ServerServices.Commands
                 messenger.User = userInfo;
 
                 var userInfoJson = JsonParser<UserInfo>.OneObjectToJson(messenger.User);
-                var command = CommandConverter.CreateJsonMessageCommand("/correctlogin", userInfoJson);
+
+                var command = new CorrectLogin() { Data = userInfoJson };
+                var commandJson = JsonParser<CorrectLogin>.OneObjectToJson(command);
+                
                 Console.WriteLine("User is got from DB");
-                messenger.SendMessage(command);
+
+                messenger.SendMessage(commandJson);
             }
             else
             {
-                var command = CommandConverter.CreateJsonMessageCommand("/incorrectlogin", string.Empty);
-                messenger.SendMessage(command);
+                var command = new IncorrectLogin() { Data = string.Empty };
+                var commandJson = JsonParser<IncorrectLogin>.OneObjectToJson(command);
+                
+                messenger.SendMessage(commandJson);
             }
-          
+
         }
 
         private DBUser GetUserFromDB(LoginData loginData)
@@ -76,9 +85,6 @@ namespace AmChat.ServerServices.Commands
                     Console.WriteLine("User added to DB");
                 }
             }
-
-            
-
             return user;
         }
 

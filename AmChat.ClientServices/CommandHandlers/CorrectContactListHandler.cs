@@ -1,5 +1,4 @@
 ﻿using AmChat.Infrastructure;
-using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -8,20 +7,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmChat.ClientServices.Commands
+namespace AmChat.ClientServices.CommandHandlers
 {
-    public class CorrectContactList : Command
+    public class CorrectContactListHandler : ICommandHandler
     {
-        public override string Name => "CorrectContactList";
-
-        public override void Execute(IMessengerService messenger, string data)
-        {   
+        public void Execute(IMessengerService messenger, string data)
+        {
             var chatsInfo = new ObservableCollection<ChatInfo>(JsonParser<IEnumerable<ChatInfo>>.JsonToOneObject(data));
             var chats = ChatsIonfoToChats(chatsInfo);
 
             foreach (var chat in chats)
             {
-                if(chat.ChatMessages==null)
+                if (chat.ChatMessages == null)
                 {
                     chat.ChatMessages = new ObservableCollection<ChatMessage>();
                 }

@@ -46,8 +46,19 @@
   <ItemGroup>
     <Compile Include="ChatInfo.cs" />
     <Compile Include="Commands\Command.cs" />
-    <Compile Include="Commands\CommandConverter.cs" />
-    <Compile Include="Commands\CommandMessage.cs" />
+    <Compile Include="Commands\FromClienToServer\AddOrUpdateChat.cs" />
+    <Compile Include="Commands\FromClienToServer\CloseConnection.cs" />
+    <Compile Include="Commands\FromClienToServer\GetChats.cs" />
+    <Compile Include="Commands\FromClienToServer\Login.cs" />
+    <Compile Include="Commands\FromClienToServer\SendMessageToChat.cs" />
+    <Compile Include="Commands\FromServerToClient\ChatIsAdded.cs" />
+    <Compile Include="Commands\FromServerToClient\CorrectContactList.cs" />
+    <Compile Include="Commands\FromServerToClient\CorrectLogin.cs" />
+    <Compile Include="Commands\FromServerToClient\IncorrectLogin.cs" />
+    <Compile Include="Commands\FromServerToClient\MessageToCertainChat.cs" />
+    <Compile Include="Commands\FromServerToClient\ServerError.cs" />
+    <Compile Include="Commands\FromServerToClient\UnreadMessagesInChat.cs" />
+    <Compile Include="Interfaces\ICommandHandler.cs" />
     <Compile Include="Interfaces\IMessengerService.cs" />
     <Compile Include="JsonParser.cs" />
     <Compile Include="ChatMessage.cs" />
@@ -61,5 +72,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

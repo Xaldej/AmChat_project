@@ -7,12 +7,10 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure.Commands
 {
-    public abstract class Command
+    public class Command
     {
-        public abstract string Name { get; }
+        public virtual string Name { get; set; }
 
-        public bool CheckIsCalled(string command) => command.ToLower().Contains("/" + Name.ToLower());
-
-        public abstract void Execute(IMessengerService messenger, string data);
+        public string Data { get; set; }
     }
 }
