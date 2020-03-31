@@ -9,11 +9,11 @@ namespace AmChat.ClientServices.CommandHandlers
 {
     public class ServerErrorHandler : ICommandHandler
     {
-        public Action<string> SendError;
+        public Action<string> NewServerError;
 
         public void Execute(IMessengerService messenger, string data)
         {
-            SendError(data);
+            NewServerError(data);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace AmChat.Server
 {
     public class TcpServer
     {
-        List<ServerMessengerService> ConnectedClients { get; set; }
+        List<IMessengerService> ConnectedClients { get; set; }
 
         List<Chat> ActiveChats { get; set; }
 
@@ -24,7 +24,7 @@ namespace AmChat.Server
 
         public TcpServer()
         {
-            ConnectedClients = new List<ServerMessengerService>();
+            ConnectedClients = new List<IMessengerService>();
 
             ActiveChats = new List<Chat>();
 
@@ -69,9 +69,10 @@ namespace AmChat.Server
 
         private void AddClient(TcpClient tcpClient)
         {
-            var client = new ServerMessengerService(tcpClient);
+            IMessengerService client = new ServerMessengerService(tcpClient);
             client.UserChats.CollectionChanged += ChatMaintenanceService.OnUserChatsChanged;
-            client.ClientDisconnected += RemoveClient;
+
+            client.NewEvent += RemoveClient;
 
             ConnectedClients.Add(client);
 
@@ -81,12 +82,14 @@ namespace AmChat.Server
             Console.WriteLine("client is connected");
         }
 
-        private void RemoveClient(IMessengerService client)
+        private void RemoveClient(string userId)
         {
-            var clientToRemove = ConnectedClients.Where(c => c.Equals(client)).FirstOrDefault();
+            var id = Guid.Parse(userId);
+
+            var clientToRemove = ConnectedClients.Where(c => c.User.Id == id).FirstOrDefault();
             ConnectedClients.Remove(clientToRemove);
 
-            ChatMaintenanceService.ChangeChatListenersAmount(client);
+            ChatMaintenanceService.ChangeChatListenersAmount(clientToRemove);
         }
     }
 }

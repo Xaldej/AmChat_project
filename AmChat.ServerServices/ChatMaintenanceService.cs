@@ -16,7 +16,7 @@ namespace AmChat.ServerServices
 {
     public class ChatMaintenanceService
     {
-        public List<ServerMessengerService> ConnectedClients { get; set; }
+        public List<IMessengerService> ConnectedClients { get; set; }
 
         public ServerSenderService ServerSender { get; set; }
 
@@ -27,7 +27,7 @@ namespace AmChat.ServerServices
         ChatHistoryService ChatHistoryService { get; set; }
 
 
-        public ChatMaintenanceService(List<Chat> activeChats, List<ServerMessengerService> connectedClients, ServerSenderService serverSender)
+        public ChatMaintenanceService(List<Chat> activeChats, List<IMessengerService> connectedClients, ServerSenderService serverSender)
         {
             ActiveChats = activeChats;
 
@@ -50,6 +50,18 @@ namespace AmChat.ServerServices
             ServerSender.SendNotificationToChat(chat, notification);
         }
 
+        public void ChangeChatListenersAmount(IMessengerService client)
+        {
+            foreach (var chat in client.UserChats)
+            {
+                ChatListenersAmount[chat]--;
+                if (ChatListenersAmount[chat] == 0)
+                {
+                    RemoveInactiveChat(chat);
+                }
+            }
+        }
+
         public void OnUserChatsChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
@@ -62,18 +74,6 @@ namespace AmChat.ServerServices
                     break;
             }
 
-        }
-
-        public void ChangeChatListenersAmount(IMessengerService client)
-        {
-            foreach (var chat in client.UserChats)
-            {
-                ChatListenersAmount[chat]--;
-                if (ChatListenersAmount[chat] == 0)
-                {
-                    RemoveInactiveChat(chat);
-                }
-            }
         }
 
 

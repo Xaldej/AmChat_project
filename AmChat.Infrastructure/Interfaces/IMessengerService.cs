@@ -14,6 +14,8 @@ namespace AmChat.Infrastructure.Interfaces
 
         ObservableCollection<Chat> UserChats { get; set; }
 
+        Action<string> NewEvent { get; set; }
+
         void ListenMessages();
 
         void SendMessage(string message);

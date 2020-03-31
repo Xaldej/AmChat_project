@@ -19,7 +19,7 @@ namespace AmChat.ClientServices
     {
         Dictionary<string, ICommandHandler> CommandHandlers { get; set; }
 
-        ClientMessengerService Messenger { get; set; }
+        IMessengerService Messenger { get; set; }
 
         public Chat ChosenChat { get; set; }
 
@@ -38,14 +38,13 @@ namespace AmChat.ClientServices
 
         public Action<string, bool> ErrorIsGotten;
 
-        public Action<Guid> NewUnreadNotification;
 
-
-        public CommandHandlerService(ClientMessengerService messenger)
+        public CommandHandlerService(IMessengerService messenger)
         {
             Messenger = messenger;
             
-            Messenger.UserChats.CollectionChanged += AddChatToContactList;
+            Messenger.UserChats.CollectionChanged += OnUserChatsChanged;
+            Messenger.NewEvent += OnNewMessengerEvent;
 
             InitializeCommandsHandlers();
         }
@@ -96,15 +95,6 @@ namespace AmChat.ClientServices
             Messenger.SendMessage(commandJson);
         }
 
-        public void ProcessMessage(string message)
-        {
-            var command = JsonParser<Command>.JsonToOneObject(message);
-
-            var handler = CommandHandlers[command.Name];
-
-            handler.Execute(Messenger, command.Data);
-        }
-
         public void SendMessageToChat(string message)
         {
             var messageToChat = new ChatMessage()
@@ -126,17 +116,6 @@ namespace AmChat.ClientServices
         }
 
 
-        private void AddChatToContactList(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (!(e.NewItems[0] is Chat newChat))
-            {
-                return;
-            }
-
-            newChat.ChatMessages.CollectionChanged += ShowNewMessage;
-            ChatAdded(newChat);
-        }
-
         private void InitializeCommandsHandlers()
         {
             CommandHandlers = new Dictionary<string, ICommandHandler>();
@@ -148,11 +127,7 @@ namespace AmChat.ClientServices
             incorrectLoginHandler.IncorrectLoginData += OnIncorrectLoginData;
 
             var serverErrorHandler = new ServerErrorHandler();
-            serverErrorHandler.SendError += ShowError;
-
-            var unreadMessagesInChatHandler = new UnreadMessagesInChatHandler();
-            unreadMessagesInChatHandler.NewUnreadNotification += OnNewUnreadNotification;
-
+            serverErrorHandler.NewServerError += OnNewServerError;
 
             CommandHandlers.Add(nameof(ChatIsAdded).ToLower(), new ChatIsAddedHandler());
             CommandHandlers.Add(nameof(CorrectContactList).ToLower(), new CorrectContactListHandler());
@@ -160,30 +135,9 @@ namespace AmChat.ClientServices
             CommandHandlers.Add(nameof(IncorrectLogin).ToLower(), incorrectLoginHandler);
             CommandHandlers.Add(nameof(MessageToCertainChat).ToLower(), new MessageToCertainChatHandler());
             CommandHandlers.Add(nameof(ServerError).ToLower(), serverErrorHandler);
-            CommandHandlers.Add(nameof(UnreadMessagesInChat).ToLower(), unreadMessagesInChatHandler);
         }
 
-        private void OnIncorrectLoginData()
-        {
-            IncorrectLoginData();
-        }
-
-        private void OnNewUnreadNotification(Guid chatId)
-        {
-            NewUnreadNotification(chatId);
-        }
-
-        private void OnUserIsLoggedIn()
-        {
-            CorrectLoginData();
-        }
-
-        private void ShowError(string errorText)
-        {
-            ErrorIsGotten(errorText, false);
-        }
-       
-        private void ShowNewMessage(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnChatMessagesChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
 
             if (!(e.NewItems[0] is ChatMessage message))
@@ -212,6 +166,41 @@ namespace AmChat.ClientServices
                     MessageToCurrentChatIsGotten(messageToShow);
                 }
             }
+        }
+
+        private void OnNewMessengerEvent(string message)
+        {
+            var command = JsonParser<Command>.JsonToOneObject(message);
+
+            var handler = CommandHandlers[command.Name];
+
+            handler.Execute(Messenger, command.Data);
+        }
+
+        private void OnIncorrectLoginData()
+        {
+            IncorrectLoginData();
+        }
+
+        private void OnUserChatsChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (!(e.NewItems[0] is Chat newChat))
+            {
+                return;
+            }
+
+            newChat.ChatMessages.CollectionChanged += OnChatMessagesChanged;
+            ChatAdded(newChat);
+        }
+
+        private void OnUserIsLoggedIn()
+        {
+            CorrectLoginData();
+        }
+
+        private void OnNewServerError(string errorText)
+        {
+            ErrorIsGotten(errorText, false);
         }
     }
 }

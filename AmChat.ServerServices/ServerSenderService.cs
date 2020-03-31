@@ -1,6 +1,8 @@
 ﻿using AmChat.Data;
 using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
+using AmChat.Infrastructure.Commands.FromServerToClient;
+using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -14,12 +16,12 @@ namespace AmChat.ServerServices
     {
         List<Chat> ActiveChats { get; set; }
 
-        public List<ServerMessengerService> ConnectedClients { get; set; }
+        public List<IMessengerService> ConnectedClients { get; set; }
 
         UserInfo ServerNotificationUser { get; set; }
 
 
-        public ServerSenderService(List<Chat> activeChats, List<ServerMessengerService> connectedClients)
+        public ServerSenderService(List<Chat> activeChats, List<IMessengerService> connectedClients)
         {
             ActiveChats = activeChats;
 
@@ -39,14 +41,17 @@ namespace AmChat.ServerServices
             }
         }
 
-        public void SendMessageToCertainUser(UserInfo userToSend, ChatMessage messageToChat)
+        public void SendMessageToCertainUser(UserInfo user, ChatMessage message)
         {
-            var clientToSend = ConnectedClients.Where(c => c.User.Equals(userToSend)).FirstOrDefault();
+            var clientToSend = ConnectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
 
             if (clientToSend != null)
-            {
-                clientToSend.CommandHandler.SendMessageToExistingChat(messageToChat);
+            {   
+                var messageJson = JsonParser<ChatMessage>.OneObjectToJson(message);
+                var command = new MessageToCertainChat() { Data = messageJson };
+                var commandJson = JsonParser<MessageToCertainChat>.OneObjectToJson(command);
 
+                clientToSend.SendMessage(commandJson);
             }
         }
 

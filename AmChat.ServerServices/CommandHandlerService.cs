@@ -20,12 +20,14 @@ namespace AmChat.ServerServices
 
         public Action<IMessengerService> ClientDisconnected;
 
+
         public CommandHandlerService(IMessengerService messenger)
         {
             Messenger = messenger;
 
             InitializeCommandHandlers();
         }
+
 
         public void ProcessMessage(string message)
         {
@@ -64,16 +66,6 @@ namespace AmChat.ServerServices
             }
 
             handler.Execute(Messenger, command.Data);
-        }
-
-        public void SendMessageToExistingChat(ChatMessage message)
-        {
-            var messageToUserJson = JsonParser<ChatMessage>.OneObjectToJson(message);
-
-            var command = new MessageToCertainChat() { Data = messageToUserJson };
-            var commandJson = JsonParser<MessageToCertainChat>.OneObjectToJson(command);
-
-            Messenger.SendMessage(commandJson);
         }
 
 

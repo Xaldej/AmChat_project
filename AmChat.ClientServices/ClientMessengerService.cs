@@ -1,5 +1,6 @@
 ﻿using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
+using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace AmChat.ClientServices
 
         public ObservableCollection<Chat> UserChats { get; set; }
 
-        public CommandHandlerService CommandHandler { get; set; }
+        public Action<string> NewEvent { get; set; }
 
         TcpClient TcpClient { get; set; }
 
@@ -31,34 +32,41 @@ namespace AmChat.ClientServices
             User = new UserInfo();
 
             UserChats = new ObservableCollection<Chat>();
-
-            CommandHandler = new CommandHandlerService(this);
         }
 
 
         public void ListenMessages()
         {
-            byte[] data = new byte[TcpClient.ReceiveBufferSize];
-            StringBuilder builder = new StringBuilder();
-            int bytes = 0;
-            try
+            using (Stream = TcpClient.GetStream())
             {
-                do
+                byte[] data = new byte[TcpClient.ReceiveBufferSize];
+                while (true)
                 {
-                    bytes = Stream.Read(data, 0, data.Length);
-                    builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+                    StringBuilder builder = new StringBuilder();
+                    int bytes = 0;
+                    try
+                    {
+                        do
+                        {
+                            bytes = Stream.Read(data, 0, data.Length);
+                            builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+                        }
+                        while (Stream.DataAvailable);
+                    }
+                    catch
+                    {
+                        string errorMessage = "Connection lost. Check your internet connection and try to restart the app";
+                        var error = new ServerError() { Data = errorMessage };
+                        var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
+
+                        NewEvent(errorJson);
+                    }
+
+                    var message = builder.ToString();
+
+                    NewEvent(message);
                 }
-                while (Stream.DataAvailable);
             }
-            catch
-            {
-                //string errorMessage = "Connection lost. Check your internet connection and try to restart the app";
-                //ErrorIsGotten(errorMessage, true);
-            }
-
-            var message = builder.ToString();
-
-            CommandHandler.ProcessMessage(message);
         }
 
 

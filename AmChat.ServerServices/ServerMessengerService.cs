@@ -26,13 +26,14 @@ namespace AmChat.ServerServices
 
         public CommandHandlerService CommandHandler { get; set; }
 
-        public Action<IMessengerService> ClientDisconnected;
+        public Action<string> NewEvent { get; set; }
 
 
         ServerMessengerService()
         {
 
         }
+
 
         public ServerMessengerService(TcpClient tcpClient)
         {
@@ -68,7 +69,7 @@ namespace AmChat.ServerServices
                     }
                     catch
                     {
-                        ClientDisconnected(this);
+                        NewEvent(User.Id.ToString());
                         break;
                     }
 
@@ -88,7 +89,7 @@ namespace AmChat.ServerServices
 
         private void OnClientDisconnectd(IMessengerService messenger)
         {
-            ClientDisconnected(messenger);
+            NewEvent(messenger.User.Id.ToString());
         }
     }
 }

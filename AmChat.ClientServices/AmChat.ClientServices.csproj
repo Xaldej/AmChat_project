@@ -41,8 +41,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnyTypeInTargetAssembly.cs" />
-    <Compile Include="ChatHistoryServise.cs" />
     <Compile Include="ClientMessengerService.cs" />
     <Compile Include="CommandHandlers\ChatIsAddedHandler.cs" />
     <Compile Include="CommandHandlers\CorrectContactListHandler.cs" />
@@ -50,7 +48,6 @@
     <Compile Include="CommandHandlers\IncorrectLoginHandler.cs" />
     <Compile Include="CommandHandlers\MessageToCertainChatHandler.cs" />
     <Compile Include="CommandHandlers\ServerErrorHandler.cs" />
-    <Compile Include="CommandHandlers\UnreadMessagesInChatHandler.cs" />
     <Compile Include="CommandHandlerService.cs" />
     <Compile Include="LoginService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

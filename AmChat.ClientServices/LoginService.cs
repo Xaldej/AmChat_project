@@ -1,6 +1,7 @@
 ﻿using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Commands.FromClienToServer;
+using AmChat.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace AmChat.ClientServices
 {
     public class LoginService
     {
-        public ClientMessengerService Messenger { get; set; }
+        IMessengerService Messenger { get; set; }
 
         CommandHandlerService CommandHandler { get; set; }
 
@@ -19,7 +20,7 @@ namespace AmChat.ClientServices
 
         public Action IncorrectLogin;
 
-        public LoginService(ClientMessengerService messenger, CommandHandlerService commandHandler)
+        public LoginService(IMessengerService messenger, CommandHandlerService commandHandler)
         {
             Messenger = messenger;
 
