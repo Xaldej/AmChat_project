@@ -53,18 +53,6 @@ namespace AmChat.ServerServices
             }
         }
 
-        private ObservableCollection<ChatMessage>GetNewMessages(Chat chat, ObservableCollection<ChatMessage> messages)
-        {
-            var newMessages = messages;
-            var historyMessages = GetChatHistory(chat);
-
-            foreach (var hm in historyMessages)
-            {
-                newMessages.Remove(hm);
-            }
-
-            return newMessages;
-        }
 
         private List<ChatMessage> DbMessagesToMessages(List<DBChatMessage> dbMessages)
         {
@@ -92,6 +80,19 @@ namespace AmChat.ServerServices
             lastNMessages = messages.Skip(Math.Max(0, messages.Count() - n)).ToList();
 
             return lastNMessages;
+        }
+
+        private ObservableCollection<ChatMessage>GetNewMessages(Chat chat, ObservableCollection<ChatMessage> messages)
+        {
+            var newMessages = messages;
+            var historyMessages = GetChatHistory(chat);
+
+            foreach (var hm in historyMessages)
+            {
+                newMessages.Remove(hm);
+            }
+
+            return newMessages;
         }
 
         private UserInfo GetUserFromDb(Guid id)

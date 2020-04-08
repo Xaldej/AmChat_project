@@ -16,7 +16,6 @@ namespace AmChat.Server
 
         List<Chat> ActiveChats { get; set; }
 
-
         ChatMaintenanceService ChatMaintenanceService { get; set; }
 
         ServerSenderService ServerSender { get; set; }
@@ -72,7 +71,7 @@ namespace AmChat.Server
             IMessengerService client = new ServerMessengerService(tcpClient);
             client.UserChats.CollectionChanged += ChatMaintenanceService.OnUserChatsChanged;
 
-            client.NewEvent += RemoveClient;
+            client.NewCommand += RemoveClient;
 
             ConnectedClients.Add(client);
 
@@ -87,9 +86,13 @@ namespace AmChat.Server
             var id = Guid.Parse(userId);
 
             var clientToRemove = ConnectedClients.Where(c => c.User.Id == id).FirstOrDefault();
-            ConnectedClients.Remove(clientToRemove);
 
-            ChatMaintenanceService.ChangeChatListenersAmount(clientToRemove);
+            if(clientToRemove!=null)
+            {
+                ConnectedClients.Remove(clientToRemove);
+
+                ChatMaintenanceService.ChangeChatListenersAmount(clientToRemove);
+            }
         }
     }
 }

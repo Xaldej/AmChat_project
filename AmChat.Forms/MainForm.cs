@@ -21,6 +21,7 @@ namespace AmChat.Forms
 
         LoginForm LoginForm { get; set; }
 
+        ClientEncryptService EncryptService { get; set; }
 
         CommandHandlerService CommandHandler { get; set; }
 
@@ -39,6 +40,8 @@ namespace AmChat.Forms
             CreateMessenger();
 
             CreateCommandHandler();
+
+            CreateEncryptService();
 
             GetLogin();
         }
@@ -63,6 +66,15 @@ namespace AmChat.Forms
 
             var thread = new Thread(() => Messenger.ListenMessages());
             thread.Start();
+        }
+
+        private void CreateEncryptService()
+        {
+            EncryptService = new ClientEncryptService(Messenger);
+            CommandHandler.EncryptServce = EncryptService;
+            Messenger.Encryptor = EncryptService.Encrypter;
+
+            EncryptService.GetKeyFromServer();
         }
 
         private void GetLogin()

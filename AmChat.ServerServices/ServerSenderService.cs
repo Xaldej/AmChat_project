@@ -31,9 +31,9 @@ namespace AmChat.ServerServices
         }
 
 
-        public void SendCommandToCertainUser(UserInfo userToSend, string command)
+        public void SendCommandToCertainUser(UserInfo user, string command)
         {
-            var clientToSend = ConnectedClients.Where(c => c.User.Equals(userToSend)).FirstOrDefault();
+            var clientToSend = ConnectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
 
             if (clientToSend != null)
             {

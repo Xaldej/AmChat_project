@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,6 +24,7 @@ namespace AmChat.ClientServices
 
         public Chat ChosenChat { get; set; }
 
+        public ClientEncryptService EncryptServce { get; set; }
 
         public Action<string> MessageToCurrentChatIsGotten;
 
@@ -34,9 +36,9 @@ namespace AmChat.ClientServices
 
         public Action CorrectLoginData;
 
-        public Action IncorrectLoginData;
-
         public Action<string, bool> ErrorIsGotten;
+
+        public Action IncorrectLoginData;
 
 
         public CommandHandlerService(IMessengerService messenger)
@@ -44,7 +46,7 @@ namespace AmChat.ClientServices
             Messenger = messenger;
             
             Messenger.UserChats.CollectionChanged += OnUserChatsChanged;
-            Messenger.NewEvent += OnNewMessengerEvent;
+            Messenger.NewCommand += OnNewMessengerEvent;
 
             InitializeCommandsHandlers();
         }
@@ -129,12 +131,15 @@ namespace AmChat.ClientServices
             var serverErrorHandler = new ServerErrorHandler();
             serverErrorHandler.NewServerError += OnNewServerError;
 
-            CommandHandlers.Add(nameof(ChatIsAdded).ToLower(), new ChatIsAddedHandler());
-            CommandHandlers.Add(nameof(CorrectContactList).ToLower(), new CorrectContactListHandler());
-            CommandHandlers.Add(nameof(CorrectLogin).ToLower(), correctLoginHandler);
-            CommandHandlers.Add(nameof(IncorrectLogin).ToLower(), incorrectLoginHandler);
+            CommandHandlers.Add(nameof(AesKey).ToLower(),               new AesKeyHandler());
+            CommandHandlers.Add(nameof(AesVector).ToLower(),            new AesVectorHandler());
+            CommandHandlers.Add(nameof(ChatIsAdded).ToLower(),          new ChatIsAddedHandler());
+            CommandHandlers.Add(nameof(CorrectContactList).ToLower(),   new CorrectContactListHandler());
+            CommandHandlers.Add(nameof(CorrectLogin).ToLower(),         correctLoginHandler);
+            CommandHandlers.Add(nameof(IncorrectLogin).ToLower(),       incorrectLoginHandler);
             CommandHandlers.Add(nameof(MessageToCertainChat).ToLower(), new MessageToCertainChatHandler());
-            CommandHandlers.Add(nameof(ServerError).ToLower(), serverErrorHandler);
+            CommandHandlers.Add(nameof(ServerPublicKey).ToLower(),      new ServerPublicKeyHandler());
+            CommandHandlers.Add(nameof(ServerError).ToLower(),          serverErrorHandler);
         }
 
         private void OnChatMessagesChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -168,18 +173,23 @@ namespace AmChat.ClientServices
             }
         }
 
+        private void OnIncorrectLoginData()
+        {
+            IncorrectLoginData();
+        }
+
         private void OnNewMessengerEvent(string message)
         {
+            if(message == string.Empty)
+            {
+                return;
+            }
+
             var command = JsonParser<Command>.JsonToOneObject(message);
 
             var handler = CommandHandlers[command.Name];
 
             handler.Execute(Messenger, command.Data);
-        }
-
-        private void OnIncorrectLoginData()
-        {
-            IncorrectLoginData();
         }
 
         private void OnUserChatsChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -200,7 +210,14 @@ namespace AmChat.ClientServices
 
         private void OnNewServerError(string errorText)
         {
-            ErrorIsGotten(errorText, false);
+            bool closeApp = false;
+
+            if(errorText.Contains("Connection lost"))
+            {
+                closeApp = true;
+            }
+
+            ErrorIsGotten(errorText, closeApp);
         }
     }
 }

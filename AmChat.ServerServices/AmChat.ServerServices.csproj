@@ -56,8 +56,10 @@
     <Compile Include="ChatMaintenanceService.cs" />
     <Compile Include="CommandHandlerService.cs" />
     <Compile Include="CommandHandlers\AddOrUpdateChatHandler.cs" />
+    <Compile Include="CommandHandlers\ClientPublicKeyHandler.cs" />
     <Compile Include="CommandHandlers\CloseConnectionHandler.cs" />
     <Compile Include="CommandHandlers\GetChatsHandler.cs" />
+    <Compile Include="CommandHandlers\GetKeyHandler.cs" />
     <Compile Include="CommandHandlers\LoginHandler.cs" />
     <Compile Include="CommandHandlers\SendMessageToChatHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -14,7 +14,9 @@ namespace AmChat.Infrastructure.Interfaces
 
         ObservableCollection<Chat> UserChats { get; set; }
 
-        Action<string> NewEvent { get; set; }
+        Encryptor Encryptor { get; set; }
+
+        Action<string> NewCommand { get; set; }
 
         void ListenMessages();
 

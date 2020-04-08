@@ -41,15 +41,6 @@ namespace AmChat.ServerServices
         }
 
 
-        public void AddChatToClientAndServer(UserInfo newUser, Chat chat)
-        {
-            AddChatToServer(newUser, chat);
-            AddChatToClient(newUser, chat);
-
-            string notification = $"{newUser.Login} is added";
-            ServerSender.SendNotificationToChat(chat, notification);
-        }
-
         public void ChangeChatListenersAmount(IMessengerService client)
         {
             foreach (var chat in client.UserChats)
@@ -106,6 +97,15 @@ namespace AmChat.ServerServices
                 chat.NewUserInChat += AddChatToClientAndServer;
                 ChatListenersAmount[chat] = 1;
             }
+        }
+
+        private void AddChatToClientAndServer(UserInfo newUser, Chat chat)
+        {
+            AddChatToServer(newUser, chat);
+            AddChatToClient(newUser, chat);
+
+            string notification = $"{newUser.Login} is added";
+            ServerSender.SendNotificationToChat(chat, notification);
         }
 
         private void AddChatToClient(UserInfo newUser, Chat chat)

@@ -18,7 +18,9 @@ namespace AmChat.ClientServices
 
         public ObservableCollection<Chat> UserChats { get; set; }
 
-        public Action<string> NewEvent { get; set; }
+        public Encryptor Encryptor { get; set; }
+
+        public Action<string> NewCommand { get; set; }
 
         TcpClient TcpClient { get; set; }
 
@@ -37,55 +39,57 @@ namespace AmChat.ClientServices
 
         public void ListenMessages()
         {
-            using (Stream = TcpClient.GetStream())
+            try
             {
-                byte[] data = new byte[TcpClient.ReceiveBufferSize];
-                while (true)
+                using (Stream = TcpClient.GetStream())
                 {
-                    StringBuilder builder = new StringBuilder();
-                    int bytes = 0;
-                    try
+                    while (true)
                     {
-                        do
-                        {
-                            bytes = Stream.Read(data, 0, data.Length);
-                            builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-                        }
-                        while (Stream.DataAvailable);
+                        ListenForNewMessages();
                     }
-                    catch
-                    {
-                        string errorMessage = "Connection lost. Check your internet connection and try to restart the app";
-                        var error = new ServerError() { Data = errorMessage };
-                        var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
-
-                        NewEvent(errorJson);
-                    }
-
-                    var message = builder.ToString();
-
-                    NewEvent(message);
                 }
             }
-        }
-
-
-        public void Process()
-        {
-            using (Stream = TcpClient.GetStream())
+            catch
             {
-                while (true)
-                {
-                    ListenMessages();
-                }
-            }
-        }
+                string errorMessage = "Connection lost. Check your internet connection and try to restart the app";
+                var error = new ServerError() { Data = errorMessage };
+                var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
 
+                NewCommand(errorJson);
+            }
+           
+        }
 
         public void SendMessage(string message)
         {
-            byte[] data = Encoding.Unicode.GetBytes(message);
+            byte[] data;
+
+            var messageInBytes = Encoding.Unicode.GetBytes(message);
+
+            data = Encryptor.Encrypt(messageInBytes);
+
             Stream.Write(data, 0, data.Length);
+        }
+
+
+        private void ListenForNewMessages()
+        {
+            byte[] data = new byte[TcpClient.ReceiveBufferSize];
+            StringBuilder builder = new StringBuilder();
+            
+
+            var bytesAmount = Stream.Read(data, 0, data.Length);
+
+            var cutData = new byte[bytesAmount];
+            Array.Copy(data, cutData, bytesAmount);
+
+            var decryptedData = Encryptor.Decrypt(cutData);
+
+            builder.Append(Encoding.Unicode.GetString(decryptedData, 0, decryptedData.Length));
+
+            var message = builder.ToString();
+
+            NewCommand(message);
         }
     }
 }

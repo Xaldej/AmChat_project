@@ -7,6 +7,7 @@ using AmChat.ServerServices.CommandHandlers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,7 +21,6 @@ namespace AmChat.ServerServices
 
         public Action<IMessengerService> ClientDisconnected;
 
-
         public CommandHandlerService(IMessengerService messenger)
         {
             Messenger = messenger;
@@ -31,27 +31,22 @@ namespace AmChat.ServerServices
 
         public void ProcessMessage(string message)
         {
-            var command = new Command();
+            if (message == string.Empty)
+            {
+                return;
+            }
+
+            Command command;
             try
             {
                 command = JsonParser<Command>.JsonToOneObject(message);
             }
             catch
             {
-                //TO DO: log errors
                 return;
             }
 
-            if (command == null)
-            {
-                //TO DO: log errors
-                return;
-            }
-
-
-
-            ICommandHandler handler;
-            CommandHandlers.TryGetValue(command.Name, out handler);
+            CommandHandlers.TryGetValue(command.Name, out ICommandHandler handler);
 
             if (handler == null)
             {
@@ -62,12 +57,18 @@ namespace AmChat.ServerServices
                 var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
 
                 Messenger.SendMessage(errorJson);
+
                 return;
             }
 
             handler.Execute(Messenger, command.Data);
         }
 
+
+        private void DisconnectClient(IMessengerService messenger)
+        {
+            ClientDisconnected(messenger);
+        }
 
         private void InitializeCommandHandlers()
         {
@@ -76,16 +77,14 @@ namespace AmChat.ServerServices
             var closeConnectionHandler = new CloseConnectionHandler();
             closeConnectionHandler.ConnectionIsClosed += DisconnectClient;
 
-            CommandHandlers.Add(nameof(AddOrUpdateChat).ToLower(), new AddOrUpdateChatHandler());
-            CommandHandlers.Add(nameof(CloseConnection).ToLower(), closeConnectionHandler);
-            CommandHandlers.Add(nameof(GetChats).ToLower(), new GetChatsHandler());
-            CommandHandlers.Add(nameof(Login).ToLower(), new LoginHandler());
-            CommandHandlers.Add(nameof(SendMessageToChat).ToLower(), new SendMessageToChatHandler());
+            CommandHandlers.Add(nameof(AddOrUpdateChat).ToLower(),      new AddOrUpdateChatHandler());
+            CommandHandlers.Add(nameof(ClientPublicKey).ToLower(),      new ClientPublicKeyHandler());
+            CommandHandlers.Add(nameof(CloseConnection).ToLower(),      closeConnectionHandler);
+            CommandHandlers.Add(nameof(GetChats).ToLower(),             new GetChatsHandler());
+            CommandHandlers.Add(nameof(GetKey).ToLower(),               new GetKeyHandler());
+            CommandHandlers.Add(nameof(Login).ToLower(),                new LoginHandler());
+            CommandHandlers.Add(nameof(SendMessageToChat).ToLower(),    new SendMessageToChatHandler());
         }
 
-        private void DisconnectClient(IMessengerService messenger)
-        {
-            ClientDisconnected(messenger);
-        }
     }
 }

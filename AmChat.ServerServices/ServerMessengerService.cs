@@ -20,19 +20,15 @@ namespace AmChat.ServerServices
 
         public ObservableCollection<Chat> UserChats { get; set; }
 
-        public TcpClient TcpClient { get; set; }
+        public Encryptor Encryptor { get; set; }
+
+        public Action<string> NewCommand { get; set; }
+
+        TcpClient TcpClient { get; set; }
 
         NetworkStream Stream { get; set; }
 
         public CommandHandlerService CommandHandler { get; set; }
-
-        public Action<string> NewEvent { get; set; }
-
-
-        ServerMessengerService()
-        {
-
-        }
 
 
         public ServerMessengerService(TcpClient tcpClient)
@@ -41,55 +37,66 @@ namespace AmChat.ServerServices
 
             User = new UserInfo();
 
+            Encryptor = new Encryptor();
+
             UserChats = new ObservableCollection<Chat>();
 
             CommandHandler = new CommandHandlerService(this);
             CommandHandler.ClientDisconnected += OnClientDisconnectd;
         }
 
-
         public void ListenMessages()
         {
-            using (Stream = TcpClient.GetStream())
+            try
             {
-                byte[] data = new byte[TcpClient.ReceiveBufferSize];
-                while (true)
+                using (Stream = TcpClient.GetStream())
                 {
-                    StringBuilder builder = new StringBuilder();
-                    int bytes = 0;
-
-                    try
+                    while (true)
                     {
-                        do
-                        {
-                            bytes = Stream.Read(data, 0, data.Length);
-                            builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-                        }
-                        while (Stream.DataAvailable);
+                        ListenForNewMessages();
                     }
-                    catch
-                    {
-                        NewEvent(User.Id.ToString());
-                        break;
-                    }
-
-                    string message = builder.ToString();
-
-                    CommandHandler.ProcessMessage(message);
                 }
+            }
+            catch
+            {
+                NewCommand(User.Id.ToString());
             }
         }
 
         public void SendMessage(string message)
         {
-            byte[] data = Encoding.Unicode.GetBytes(message);
+            byte[] data;
+
+            var messageInBytes = Encoding.Unicode.GetBytes(message);
+
+            data = Encryptor.Encrypt(messageInBytes);
+
             Stream.Write(data, 0, data.Length);
         }
 
 
+        private void ListenForNewMessages()
+        {
+            byte[] data = new byte[TcpClient.ReceiveBufferSize];
+            StringBuilder builder = new StringBuilder();
+
+            var bytesAmount = Stream.Read(data, 0, data.Length);
+
+            var cutData = new byte[bytesAmount];
+            Array.Copy(data, cutData, bytesAmount);
+
+            var decryptedData = Encryptor.Decrypt(cutData);
+
+            builder.Append(Encoding.Unicode.GetString(decryptedData, 0, decryptedData.Length));
+
+            var message = builder.ToString();
+
+            CommandHandler.ProcessMessage(message);
+        }
+
         private void OnClientDisconnectd(IMessengerService messenger)
         {
-            NewEvent(messenger.User.Id.ToString());
+            NewCommand(messenger.User.Id.ToString());
         }
     }
 }
