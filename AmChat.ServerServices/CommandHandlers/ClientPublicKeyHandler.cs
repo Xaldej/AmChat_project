@@ -35,7 +35,7 @@ namespace AmChat.ServerServices.CommandHandlers
         }
 
 
-        private static void SendAesKey(IMessengerService messenger)
+        private void SendAesKey(IMessengerService messenger)
         {
             var aesKey = messenger.Encryptor.Aes.Key;
             var aesKeyJson = JsonParser<byte[]>.OneObjectToJson(aesKey);

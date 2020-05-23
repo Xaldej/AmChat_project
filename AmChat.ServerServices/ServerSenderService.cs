@@ -55,23 +55,13 @@ namespace AmChat.ServerServices
             }
         }
 
-        public void SendNewMessageToUsers(object sender, NotifyCollectionChangedEventArgs e)
+        public void SendNewMessageToUsers(ChatMessage message, Chat chat)
         {
-            if (e.Action == NotifyCollectionChangedAction.Add)
+            var usersToSend = chat.UsersInChat.Where(u => !u.Equals(message.FromUser)).ToList();
+
+            foreach (var user in usersToSend)
             {
-                if (!(e.NewItems[0] is ChatMessage messageToChat))
-                {
-                    return;
-                }
-
-                var chat = ActiveChats.Where(c => c.Id == messageToChat.ToChatId).FirstOrDefault();
-
-                var usersToSend = chat.UsersInChat.Where(u => !u.Equals(messageToChat.FromUser)).ToList();
-
-                foreach (var user in usersToSend)
-                {
-                    SendMessageToCertainUser(user, messageToChat);
-                }
+                SendMessageToCertainUser(user, message);
             }
         }
 

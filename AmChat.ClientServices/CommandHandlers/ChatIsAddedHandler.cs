@@ -1,5 +1,6 @@
 ﻿using AmChat.Infrastructure;
 using AmChat.Infrastructure.Interfaces;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,29 +12,39 @@ namespace AmChat.ClientServices.CommandHandlers
 {
     public class ChatIsAddedHandler : ICommandHandler
     {
+        private readonly IMapper mapper;
+
+
+        public ChatIsAddedHandler()
+        {
+            var mapperConfig = Mappings.GetChatIsAddedHandlerConfig();
+
+            mapper = new Mapper(mapperConfig);
+        }
+
+
         public void Execute(IMessengerService messenger, string data)
         {
             var chatInfo = JsonParser<ChatInfo>.JsonToOneObject(data);
 
-            var chatToAdd = ChatInfoToChat(chatInfo);
+            var chatToAdd = mapper.Map<Chat>(chatInfo);
 
-            if (chatToAdd.ChatMessages == null)
+            ObservableCollection<ChatMessage> chatMessages;
+            var chatHistory = chatToAdd.ChatMessages;
+
+            if (chatHistory == null)
             {
-                chatToAdd.ChatMessages = new ObservableCollection<ChatMessage>();
+                chatMessages = new ObservableCollection<ChatMessage>();
+            }
+            else
+            {
+                chatMessages = new ObservableCollection<ChatMessage>(chatHistory);
             }
 
-            messenger.UserChats.Add(chatToAdd);
-        }
+            chatMessages.CollectionChanged += chatToAdd.OnNewMessageInChat;
+            chatToAdd.ChatMessages = chatMessages;
 
-        private Chat ChatInfoToChat(ChatInfo chatInfo)
-        {
-            return new Chat()
-            {
-                Id = chatInfo.Id,
-                Name = chatInfo.Name,
-                UsersInChat = chatInfo.UsersInChat,
-                ChatMessages = chatInfo.ChatMessages,
-            };
+            messenger.UserChats.Add(chatToAdd);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AmChat.Infrastructure;
 using AmChat.Infrastructure.Interfaces;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,39 +12,41 @@ namespace AmChat.ClientServices.CommandHandlers
 {
     public class CorrectContactListHandler : ICommandHandler
     {
+        private readonly IMapper mapper;
+
+
+        public CorrectContactListHandler()
+        {
+            var mapperConfig = Mappings.GetCorrectContactListHandlerConfig();
+
+            mapper = new Mapper(mapperConfig);
+        }
+
+
         public void Execute(IMessengerService messenger, string data)
         {
             var chatsInfo = new ObservableCollection<ChatInfo>(JsonParser<IEnumerable<ChatInfo>>.JsonToOneObject(data));
-            var chats = ChatsIonfoToChats(chatsInfo);
+            var chats = mapper.Map<IEnumerable<Chat>>(chatsInfo);
 
             foreach (var chat in chats)
             {
-                if (chat.ChatMessages == null)
+                ObservableCollection<ChatMessage> chatMessages;
+                var chatHistory = chat.ChatMessages;
+
+                if (chatHistory == null)
                 {
-                    chat.ChatMessages = new ObservableCollection<ChatMessage>();
+                    chatMessages = new ObservableCollection<ChatMessage>();
                 }
+                else
+                {
+                    chatMessages = new ObservableCollection<ChatMessage>(chatHistory);
+                }
+
+                chatMessages.CollectionChanged += chat.OnNewMessageInChat;
+                chat.ChatMessages = chatMessages;
 
                 messenger.UserChats.Add(chat);
             }
-        }
-
-        private ObservableCollection<Chat> ChatsIonfoToChats(ObservableCollection<ChatInfo> chatsInfo)
-        {
-            var chats = new ObservableCollection<Chat>();
-
-            foreach (var chatInfo in chatsInfo)
-            {
-                var chat = new Chat()
-                {
-                    Id = chatInfo.Id,
-                    Name = chatInfo.Name,
-                    UsersInChat = chatInfo.UsersInChat,
-                    ChatMessages = chatInfo.ChatMessages,
-                };
-                chats.Add(chat);
-            }
-
-            return chats;
         }
     }
 }

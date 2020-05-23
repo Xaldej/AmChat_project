@@ -13,9 +13,9 @@ namespace AmChat.Infrastructure
 
         public string Name { get; set; }
 
-        public ObservableCollection<UserInfo> UsersInChat;
+        public ICollection<UserInfo> UsersInChat;
 
-        public ObservableCollection<ChatMessage> ChatMessages;
+        public ICollection<ChatMessage> ChatMessages;
 
         public ChatInfo()
         {
@@ -37,8 +37,8 @@ namespace AmChat.Infrastructure
             var hashCode = -1118474401;
             hashCode = hashCode * -1521134295 + EqualityComparer<Guid>.Default.GetHashCode(Id);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
-            hashCode = hashCode * -1521134295 + EqualityComparer<ObservableCollection<UserInfo>>.Default.GetHashCode(UsersInChat);
-            hashCode = hashCode * -1521134295 + EqualityComparer<ObservableCollection<ChatMessage>>.Default.GetHashCode(ChatMessages);
+            hashCode = hashCode * -1521134295 + EqualityComparer<ICollection<UserInfo>>.Default.GetHashCode(UsersInChat);
+            hashCode = hashCode * -1521134295 + EqualityComparer<ICollection<ChatMessage>>.Default.GetHashCode(ChatMessages);
             return hashCode;
         }
     }

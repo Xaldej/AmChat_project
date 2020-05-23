@@ -82,7 +82,7 @@ namespace AmChat.ServerServices
             return lastNMessages;
         }
 
-        private ObservableCollection<ChatMessage>GetNewMessages(Chat chat, ObservableCollection<ChatMessage> messages)
+        private ICollection<ChatMessage>GetNewMessages(Chat chat, ICollection<ChatMessage> messages)
         {
             var newMessages = messages;
             var historyMessages = GetChatHistory(chat);
@@ -111,7 +111,7 @@ namespace AmChat.ServerServices
             };
         }
 
-        private List<DBChatMessage> MessagesToDbMessages(ObservableCollection<ChatMessage> messages)
+        private List<DBChatMessage> MessagesToDbMessages(ICollection<ChatMessage> messages)
         {
             var chatMessages = new List<DBChatMessage>();
 

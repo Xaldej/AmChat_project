@@ -4,6 +4,7 @@ using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,17 @@ namespace AmChat.ServerServices.CommandHandlers
 {
     public class LoginHandler : ICommandHandler
     {
+        private readonly IMapper mapper;
+
+
+        public LoginHandler()
+        {
+            var mapperConfig = Mappings.GetLoginHandlerConfig();
+
+            mapper = new Mapper(mapperConfig);
+        }
+
+
         public void Execute(IMessengerService messenger, string data)
         {
             var loginData = JsonParser<LoginData>.JsonToOneObject(data);
@@ -26,37 +38,52 @@ namespace AmChat.ServerServices.CommandHandlers
             catch
             {
                 Console.WriteLine("User is not logged in");
-
-                var error = new ServerError() { Data = "Login problems. Try to reconnect" };
-                var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
-                
-                messenger.SendMessage(errorJson);
+                SendErrorToClient(messenger);
 
                 return;
             }
 
             if (loginData.PasswordHash == dbUser.PasswordHash)
             {
-                UserInfo userInfo = UserToUserInfo(dbUser);
-                messenger.User = userInfo;
+                UserInfo userInfo = mapper.Map<UserInfo>(dbUser);
 
-                var userInfoJson = JsonParser<UserInfo>.OneObjectToJson(messenger.User);
+                SendCorrectLoginMessage(messenger, userInfo);
 
-                var command = new CorrectLogin() { Data = userInfoJson };
-                var commandJson = JsonParser<CorrectLogin>.OneObjectToJson(command);
-                
                 Console.WriteLine("User is got from DB");
-
-                messenger.SendMessage(commandJson);
             }
             else
             {
-                var command = new IncorrectLogin() { Data = string.Empty };
-                var commandJson = JsonParser<IncorrectLogin>.OneObjectToJson(command);
-                
-                messenger.SendMessage(commandJson);
+                SendIncorrectLoginError(messenger);
             }
 
+        }
+
+        private void SendIncorrectLoginError(IMessengerService messenger)
+        {
+            var command = new IncorrectLogin() { Data = string.Empty };
+            var commandJson = JsonParser<IncorrectLogin>.OneObjectToJson(command);
+
+            messenger.SendMessage(commandJson);
+        }
+
+        private void SendCorrectLoginMessage(IMessengerService messenger, UserInfo userInfo)
+        {
+            messenger.User = userInfo;
+
+            var userInfoJson = JsonParser<UserInfo>.OneObjectToJson(messenger.User);
+
+            var command = new CorrectLogin() { Data = userInfoJson };
+            var commandJson = JsonParser<CorrectLogin>.OneObjectToJson(command);
+
+            messenger.SendMessage(commandJson);
+        }
+
+        private void SendErrorToClient(IMessengerService messenger)
+        {
+            var error = new ServerError() { Data = "Login problems. Try to reconnect" };
+            var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
+
+            messenger.SendMessage(errorJson);
         }
 
         private DBUser GetUserFromDB(LoginData loginData)
@@ -86,15 +113,6 @@ namespace AmChat.ServerServices.CommandHandlers
                 }
             }
             return user;
-        }
-
-        private UserInfo UserToUserInfo(DBUser user)
-        {
-            return new UserInfo()
-            {
-                Id = user.Id,
-                Login = user.Login
-            };
         }
     }
 }

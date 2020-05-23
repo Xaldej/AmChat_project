@@ -17,16 +17,16 @@ namespace AmChat.Forms
 {
     public partial class MainForm : Form
     {   
-        List<ChatControl> ChatsControls { get; set; }
+        private List<ChatControl> ChatsControls { get; set; }
 
-        LoginForm LoginForm { get; set; }
+        private LoginForm LoginForm { get; set; }
 
-        ClientEncryptService EncryptService { get; set; }
+        private ClientEncryptService EncryptService { get; set; }
 
-        CommandHandlerService CommandHandler { get; set; }
+        private CommandHandlerService CommandHandler { get; set; }
 
-        IMessengerService Messenger { get; set; }
-        
+        private IMessengerService Messenger { get; set; }
+
 
         public MainForm()
         {
@@ -65,6 +65,7 @@ namespace AmChat.Forms
             Messenger = new ClientMessengerService(tcpClient);
 
             var thread = new Thread(() => Messenger.ListenMessages());
+            thread.IsBackground = true;
             thread.Start();
         }
 
@@ -253,6 +254,8 @@ namespace AmChat.Forms
             {
                 CommandHandler.CloseConnection();
             }
+
+
         }
 
         private void Send_button_Click(object sender, EventArgs e)

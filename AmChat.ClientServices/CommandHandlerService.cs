@@ -142,16 +142,8 @@ namespace AmChat.ClientServices
             CommandHandlers.Add(nameof(ServerError).ToLower(),          serverErrorHandler);
         }
 
-        private void OnChatMessagesChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnChatMessagesChanged(ChatMessage message, Chat chat)
         {
-
-            if (!(e.NewItems[0] is ChatMessage message))
-            {
-                return;
-            }
-
-
-
             if (message.FromUser.Equals(Messenger.User))
             {
                 MessageCorretlySend(message.Text);
@@ -159,7 +151,7 @@ namespace AmChat.ClientServices
             else
             {
 
-                if (ChosenChat == null || ChosenChat.Id != message.ToChatId)
+                if (ChosenChat == null || ChosenChat.Id != chat.Id)
                 {
                     var chatToShowMessage = Messenger.UserChats.Where(c => c.Id == message.ToChatId).FirstOrDefault();
 
@@ -199,7 +191,7 @@ namespace AmChat.ClientServices
                 return;
             }
 
-            newChat.ChatMessages.CollectionChanged += OnChatMessagesChanged;
+            newChat.NewMessageInChat += OnChatMessagesChanged;
             ChatAdded(newChat);
         }
 

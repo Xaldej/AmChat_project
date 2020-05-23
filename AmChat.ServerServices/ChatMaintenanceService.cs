@@ -90,10 +90,12 @@ namespace AmChat.ServerServices
             }
             else
             {
-                chat.ChatMessages = ChatHistoryService.GetChatHistory(chat);
+                var chatMessages = ChatHistoryService.GetChatHistory(chat);
+                chatMessages.CollectionChanged += chat.OnNewMessageInChat;
+                chat.ChatMessages = chatMessages;
                 ActiveChats.Add(chat);
 
-                chat.ChatMessages.CollectionChanged += ServerSender.SendNewMessageToUsers;
+                chat.NewMessageInChat += ServerSender.SendNewMessageToUsers;
                 chat.NewUserInChat += AddChatToClientAndServer;
                 ChatListenersAmount[chat] = 1;
             }

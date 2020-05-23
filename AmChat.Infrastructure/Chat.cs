@@ -10,16 +10,24 @@ namespace AmChat.Infrastructure
 {
     public class Chat : ChatInfo
     {
+        public Action<ChatMessage, Chat> NewMessageInChat;
+
         public Action<UserInfo, Chat> NewUserInChat;
 
-        public Chat()
-        {
-            UsersInChat = new ObservableCollection<UserInfo>();
 
-            UsersInChat.CollectionChanged += OnUsersInChatChanged;
+        public void OnNewMessageInChat(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                if (!(e.NewItems[0] is ChatMessage newMessage))
+                {
+                    return;
+                }
+                NewMessageInChat(newMessage, this);
+            }
         }
 
-        private void OnUsersInChatChanged(object sender, NotifyCollectionChangedEventArgs e)
+        public void OnUsersInChatChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if(e.Action == NotifyCollectionChangedAction.Add)
             {

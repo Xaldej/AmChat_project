@@ -4,6 +4,7 @@ using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,6 +16,17 @@ namespace AmChat.ServerServices.CommandHandlers
 {
     public class GetChatsHandler : ICommandHandler
     {
+        private readonly IMapper mapper;
+
+
+        public GetChatsHandler()
+        {
+            var mapperConfig = Mappings.GetGetChatsHandlerConfig();
+
+            mapper = new Mapper(mapperConfig);
+        }
+
+
         public void Execute(IMessengerService messenger, string data)
         {
             List<DBChat> chats = new List<DBChat>();
@@ -24,47 +36,27 @@ namespace AmChat.ServerServices.CommandHandlers
             }
             catch
             {
-                var error = new ServerError() { Data = "Cannot load contact list. Try to restart the app" };
-                var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
-
-                messenger.SendMessage(errorJson);
+                SendErrorMessage(messenger);
             }
 
             if (chats.Count() > 0)
             {
-                foreach (var chat in chats)
-                {
-                    var userChat = ChatToUserChat(chat);
-                    messenger.UserChats.Add(userChat);
-                }
+                AddChatToServerMessenger(messenger, chats);
 
-                var chatsInfo = ChatsToChatsInfo(messenger.UserChats);
-                var chatsInfoJson = JsonParser<ChatInfo>.ManyObjectsToJson(chatsInfo);
-
-                var command = new CorrectContactList() { Data = chatsInfoJson };
-                var commandJson = JsonParser<CorrectContactList>.OneObjectToJson(command);
-                
-                messenger.SendMessage(commandJson);
+                SendChatToClient(messenger);
             }
         }
 
-        private ObservableCollection<ChatInfo> ChatsToChatsInfo(ObservableCollection<Chat> chats)
+        private void AddChatToServerMessenger(IMessengerService messenger, List<DBChat> chats)
         {
-            var chatsInfo = new ObservableCollection<ChatInfo>();
-
             foreach (var chat in chats)
             {
-                var chatInfo = new ChatInfo()
-                {
-                    Id = chat.Id,
-                    Name = chat.Name,
-                    ChatMessages = chat.ChatMessages,
-                    UsersInChat = chat.UsersInChat,
-                };
-                chatsInfo.Add(chatInfo);
+                var userChat = mapper.Map<Chat>(chat);
+                var usersInChat = new ObservableCollection<UserInfo>(GetUsersInChat(chat));
+                usersInChat.CollectionChanged += userChat.OnUsersInChatChanged;
+                userChat.UsersInChat = usersInChat;
+                messenger.UserChats.Add(userChat);
             }
-
-            return chatsInfo;
         }
 
         private List<DBChat> GetChatsFromDb(UserInfo forUser)
@@ -85,21 +77,9 @@ namespace AmChat.ServerServices.CommandHandlers
             return chats;
         }
 
-        private Chat ChatToUserChat(DBChat chat)
-        {
-            List<UserInfo> usersInChat = GetUsersInChat(chat);
-
-            return new Chat()
-            {
-                Id = chat.Id,
-                Name = chat.Name,
-                UsersInChat = new ObservableCollection<UserInfo>(usersInChat),
-            };
-        }
-
         private List<UserInfo> GetUsersInChat(DBChat chat)
         {
-            List<UserInfo> users = new List<UserInfo>();
+            var users = new List<UserInfo>();
             using (var context = new AmChatContext())
             {
                 var userIds = context.ChatUsers.Where(uinc => uinc.ChatId == chat.Id).Select(uinc => uinc.UserId).ToList();
@@ -107,20 +87,31 @@ namespace AmChat.ServerServices.CommandHandlers
                 foreach (var userId in userIds)
                 {
                     var user = context.Users.Where(u => u.Id == userId).FirstOrDefault();
-                    users.Add(UserToUserInfo(user));
+                    users.Add(mapper.Map<UserInfo>(user));
                 }
             }
 
             return users;
         }
 
-        private UserInfo UserToUserInfo(DBUser user)
+        private void SendChatToClient(IMessengerService messenger)
         {
-            return new UserInfo()
-            {
-                Id = user.Id,
-                Login = user.Login,
-            };
+            var chatsInfo = mapper.Map<IEnumerable<ChatInfo>>(messenger.UserChats);
+            var chatsInfoJson = JsonParser<ChatInfo>.ManyObjectsToJson(chatsInfo);
+
+            var command = new CorrectContactList() { Data = chatsInfoJson };
+            var commandJson = JsonParser<CorrectContactList>.OneObjectToJson(command);
+
+            messenger.SendMessage(commandJson);
         }
+
+        private void SendErrorMessage(IMessengerService messenger)
+        {
+            var error = new ServerError() { Data = "Cannot load contact list. Try to restart the app" };
+            var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
+
+            messenger.SendMessage(errorJson);
+        }
+
     }
 }
