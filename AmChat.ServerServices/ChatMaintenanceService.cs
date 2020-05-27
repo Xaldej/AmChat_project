@@ -4,6 +4,7 @@ using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
+using AmChat.Infrastructure.Interfaces.ServerServices;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,20 +15,20 @@ using System.Threading.Tasks;
 
 namespace AmChat.ServerServices
 {
-    public class ChatMaintenanceService
+    public class ChatMaintenanceService : IChatMaintenanceService
     {
-        public List<IMessengerService> ConnectedClients { get; set; }
-
-        public ServerSenderService ServerSender { get; set; }
-
         List<Chat> ActiveChats { get; set; }
 
         Dictionary<Chat, int> ChatListenersAmount { get; set; }
 
-        ChatHistoryService ChatHistoryService { get; set; }
+        List<IMessengerService> ConnectedClients { get; set; }
+
+        IChatHistoryService ChatHistoryService { get; set; }
+
+        IServerSenderService ServerSender { get; set; }
 
 
-        public ChatMaintenanceService(List<Chat> activeChats, List<IMessengerService> connectedClients, ServerSenderService serverSender)
+        public ChatMaintenanceService(List<Chat> activeChats, List<IMessengerService> connectedClients, IServerSenderService serverSender)
         {
             ActiveChats = activeChats;
 
@@ -45,7 +46,13 @@ namespace AmChat.ServerServices
         {
             foreach (var chat in client.UserChats)
             {
+                if (!ChatListenersAmount.ContainsKey(chat))
+                {
+                    break;
+                }
+
                 ChatListenersAmount[chat]--;
+
                 if (ChatListenersAmount[chat] == 0)
                 {
                     RemoveInactiveChat(chat);
@@ -53,7 +60,7 @@ namespace AmChat.ServerServices
             }
         }
 
-        public void OnUserChatsChanged(object sender, NotifyCollectionChangedEventArgs e)
+        public void ProcessChatChange(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -95,7 +102,7 @@ namespace AmChat.ServerServices
                 chat.ChatMessages = chatMessages;
                 ActiveChats.Add(chat);
 
-                chat.NewMessageInChat += ServerSender.SendNewMessageToUsers;
+                chat.NewMessageInChat += ServerSender.SendNewMessageToUsersInChat;
                 chat.NewUserInChat += AddChatToClientAndServer;
                 ChatListenersAmount[chat] = 1;
             }
@@ -113,10 +120,8 @@ namespace AmChat.ServerServices
         private void AddChatToClient(UserInfo newUser, Chat chat)
         {
             var chatInfo = ChatToChatInfo(chat);
-            var chatInfoJson = JsonParser<ChatInfo>.OneObjectToJson(chatInfo);
 
-            var command = new ChatIsAdded() { Data = chatInfoJson };
-            var commandJson = JsonParser<ChatIsAdded>.OneObjectToJson(command);
+            var commandJson = CommandExtentions.GetCommandJson<ChatIsAdded, ChatInfo>(chatInfo);
 
             ServerSender.SendCommandToCertainUser(newUser, commandJson);
         }

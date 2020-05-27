@@ -1,4 +1,5 @@
 ﻿using AmChat.Infrastructure;
+using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
 using System;
@@ -17,9 +18,7 @@ namespace AmChat.ServerServices.CommandHandlers
         {   
             var rsaXml = messenger.Encryptor.Rsa.ToXmlString(false);
 
-            var command = new ServerPublicKey() { Data = rsaXml };
-
-            var commandJson = JsonParser<ServerPublicKey>.OneObjectToJson(command);
+            var commandJson = CommandExtentions.GetCommandJson<ServerPublicKey, string>(rsaXml, true);
 
             messenger.SendMessage(commandJson);
         }

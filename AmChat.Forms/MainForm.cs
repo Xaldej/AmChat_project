@@ -19,11 +19,11 @@ namespace AmChat.Forms
     {   
         private List<ChatControl> ChatsControls { get; set; }
 
+        private Chat ChosenChat { get; set; }
+
         private LoginForm LoginForm { get; set; }
 
-        private ClientEncryptService EncryptService { get; set; }
-
-        private CommandHandlerService CommandHandler { get; set; }
+        private CommandSender CommandSender { get; set; }
 
         private IMessengerService Messenger { get; set; }
 
@@ -33,6 +33,8 @@ namespace AmChat.Forms
             InitializeComponent();
 
             ChatsControls = new List<ChatControl>();
+
+            LoginForm = new LoginForm();
         }
 
         private void AM_Chat_Load(object sender, EventArgs e)
@@ -41,22 +43,13 @@ namespace AmChat.Forms
 
             CreateCommandHandler();
 
-            CreateEncryptService();
+            CommandSender = new CommandSender(Messenger);
+
+            CommandSender.GetKeyFromServer();
 
             GetLogin();
         }
 
-
-        private void CreateCommandHandler()
-        {
-            CommandHandler = new CommandHandlerService(Messenger);
-
-            CommandHandler.ChatAdded += AddChatToContactPanel;
-            CommandHandler.ErrorIsGotten += ShowErrorToUser;
-            CommandHandler.MessageToCurrentChatIsGotten += ShowMessageFromOtherUser;
-            CommandHandler.MessageToOtherChatIsGotten += ShowUnreadMessages;
-            CommandHandler.MessageCorretlySend += ShowMessageToOtherUser;
-        }
 
         private void CreateMessenger()
         {
@@ -64,54 +57,62 @@ namespace AmChat.Forms
 
             Messenger = new ClientMessengerService(tcpClient);
 
-            var thread = new Thread(() => Messenger.ListenMessages());
-            thread.IsBackground = true;
+            var thread = new Thread(() => Messenger.ListenMessages()) { IsBackground = true };
             thread.Start();
         }
 
-        private void CreateEncryptService()
+        private void CreateCommandHandler()
         {
-            EncryptService = new ClientEncryptService(Messenger);
-            CommandHandler.EncryptServce = EncryptService;
-            Messenger.Encryptor = EncryptService.Encrypter;
+            var commandHandler = new ClientCommandHandlerService(Messenger);
 
-            EncryptService.GetKeyFromServer();
+            commandHandler.ChatAdded += AddChatToContactPanel;
+            commandHandler.ErrorIsGotten += ShowErrorToUser;
+            commandHandler.CorrectLoginData += OnCorrectLogin;
+            commandHandler.IncorrectLoginData += LoginForm.ShowIncorrectLoginMessage;
+            commandHandler.NewMessageInChat += ShowNewMessage;
+
+            Messenger.CommandHandler = commandHandler;
+        }
+
+        private void ShowNewMessage(ChatMessage message, Chat chat)
+        {
+            if (message.FromUser.Equals(Messenger.User))
+            {
+                ShowMessageToOtherUser(message.Text);
+            }
+            else
+            {
+                if (ChosenChat == null || chat.Id != ChosenChat.Id)
+                {
+                    var chatToShowMessage = Messenger.UserChats.Where(c => c.Id == message.ToChatId).FirstOrDefault();
+                    ShowUnreadMessages(message);
+                }
+                else
+                {
+                    var messageToShow = message.FromUser.Login + ":\n" + message.Text;
+                    ShowMessageFromOtherUser(messageToShow);
+                }
+            }
         }
 
         private void GetLogin()
         {
-            LoginForm = new LoginForm();
-
-            var loginService = new LoginService(Messenger, CommandHandler);
-            loginService.CorrectLogin += OnCorrectLogin;
-            loginService.IncorrectLogin += LoginForm.ShowIncorrectLoginMessage;
-
-            LoginForm.LoginDataIsEntered += loginService.Login;
+            LoginForm.LoginDataIsEntered += CommandSender.Login;
 
             LoginForm.ShowDialog();
         }
 
-
-        private void AddChat(string chatName, List<string> userLoginsToAdd)
-        {
-            CommandHandler.AddChat(chatName, userLoginsToAdd);
-        }
 
         private void AddChatToContactPanel(Chat chat)
         {
             var chatControl = new ChatControl(chat) { Dock = DockStyle.Top };
 
             chatControl.ChatChosen += ChangeChat;
-            chatControl.NewChatLoginsEntered += AddUsersToChat;
+            chatControl.NewChatLoginsEntered += CommandSender.AddUsersToChat;
 
             Chats_panel.Invoke(new Action(() => Chats_panel.Controls.Add(chatControl)));
 
             ChatsControls.Add(chatControl);
-        }
-
-        private void AddUsersToChat(Chat chat, List<string> userLoginsToAdd)
-        {
-            CommandHandler.AddUsersToChat(chat, userLoginsToAdd);
         }
 
         private void AddMessageToChat(string message, HorizontalAlignment alignment)
@@ -131,7 +132,7 @@ namespace AmChat.Forms
 
             Chat_panel.Enabled = true;
 
-            CommandHandler.ChosenChat = chatControl.Chat;
+            ChosenChat = chatControl.Chat;
 
             UpdateChatHistory();
         }
@@ -152,7 +153,7 @@ namespace AmChat.Forms
         private void OnCorrectLogin()
         {
             LoginForm.CloseForm();
-            CommandHandler.GetChats();
+            CommandSender.GetChats();
         }
 
         private void ShowMessageFromOtherUser(string message)
@@ -190,7 +191,7 @@ namespace AmChat.Forms
 
             if (isUserInputCorrect)
             {
-                CommandHandler.SendMessageToChat(userInput);
+                CommandSender.SendMessageToChat(userInput, ChosenChat);
             }
         }
 
@@ -198,7 +199,7 @@ namespace AmChat.Forms
         {
             Chat_richTextBox.Invoke(new Action(() => Chat_richTextBox.Clear()));
 
-            foreach (var message in CommandHandler.ChosenChat.ChatMessages)
+            foreach (var message in ChosenChat.ChatMessages)
             {
                 string messageToShow;
                 HorizontalAlignment alignment;
@@ -235,7 +236,7 @@ namespace AmChat.Forms
         {
             var addChatForm = new AddChatAndUsersForm();
 
-            addChatForm.NewChatInfoEntered += AddChat;
+            addChatForm.NewChatInfoEntered += CommandSender.AddChat;
 
             addChatForm.ShowDialog();
         }
@@ -252,10 +253,8 @@ namespace AmChat.Forms
         {
             if(Messenger!=null)
             {
-                CommandHandler.CloseConnection();
+                CommandSender.CloseConnection();
             }
-
-
         }
 
         private void Send_button_Click(object sender, EventArgs e)

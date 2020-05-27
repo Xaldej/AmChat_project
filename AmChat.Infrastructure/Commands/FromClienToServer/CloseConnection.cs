@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure.Commands.FromClienToServer
 {
-    public class CloseConnection : Command
+    public class CloseConnection : BaseCommand
     {
         public override string Name => nameof(CloseConnection).ToLower();
     }

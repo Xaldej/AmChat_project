@@ -44,7 +44,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientEncryptService.cs" />
     <Compile Include="ClientMessengerService.cs" />
     <Compile Include="CommandHandlers\AesVectorHandler.cs" />
     <Compile Include="CommandHandlers\ChatIsAddedHandler.cs" />
@@ -54,9 +53,8 @@
     <Compile Include="CommandHandlers\MessageToCertainChatHandler.cs" />
     <Compile Include="CommandHandlers\AesKeyHandler.cs" />
     <Compile Include="CommandHandlers\ServerErrorHandler.cs" />
-    <Compile Include="CommandHandlerService.cs" />
+    <Compile Include="ClientCommandHandlerService.cs" />
     <Compile Include="CommandHandlers\ServerPublicKeyHandler.cs" />
-    <Compile Include="LoginService.cs" />
     <Compile Include="Mappings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TcpConnectionService.cs" />

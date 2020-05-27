@@ -20,15 +20,13 @@ namespace AmChat.ServerServices
 
         public ObservableCollection<Chat> UserChats { get; set; }
 
-        public Encryptor Encryptor { get; set; }
-
-        public Action<string> NewCommand { get; set; }
+        public IEncryptor Encryptor { get; set; }
 
         TcpClient TcpClient { get; set; }
 
         NetworkStream Stream { get; set; }
 
-        public CommandHandlerService CommandHandler { get; set; }
+        public ICommandHandlerService CommandHandler { get; set; }
 
 
         public ServerMessengerService(TcpClient tcpClient)
@@ -40,10 +38,8 @@ namespace AmChat.ServerServices
             Encryptor = new Encryptor();
 
             UserChats = new ObservableCollection<Chat>();
-
-            CommandHandler = new CommandHandlerService(this);
-            CommandHandler.ClientDisconnected += OnClientDisconnectd;
         }
+
 
         public void ListenMessages()
         {
@@ -59,7 +55,9 @@ namespace AmChat.ServerServices
             }
             catch
             {
-                NewCommand(User.Id.ToString());
+                var message = new CloseConnection() { Data = "ConnectionLost"};
+                var messageJson = JsonParser<CloseConnection>.OneObjectToJson(message);
+                CommandHandler.ProcessMessage(this, messageJson);
             }
         }
 
@@ -91,12 +89,7 @@ namespace AmChat.ServerServices
 
             var message = builder.ToString();
 
-            CommandHandler.ProcessMessage(message);
-        }
-
-        private void OnClientDisconnectd(IMessengerService messenger)
-        {
-            NewCommand(messenger.User.Id.ToString());
+            CommandHandler.ProcessMessage(this, message);
         }
     }
 }

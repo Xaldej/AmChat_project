@@ -1,5 +1,6 @@
 ﻿using AmChat.Infrastructure;
 using AmChat.Infrastructure.Interfaces;
+using AmChat.Infrastructure.Interfaces.ServerServices;
 using AmChat.ServerServices;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,9 @@ namespace AmChat.Server
 
         List<Chat> ActiveChats { get; set; }
 
-        ChatMaintenanceService ChatMaintenanceService { get; set; }
+        IChatMaintenanceService ChatMaintenanceService { get; set; }
 
-        ServerSenderService ServerSender { get; set; }
+        IServerSenderService ServerSender { get; set; }
 
 
         public TcpServer()
@@ -27,7 +28,7 @@ namespace AmChat.Server
 
             ActiveChats = new List<Chat>();
 
-            ServerSender = new ServerSenderService(ActiveChats, ConnectedClients);
+            ServerSender = new ServerSenderService(ConnectedClients);
 
             ChatMaintenanceService = new ChatMaintenanceService(ActiveChats, ConnectedClients, ServerSender);
         }
@@ -69,9 +70,12 @@ namespace AmChat.Server
         private void AddClient(TcpClient tcpClient)
         {
             IMessengerService client = new ServerMessengerService(tcpClient);
-            client.UserChats.CollectionChanged += ChatMaintenanceService.OnUserChatsChanged;
+            client.UserChats.CollectionChanged += ChatMaintenanceService.ProcessChatChange;
 
-            client.NewCommand += RemoveClient;
+            var commandHandler = new ServerCommandHandlerService();
+            commandHandler.ClientDisconnected += RemoveClient;
+
+            client.CommandHandler = commandHandler;
 
             ConnectedClients.Add(client);
 
@@ -81,17 +85,13 @@ namespace AmChat.Server
             Console.WriteLine("client is connected");
         }
 
-        private void RemoveClient(string userId)
+        private void RemoveClient(IMessengerService client)
         {
-            var id = Guid.Parse(userId);
-
-            var clientToRemove = ConnectedClients.Where(c => c.User.Id == id).FirstOrDefault();
-
-            if(clientToRemove!=null)
+            if(client != null)
             {
-                ConnectedClients.Remove(clientToRemove);
+                ConnectedClients.Remove(client);
 
-                ChatMaintenanceService.ChangeChatListenersAmount(clientToRemove);
+                ChatMaintenanceService.ChangeChatListenersAmount(client);
             }
         }
     }

@@ -14,22 +14,25 @@ namespace AmChat.ClientServices
 {
     public class ClientMessengerService : IMessengerService
     {
+        public ICommandHandlerService CommandHandler { get; set; }
+
+        public IEncryptor Encryptor { get; set; }
+
         public UserInfo User { get; set; }
 
         public ObservableCollection<Chat> UserChats { get; set; }
 
-        public Encryptor Encryptor { get; set; }
 
-        public Action<string> NewCommand { get; set; }
+        private TcpClient TcpClient { get; set; }
 
-        TcpClient TcpClient { get; set; }
-
-        NetworkStream Stream { get; set; }
+        private NetworkStream Stream { get; set; }
 
 
         public ClientMessengerService(TcpClient tcpClient)
         {
             TcpClient = tcpClient;
+
+            Encryptor = new Encryptor();
 
             User = new UserInfo();
 
@@ -52,10 +55,10 @@ namespace AmChat.ClientServices
             catch
             {
                 string errorMessage = "Connection lost. Check your internet connection and try to restart the app";
-                var error = new ServerError() { Data = errorMessage };
-                var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
+                var message = new ServerError() { Data = errorMessage };
+                var messageJson = JsonParser<ServerError>.OneObjectToJson(message);
 
-                NewCommand(errorJson);
+                CommandHandler.ProcessMessage(this, messageJson);
             }
            
         }
@@ -89,7 +92,7 @@ namespace AmChat.ClientServices
 
             var message = builder.ToString();
 
-            NewCommand(message);
+            CommandHandler.ProcessMessage(this, message);
         }
     }
 }

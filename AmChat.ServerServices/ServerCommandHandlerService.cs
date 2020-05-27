@@ -13,33 +13,30 @@ using System.Threading.Tasks;
 
 namespace AmChat.ServerServices
 {
-    public class CommandHandlerService
+    public class ServerCommandHandlerService : ICommandHandlerService
     {
         Dictionary<string, ICommandHandler> CommandHandlers { get; set; }
 
-        IMessengerService Messenger { get; set; }
-
         public Action<IMessengerService> ClientDisconnected;
 
-        public CommandHandlerService(IMessengerService messenger)
-        {
-            Messenger = messenger;
 
+        public ServerCommandHandlerService()
+        {
             InitializeCommandHandlers();
         }
 
 
-        public void ProcessMessage(string message)
+        public void ProcessMessage(IMessengerService messenger, string message)
         {
             if (message == string.Empty)
             {
                 return;
             }
 
-            Command command;
+            BaseCommand command;
             try
             {
-                command = JsonParser<Command>.JsonToOneObject(message);
+                command = JsonParser<BaseCommand>.JsonToOneObject(message);
             }
             catch
             {
@@ -56,12 +53,12 @@ namespace AmChat.ServerServices
                 };
                 var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
 
-                Messenger.SendMessage(errorJson);
+                messenger.SendMessage(errorJson);
 
                 return;
             }
 
-            handler.Execute(Messenger, command.Data);
+            handler.Execute(messenger, command.Data);
         }
 
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure.Commands.FromServerToClient
 {
-    public class ServerPublicKey : Command
+    public class ServerPublicKey : BaseCommand
     {
         public override string Name => nameof(ServerPublicKey).ToLower();
     }

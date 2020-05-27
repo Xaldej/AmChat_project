@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure.Commands.FromServerToClient
 {
-    public class AesVector : Command
+    public class AesVector : BaseCommand
     {
         public override string Name => nameof(AesVector).ToLower();
     }

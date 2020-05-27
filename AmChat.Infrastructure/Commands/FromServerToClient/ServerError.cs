@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure.Commands.FromServerToClient
 {
-    public class ServerError : Command
+    public class ServerError : BaseCommand
     {
         public override string Name => nameof(ServerError).ToLower();
     }

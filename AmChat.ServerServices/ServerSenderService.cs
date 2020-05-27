@@ -1,8 +1,10 @@
 ﻿using AmChat.Data;
 using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
+using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
+using AmChat.Infrastructure.Interfaces.ServerServices;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -12,19 +14,15 @@ using System.Threading.Tasks;
 
 namespace AmChat.ServerServices
 {
-    public class ServerSenderService
+    public class ServerSenderService : IServerSenderService
     {
-        List<Chat> ActiveChats { get; set; }
-
-        public List<IMessengerService> ConnectedClients { get; set; }
+        List<IMessengerService> ConnectedClients { get; set; }
 
         UserInfo ServerNotificationUser { get; set; }
 
 
-        public ServerSenderService(List<Chat> activeChats, List<IMessengerService> connectedClients)
+        public ServerSenderService(List<IMessengerService> connectedClients)
         {
-            ActiveChats = activeChats;
-
             ConnectedClients = connectedClients;
 
             GetServerNotificationUser();
@@ -47,15 +45,13 @@ namespace AmChat.ServerServices
 
             if (clientToSend != null)
             {   
-                var messageJson = JsonParser<ChatMessage>.OneObjectToJson(message);
-                var command = new MessageToCertainChat() { Data = messageJson };
-                var commandJson = JsonParser<MessageToCertainChat>.OneObjectToJson(command);
+                var commandJson = CommandExtentions.GetCommandJson<MessageToCertainChat, ChatMessage>(message);
 
                 clientToSend.SendMessage(commandJson);
             }
         }
 
-        public void SendNewMessageToUsers(ChatMessage message, Chat chat)
+        public void SendNewMessageToUsersInChat(ChatMessage message, Chat chat)
         {
             var usersToSend = chat.UsersInChat.Where(u => !u.Equals(message.FromUser)).ToList();
 

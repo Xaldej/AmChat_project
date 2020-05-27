@@ -10,14 +10,17 @@ namespace AmChat.ClientServices
 {
     public class TcpConnectionService
     {
-        TcpSettings TcpSettings { get; set; }
+        private TcpSettings TcpSettings { get; set; }
+
 
         public Action<string, bool> ErrorIsGotten;
+
 
         public TcpConnectionService(TcpSettings tcpSettings)
         {
             TcpSettings = tcpSettings;
         }
+
 
         public TcpClient Connect()
         {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure.Commands.FromClienToServer
 {
-    public class GetChats : Command
+    public class GetChats : BaseCommand
     {
         public override string Name => nameof(GetChats).ToLower();
     }

@@ -99,8 +99,7 @@ namespace AmChat.ServerServices.CommandHandlers
             var chatsInfo = mapper.Map<IEnumerable<ChatInfo>>(messenger.UserChats);
             var chatsInfoJson = JsonParser<ChatInfo>.ManyObjectsToJson(chatsInfo);
 
-            var command = new CorrectContactList() { Data = chatsInfoJson };
-            var commandJson = JsonParser<CorrectContactList>.OneObjectToJson(command);
+            var commandJson = CommandExtentions.GetCommandJson<CorrectContactList, string>(chatsInfoJson, true);
 
             messenger.SendMessage(commandJson);
         }

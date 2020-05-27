@@ -1,6 +1,7 @@
 ﻿using AmChat.Data;
 using AmChat.Data.Entitites;
 using AmChat.Infrastructure;
+using AmChat.Infrastructure.Interfaces.ServerServices;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.ServerServices
 {
-    public class ChatHistoryService
+    public class ChatHistoryService : IChatHistoryService
     {
         public ChatHistoryService()
         {

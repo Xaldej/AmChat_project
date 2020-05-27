@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmChat.Infrastructure.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure
 {
-    public class Encryptor
+    public class Encryptor : IEncryptor
     {
         public AesCryptoServiceProvider Aes { get; set; }
 
@@ -38,6 +39,7 @@ namespace AmChat.Infrastructure
             HandshakeComplete = false;
 
             GetOrGenerateRSAKeys();
+            GenerateAesKey();
         }
 
 
@@ -85,12 +87,6 @@ namespace AmChat.Infrastructure
             }
 
             return encryptedData;
-        }
-
-        public void GenerateAesKey()
-        {
-            Aes.GenerateKey();
-            Aes.GenerateIV();
         }
 
 
@@ -148,6 +144,12 @@ namespace AmChat.Infrastructure
             return output;
         }
 
+
+        private void GenerateAesKey()
+        {
+            Aes.GenerateKey();
+            Aes.GenerateIV();
+        }
 
         private void GenerateRSAKeys()
         {

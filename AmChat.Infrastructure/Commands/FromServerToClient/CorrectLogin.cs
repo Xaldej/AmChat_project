@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure.Commands.FromServerToClient
 {
-    public class CorrectLogin : Command
+    public class CorrectLogin : BaseCommand
     {
         public override string Name => nameof(CorrectLogin).ToLower();
     }

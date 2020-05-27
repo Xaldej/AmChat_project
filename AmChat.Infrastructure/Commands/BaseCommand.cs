@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure.Commands
 {
-    public class Command
+    public class BaseCommand
     {
         public virtual string Name { get; set; }
 
