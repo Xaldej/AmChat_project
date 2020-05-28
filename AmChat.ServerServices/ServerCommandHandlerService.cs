@@ -15,7 +15,7 @@ namespace AmChat.ServerServices
 {
     public class ServerCommandHandlerService : ICommandHandlerService
     {
-        Dictionary<string, ICommandHandler> CommandHandlers { get; set; }
+        private Dictionary<string, ICommandHandler> CommandHandlers { get; set; }
 
         public Action<IMessengerService> ClientDisconnected;
 

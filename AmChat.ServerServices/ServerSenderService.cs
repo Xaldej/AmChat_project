@@ -16,9 +16,9 @@ namespace AmChat.ServerServices
 {
     public class ServerSenderService : IServerSenderService
     {
-        List<IMessengerService> ConnectedClients { get; set; }
+        private List<IMessengerService> ConnectedClients { get; set; }
 
-        UserInfo ServerNotificationUser { get; set; }
+        private UserInfo ServerNotificationUser { get; set; }
 
 
         public ServerSenderService(List<IMessengerService> connectedClients)

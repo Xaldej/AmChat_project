@@ -17,15 +17,15 @@ namespace AmChat.ServerServices
 {
     public class ChatMaintenanceService : IChatMaintenanceService
     {
-        List<Chat> ActiveChats { get; set; }
+        private List<Chat> ActiveChats { get; set; }
 
-        Dictionary<Chat, int> ChatListenersAmount { get; set; }
+        private Dictionary<Chat, int> ChatListenersAmount { get; set; }
 
-        List<IMessengerService> ConnectedClients { get; set; }
+        private List<IMessengerService> ConnectedClients { get; set; }
 
-        IChatHistoryService ChatHistoryService { get; set; }
+        private IChatHistoryService ChatHistoryService { get; set; }
 
-        IServerSenderService ServerSender { get; set; }
+        private readonly IServerSenderService ServerSender;
 
 
         public ChatMaintenanceService(List<Chat> activeChats, List<IMessengerService> connectedClients, IServerSenderService serverSender)

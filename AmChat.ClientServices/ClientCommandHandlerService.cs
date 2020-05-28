@@ -44,6 +44,28 @@ namespace AmChat.ClientServices
         }
 
 
+        public void ProcessMessage(IMessengerService messenger, string message)
+        {
+            if(message == string.Empty)
+            {
+                return;
+            }
+
+            try
+            {
+                var command = JsonParser<BaseCommand>.JsonToOneObject(message);
+
+                var handler = CommandHandlers[command.Name];
+
+                handler.Execute(this.messenger, command.Data);
+            }
+            catch
+            {
+                //to do: log error about incorrect command
+            }
+        }
+
+
         private void InitializeCommandsHandlers()
         {
             CommandHandlers = new Dictionary<string, ICommandHandler>();
@@ -76,20 +98,6 @@ namespace AmChat.ClientServices
         private void OnIncorrectLoginData()
         {
             IncorrectLoginData();
-        }
-
-        public void ProcessMessage(IMessengerService messenger, string message)
-        {
-            if(message == string.Empty)
-            {
-                return;
-            }
-
-            var command = JsonParser<BaseCommand>.JsonToOneObject(message);
-
-            var handler = CommandHandlers[command.Name];
-
-            handler.Execute(this.messenger, command.Data);
         }
 
         private void OnUserChatsChanged(object sender, NotifyCollectionChangedEventArgs e)

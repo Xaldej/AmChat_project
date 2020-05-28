@@ -13,13 +13,13 @@ namespace AmChat.Server
 {
     public class TcpServer
     {
-        List<IMessengerService> ConnectedClients { get; set; }
+        private List<IMessengerService> ConnectedClients { get; set; }
 
-        List<Chat> ActiveChats { get; set; }
-
-        IChatMaintenanceService ChatMaintenanceService { get; set; }
-
-        IServerSenderService ServerSender { get; set; }
+        private List<Chat> ActiveChats { get; set; }
+        
+        private IChatMaintenanceService ChatMaintenanceService { get; set; }
+        
+        private IServerSenderService ServerSender { get; set; }
 
 
         public TcpServer()

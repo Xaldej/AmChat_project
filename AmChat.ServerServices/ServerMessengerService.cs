@@ -20,13 +20,14 @@ namespace AmChat.ServerServices
 
         public ObservableCollection<Chat> UserChats { get; set; }
 
+        public ICommandHandlerService CommandHandler { get; set; }
+
         public IEncryptor Encryptor { get; set; }
 
-        TcpClient TcpClient { get; set; }
 
-        NetworkStream Stream { get; set; }
+        private TcpClient TcpClient { get; set; }
 
-        public ICommandHandlerService CommandHandler { get; set; }
+        private NetworkStream Stream { get; set; }
 
 
         public ServerMessengerService(TcpClient tcpClient)
