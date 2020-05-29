@@ -18,7 +18,7 @@ namespace AmChat.ServerServices
     {
         public UserInfo User { get; set; }
 
-        public ObservableCollection<Chat> UserChats { get; set; }
+        public ObservableCollection<ChatInfo> UserChats { get; set; }
 
         public ICommandHandlerService CommandHandler { get; set; }
 
@@ -38,7 +38,7 @@ namespace AmChat.ServerServices
 
             Encryptor = new Encryptor();
 
-            UserChats = new ObservableCollection<Chat>();
+            UserChats = new ObservableCollection<ChatInfo>();
         }
 
 

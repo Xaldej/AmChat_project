@@ -38,7 +38,7 @@ namespace AmChat.ServerServices.CommandHandlers
         {
             var aesKey = messenger.Encryptor.Aes.Key;
 
-            var commandJson = CommandExtentions.GetCommandJson<AesKey, byte[]>(aesKey);
+            var commandJson = CommandMaker.GetCommandJson<AesKey, byte[]>(aesKey);
 
             messenger.SendMessage(commandJson);
         }
@@ -47,7 +47,7 @@ namespace AmChat.ServerServices.CommandHandlers
         {
             var aesVector = messenger.Encryptor.Aes.IV;
 
-            var commandJson = CommandExtentions.GetCommandJson<AesVector, byte[]>(aesVector);
+            var commandJson = CommandMaker.GetCommandJson<AesVector, byte[]>(aesVector);
 
             messenger.SendMessage(commandJson);
         }

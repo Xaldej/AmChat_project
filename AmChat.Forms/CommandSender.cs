@@ -25,16 +25,16 @@ namespace AmChat.Forms
         {
             var newChatInfo = new NewChatInfo(chatName, userLoginsToAdd);
 
-            var commandJson = CommandExtentions.GetCommandJson<AddOrUpdateChat, NewChatInfo>(newChatInfo);
+            var commandJson = CommandMaker.GetCommandJson<AddOrUpdateChat, NewChatInfo>(newChatInfo);
 
             messenger.SendMessage(commandJson);
         }
 
-        public void AddUsersToChat(Chat chat, List<string> userLoginsToAdd)
+        public void AddUsersToChat(ClientChat chat, List<string> userLoginsToAdd)
         {
             var newChatInfo = new NewChatInfo(chat.Id, userLoginsToAdd);
 
-            var commandJson = CommandExtentions.GetCommandJson<AddOrUpdateChat, NewChatInfo>(newChatInfo);
+            var commandJson = CommandMaker.GetCommandJson<AddOrUpdateChat, NewChatInfo>(newChatInfo);
 
             messenger.SendMessage(commandJson);
         }
@@ -43,7 +43,7 @@ namespace AmChat.Forms
         {
             try
             {
-                var commandJson = CommandExtentions.GetCommandJson<CloseConnection, string>(string.Empty, true);
+                var commandJson = CommandMaker.GetCommandJson<CloseConnection, string>(string.Empty, true);
 
                 messenger.SendMessage(commandJson);
             }
@@ -63,26 +63,26 @@ namespace AmChat.Forms
 
         public void GetChats()
         {
-            var commandJson = CommandExtentions.GetCommandJson<GetChats, string>(string.Empty, true);
+            var commandJson = CommandMaker.GetCommandJson<GetChats, string>(string.Empty, true);
 
             messenger.SendMessage(commandJson);
         }
 
         public void GetKeyFromServer()
         {
-            var commandJson = CommandExtentions.GetCommandJson<GetKey, string>(string.Empty, true);
+            var commandJson = CommandMaker.GetCommandJson<GetKey, string>(string.Empty, true);
 
             messenger.SendMessage(commandJson);
         }
 
         public void Login(LoginData loginData)
         {
-            var commandJson = CommandExtentions.GetCommandJson<Login, LoginData>(loginData);
+            var commandJson = CommandMaker.GetCommandJson<Login, LoginData>(loginData);
 
             messenger.SendMessage(commandJson);
         }
 
-        public void SendMessageToChat(string message, Chat chat)
+        public void SendMessageToChat(string message, ChatInfo chat)
         {
             var messageToChat = new ChatMessage()
             {
@@ -92,12 +92,14 @@ namespace AmChat.Forms
                 Text = message,
             };
 
-            var commandJson = CommandExtentions.GetCommandJson<SendMessageToChat, ChatMessage>(messageToChat);
+            var commandJson = CommandMaker.GetCommandJson<SendMessageToChat, ChatMessage>(messageToChat);
 
             messenger.SendMessage(commandJson);
 
             chat.ChatMessages.Add(messageToChat);
         }
+
+
     }
 }
 

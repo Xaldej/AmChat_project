@@ -17,28 +17,24 @@ namespace AmChat.ServerServices
 {
     public class ChatMaintenanceService : IChatMaintenanceService
     {
-        private List<Chat> ActiveChats { get; set; }
+        private List<ChatInfo> ActiveChats { get; set; }
 
-        private Dictionary<Chat, int> ChatListenersAmount { get; set; }
+        private Dictionary<Guid, int> ChatListenersAmount { get; set; }
 
-        private List<IMessengerService> ConnectedClients { get; set; }
+        private readonly IChatHistoryService chatHistoryService;
 
-        private IChatHistoryService ChatHistoryService { get; set; }
-
-        private readonly IServerSenderService ServerSender;
+        private readonly IServerSenderService serverSender;
 
 
-        public ChatMaintenanceService(List<Chat> activeChats, List<IMessengerService> connectedClients, IServerSenderService serverSender)
+        public ChatMaintenanceService(List<ChatInfo> activeChats, IServerSenderService serverSender)
         {
             ActiveChats = activeChats;
 
-            ConnectedClients = connectedClients;
+            this.serverSender = serverSender;
 
-            ServerSender = serverSender;
+            ChatListenersAmount = new Dictionary<Guid, int>();
 
-            ChatListenersAmount = new Dictionary<Chat, int>();
-
-            ChatHistoryService = new ChatHistoryService();
+            chatHistoryService = new ChatHistoryService();
         }
 
 
@@ -46,14 +42,14 @@ namespace AmChat.ServerServices
         {
             foreach (var chat in client.UserChats)
             {
-                if (!ChatListenersAmount.ContainsKey(chat))
+                if (!ChatListenersAmount.ContainsKey(chat.Id))
                 {
                     break;
                 }
 
-                ChatListenersAmount[chat]--;
+                ChatListenersAmount[chat.Id]--;
 
-                if (ChatListenersAmount[chat] == 0)
+                if (ChatListenersAmount[chat.Id] == 0)
                 {
                     RemoveInactiveChat(chat);
                 }
@@ -77,87 +73,64 @@ namespace AmChat.ServerServices
 
         private void AddActiveChat(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (!(e.NewItems[0] is Chat chat))
+            if (!(e.NewItems[0] is ChatInfo chat))
             {
                 return;
             }
 
-            if (ActiveChats.Contains(chat))
+            var existingChat = ActiveChats.Where(c => c.Equals(chat)).FirstOrDefault();
+            if (existingChat != null)
             {
-                if (!(sender is ObservableCollection<Chat> chatsCollection))
+                if (!(sender is ObservableCollection<ChatInfo> chatsCollection))
                 {
                     return;
                 }
 
-                var existingChat = ActiveChats.Where(c => c.Equals(chat)).FirstOrDefault();
-
                 var i = chatsCollection.IndexOf(chat);
                 chatsCollection[i] = existingChat;
-                ChatListenersAmount[existingChat]++;
+                ChatListenersAmount[existingChat.Id]++;
             }
             else
             {
-                var chatMessages = ChatHistoryService.GetChatHistory(chat);
-                chatMessages.CollectionChanged += chat.OnNewMessageInChat;
+                var serverChat = chat as ServerChat;
+                var chatMessages = new ObservableCollection<ChatMessage>();
+                chatMessages.CollectionChanged += serverChat.OnNewMessageInChat;
                 chat.ChatMessages = chatMessages;
                 ActiveChats.Add(chat);
 
-                chat.NewMessageInChat += ServerSender.SendNewMessageToUsersInChat;
-                chat.NewUserInChat += AddChatToClientAndServer;
-                ChatListenersAmount[chat] = 1;
+                serverChat.NewMessageInChat += serverSender.SendNewMessageToUsersInChat;
+                serverChat.NewUserInChat += AddChatToClientAndServer;
+                ChatListenersAmount[chat.Id] = 1;
             }
         }
 
-        private void AddChatToClientAndServer(UserInfo newUser, Chat chat)
+        private void AddChatToClientAndServer(UserInfo newUser, ChatInfo chat)
         {
-            AddChatToServer(newUser, chat);
             AddChatToClient(newUser, chat);
 
             string notification = $"{newUser.Login} is added";
-            ServerSender.SendNotificationToChat(chat, notification);
+            serverSender.SendNotificationToChat(chat, notification);
         }
 
-        private void AddChatToClient(UserInfo newUser, Chat chat)
+        private void AddChatToClient(UserInfo newUser, ChatInfo chat)
         {
-            var chatInfo = ChatToChatInfo(chat);
-
-            var commandJson = CommandExtentions.GetCommandJson<ChatIsAdded, ChatInfo>(chatInfo);
-
-            ServerSender.SendCommandToCertainUser(newUser, commandJson);
-        }
-
-        private void AddChatToServer(UserInfo user, Chat chat)
-        {
-            var serverChat = ConnectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
-
-            if (serverChat == null)
-            {
-                return;
-            }
-
-            var isChatAlreadyInUserChats = serverChat.UserChats.Contains(chat);
-            if (!isChatAlreadyInUserChats)
-            {
-                serverChat.UserChats.Add(chat);
-            }
-        }
-
-        private ChatInfo ChatToChatInfo(Chat chat)
-        {
-            return new ChatInfo()
+            var chatToSend = new ChatInfo()
             {
                 Id = chat.Id,
                 Name = chat.Name,
-                ChatMessages = chat.ChatMessages,
                 UsersInChat = chat.UsersInChat,
+                ChatMessages = chatHistoryService.GetChatHistory(chat.Id).ToList(),
             };
+
+            var commandJson = CommandMaker.GetCommandJson<ChatIsAdded, ChatInfo>(chatToSend);
+
+            serverSender.SendCommandToCertainUser(newUser, commandJson);
         }
 
-        private void RemoveInactiveChat(Chat chat)
+        private void RemoveInactiveChat(ChatInfo chat)
         {
-            Task.Run(() => ChatHistoryService.SaveChatHistory(chat));
             ActiveChats.Remove(chat);
-            ChatListenersAmount.Remove(chat);
+            ChatListenersAmount.Remove(chat.Id);
         }
     }
 }

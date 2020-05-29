@@ -12,8 +12,8 @@ namespace AmChat.Infrastructure.Interfaces.ServerServices
 
         void SendMessageToCertainUser(UserInfo user, ChatMessage message);
 
-        void SendNewMessageToUsersInChat(ChatMessage message, Chat chat);
+        void SendNewMessageToUsersInChat(ChatMessage message, ChatInfo chat);
 
-        void SendNotificationToChat(Chat chat, string notification);
+        void SendNotificationToChat(ChatInfo chat, string notification);
     }
 }

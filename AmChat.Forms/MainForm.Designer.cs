@@ -76,10 +76,10 @@
             this.Chat_richTextBox.TabIndex = 2;
             this.Chat_richTextBox.Text = "";
             // 
-            // Contacts_panel
+            // Chats_panel
             // 
             this.Chats_panel.Location = new System.Drawing.Point(326, 1);
-            this.Chats_panel.Name = "Contacts_panel";
+            this.Chats_panel.Name = "Chats_panel";
             this.Chats_panel.Size = new System.Drawing.Size(155, 529);
             this.Chats_panel.TabIndex = 1;
             // 

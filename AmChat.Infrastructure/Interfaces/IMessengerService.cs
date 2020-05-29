@@ -12,7 +12,7 @@ namespace AmChat.Infrastructure.Interfaces
     {
         UserInfo User { get; set; }
 
-        ObservableCollection<Chat> UserChats { get; set; }
+        ObservableCollection<ChatInfo> UserChats { get; set; }
 
         ICommandHandlerService CommandHandler { get; set; }
 

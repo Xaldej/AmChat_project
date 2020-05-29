@@ -23,7 +23,7 @@ namespace AmChat.ClientServices
         private readonly IMessengerService messenger;
 
 
-        public Action<Chat> ChatAdded;
+        public Action<ClientChat> ChatAdded;
 
         public Action CorrectLoginData;
 
@@ -31,7 +31,7 @@ namespace AmChat.ClientServices
 
         public Action IncorrectLoginData;
 
-        public Action<ChatMessage, Chat> NewMessageInChat;
+        public Action<ChatMessage, ClientChat> NewMessageInChat;
 
 
         public ClientCommandHandlerService(IMessengerService messenger)
@@ -90,7 +90,7 @@ namespace AmChat.ClientServices
             CommandHandlers.Add(nameof(ServerError).ToLower(),          serverErrorHandler);
         }
 
-        private void OnChatMessagesChanged(ChatMessage message, Chat chat)
+        private void OnChatMessagesChanged(ChatMessage message, ClientChat chat)
         {
             NewMessageInChat(message, chat);
         }
@@ -102,7 +102,7 @@ namespace AmChat.ClientServices
 
         private void OnUserChatsChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (!(e.NewItems[0] is Chat newChat))
+            if (!(e.NewItems[0] is ClientChat newChat))
             {
                 return;
             }

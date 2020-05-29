@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure.Commands
 {
-    public static class CommandExtentions
+    public static class CommandMaker
     {
-        public static string GetCommandJson<T, TData>(this TData data, bool isDataReady = false) where T : BaseCommand, new()
+        public static string GetCommandJson<T, TData>(TData data, bool isDataReady = false) where T : BaseCommand, new()
         {
             string dataJson;
 

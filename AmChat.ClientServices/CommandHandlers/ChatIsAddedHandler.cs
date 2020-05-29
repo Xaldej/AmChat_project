@@ -27,7 +27,7 @@ namespace AmChat.ClientServices.CommandHandlers
         {
             var chatInfo = JsonParser<ChatInfo>.JsonToOneObject(data);
 
-            var chatToAdd = mapper.Map<Chat>(chatInfo);
+            var chatToAdd = mapper.Map<ClientChat>(chatInfo);
 
             ObservableCollection<ChatMessage> chatMessages;
             var chatHistory = chatToAdd.ChatMessages;

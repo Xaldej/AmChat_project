@@ -4,6 +4,7 @@ using AmChat.Infrastructure;
 using AmChat.Infrastructure.Commands;
 using AmChat.Infrastructure.Commands.FromServerToClient;
 using AmChat.Infrastructure.Interfaces;
+using AmChat.Infrastructure.Interfaces.ServerServices;
 using AutoMapper;
 using System;
 using System.Collections.Generic;
@@ -16,11 +17,15 @@ namespace AmChat.ServerServices.CommandHandlers
 {
     public class GetChatsHandler : ICommandHandler
     {
+        private readonly IChatHistoryService chatHistoryService;
+
         private readonly IMapper mapper;
 
 
         public GetChatsHandler()
         {
+            chatHistoryService = new ChatHistoryService();
+
             var mapperConfig = Mappings.GetGetChatsHandlerConfig();
 
             mapper = new Mapper(mapperConfig);
@@ -53,7 +58,7 @@ namespace AmChat.ServerServices.CommandHandlers
         {
             foreach (var chat in chats)
             {
-                var userChat = mapper.Map<Chat>(chat);
+                var userChat = mapper.Map<ServerChat>(chat);
                 var usersInChat = new ObservableCollection<UserInfo>(GetUsersInChat(chat));
                 usersInChat.CollectionChanged += userChat.OnUsersInChatChanged;
                 userChat.UsersInChat = usersInChat;
@@ -79,6 +84,26 @@ namespace AmChat.ServerServices.CommandHandlers
             return chats;
         }
 
+        private IEnumerable<ChatInfo> GetChatsToSend(IEnumerable<ChatInfo> chats)
+        {
+            var chatsToSend = new List<ChatInfo>();
+
+            foreach (var chat in chats)
+            {
+                var chatToSend = new ChatInfo()
+                {
+                    Id = chat.Id,
+                    Name = chat.Name,
+                    UsersInChat = chat.UsersInChat,
+                    ChatMessages = chatHistoryService.GetChatHistory(chat.Id).ToList(),
+                };
+
+                chatsToSend.Add(chatToSend);
+            }
+
+            return chatsToSend;
+        }
+
         private List<UserInfo> GetUsersInChat(DBChat chat)
         {
             var users = new List<UserInfo>();
@@ -98,10 +123,13 @@ namespace AmChat.ServerServices.CommandHandlers
 
         private void SendChatToClient(IMessengerService messenger)
         {
-            var chatsInfo = mapper.Map<IEnumerable<ChatInfo>>(messenger.UserChats);
-            var chatsInfoJson = JsonParser<ChatInfo>.ManyObjectsToJson(chatsInfo);
+            var chatsInfo = messenger.UserChats;
 
-            var commandJson = CommandExtentions.GetCommandJson<CorrectContactList, string>(chatsInfoJson, true);
+            var chatsToSend = GetChatsToSend(chatsInfo);
+
+            var chatsJson = JsonParser<ChatInfo>.ManyObjectsToJson(chatsToSend);
+
+            var commandJson = CommandMaker.GetCommandJson<CorrectContactList, string>(chatsJson, true);
 
             messenger.SendMessage(commandJson);
         }

@@ -9,8 +9,8 @@ namespace AmChat.Infrastructure.Interfaces.ServerServices
 {
     public interface IChatHistoryService
     {
-        ObservableCollection<ChatMessage> GetChatHistory(Chat chat);
+        void AddNewMessageToChatHistory(ChatMessage message);
 
-        void SaveChatHistory(Chat chat);
+        IEnumerable<ChatMessage> GetChatHistory(Guid chatId);
     }
 }

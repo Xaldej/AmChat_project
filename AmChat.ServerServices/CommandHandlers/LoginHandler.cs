@@ -62,7 +62,7 @@ namespace AmChat.ServerServices.CommandHandlers
 
         private void SendIncorrectLoginError(IMessengerService messenger)
         {
-            var commandJson = CommandExtentions.GetCommandJson<IncorrectLogin, string>(string.Empty);
+            var commandJson = CommandMaker.GetCommandJson<IncorrectLogin, string>(string.Empty);
 
             messenger.SendMessage(commandJson);
         }
@@ -71,7 +71,7 @@ namespace AmChat.ServerServices.CommandHandlers
         {
             messenger.User = userInfo;
 
-            var commandJson = CommandExtentions.GetCommandJson<CorrectLogin, UserInfo>(messenger.User);
+            var commandJson = CommandMaker.GetCommandJson<CorrectLogin, UserInfo>(messenger.User);
 
             messenger.SendMessage(commandJson);
         }

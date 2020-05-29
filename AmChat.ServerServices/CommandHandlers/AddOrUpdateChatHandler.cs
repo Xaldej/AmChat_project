@@ -119,12 +119,12 @@ namespace AmChat.ServerServices.CommandHandlers
             return chat;
         }
 
-        private async void AddNewUserToMessengerChat(List<UserInfo> users, Chat chat)
+        private async void AddNewUserToMessengerChat(List<UserInfo> users, ChatInfo chat)
         {
             foreach (var user in users)
             {
                 chat.UsersInChat.Add(user);
-                await Task.Delay(500);
+                await Task.Delay(1000);
             }
         }
 
@@ -218,12 +218,10 @@ namespace AmChat.ServerServices.CommandHandlers
 
             AddChatsForUsersInDb(usersToAdd, dbChat);
 
-            Chat chat;
+            ChatInfo chat;
             if (CreateNewChat)
             {
-                //chat = DbChatToChat(dbChat);
-
-                chat = mapper.Map<Chat>(dbChat);
+                chat = mapper.Map<ServerChat>(dbChat);
 
                 messenger.UserChats.Add(chat);
             }

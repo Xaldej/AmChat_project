@@ -24,7 +24,7 @@ namespace AmChat.Infrastructure
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Chat chatToCompare))
+            if (!(obj is ClientChat chatToCompare))
             {
                 return false;
             }

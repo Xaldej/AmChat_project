@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
@@ -8,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace AmChat.Infrastructure
 {
-    public class Chat : ChatInfo
+    public class ServerChat : ChatInfo
     {
-        public Action<ChatMessage, Chat> NewMessageInChat;
+        public Action<ChatMessage, ChatInfo> NewMessageInChat;
 
-        public Action<UserInfo, Chat> NewUserInChat;
+        public Action<UserInfo, ChatInfo> NewUserInChat;
 
 
         public void OnNewMessageInChat(object sender, NotifyCollectionChangedEventArgs e)
@@ -24,12 +23,14 @@ namespace AmChat.Infrastructure
                     return;
                 }
                 NewMessageInChat(newMessage, this);
+
+                (sender as ICollection<ChatMessage>)?.Remove(newMessage);
             }
         }
 
         public void OnUsersInChatChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if(e.Action == NotifyCollectionChangedAction.Add)
+            if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 if (!(e.NewItems[0] is UserInfo newUser))
                 {

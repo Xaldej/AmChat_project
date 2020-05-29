@@ -26,7 +26,7 @@ namespace AmChat.ClientServices.CommandHandlers
         public void Execute(IMessengerService messenger, string data)
         {
             var chatsInfo = new ObservableCollection<ChatInfo>(JsonParser<IEnumerable<ChatInfo>>.JsonToOneObject(data));
-            var chats = mapper.Map<IEnumerable<Chat>>(chatsInfo);
+            var chats = mapper.Map<IEnumerable<ClientChat>>(chatsInfo);
 
             foreach (var chat in chats)
             {

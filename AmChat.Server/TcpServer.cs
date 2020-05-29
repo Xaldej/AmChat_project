@@ -15,7 +15,7 @@ namespace AmChat.Server
     {
         private List<IMessengerService> ConnectedClients { get; set; }
 
-        private List<Chat> ActiveChats { get; set; }
+        private List<ChatInfo> ActiveChats { get; set; }
         
         private IChatMaintenanceService ChatMaintenanceService { get; set; }
         
@@ -28,11 +28,11 @@ namespace AmChat.Server
 
             ConnectedClients = new List<IMessengerService>();
 
-            ActiveChats = new List<Chat>();
+            ActiveChats = new List<ChatInfo>();
 
             ServerSender = new ServerSenderService(ConnectedClients);
 
-            ChatMaintenanceService = new ChatMaintenanceService(ActiveChats, ConnectedClients, ServerSender);
+            ChatMaintenanceService = new ChatMaintenanceService(ActiveChats, ServerSender);
         }
 
 

@@ -12,12 +12,12 @@ namespace AmChat.ClientServices
     {
         public static MapperConfiguration GetChatIsAddedHandlerConfig()
         {
-            return new MapperConfiguration(cfg => cfg.CreateMap<ChatInfo, Chat>());
+            return new MapperConfiguration(cfg => cfg.CreateMap<ChatInfo, ClientChat>());
         }
 
         public static MapperConfiguration GetCorrectContactListHandlerConfig()
         {
-            return new MapperConfiguration(cfg => cfg.CreateMap<ChatInfo, Chat>());
+            return new MapperConfiguration(cfg => cfg.CreateMap<ChatInfo, ClientChat>());
         }
     }
 }

@@ -20,12 +20,16 @@ namespace AmChat.ServerServices
 
         private UserInfo ServerNotificationUser { get; set; }
 
+        private readonly IChatHistoryService chatHistoryService;
+
 
         public ServerSenderService(List<IMessengerService> connectedClients)
         {
             ConnectedClients = connectedClients;
 
             GetServerNotificationUser();
+
+            chatHistoryService = new ChatHistoryService();
         }
 
 
@@ -45,13 +49,13 @@ namespace AmChat.ServerServices
 
             if (clientToSend != null)
             {   
-                var commandJson = CommandExtentions.GetCommandJson<MessageToCertainChat, ChatMessage>(message);
+                var commandJson = CommandMaker.GetCommandJson<MessageToCertainChat, ChatMessage>(message);
 
                 clientToSend.SendMessage(commandJson);
             }
         }
 
-        public void SendNewMessageToUsersInChat(ChatMessage message, Chat chat)
+        public void SendNewMessageToUsersInChat(ChatMessage message, ChatInfo chat)
         {
             var usersToSend = chat.UsersInChat.Where(u => !u.Equals(message.FromUser)).ToList();
 
@@ -61,7 +65,7 @@ namespace AmChat.ServerServices
             }
         }
 
-        public void SendNotificationToChat(Chat chat, string notification)
+        public void SendNotificationToChat(ChatInfo chat, string notification)
         {
             var message = new ChatMessage()
             {
@@ -72,6 +76,9 @@ namespace AmChat.ServerServices
             };
 
             chat.ChatMessages.Add(message);
+
+            Task.Run(() => chatHistoryService.AddNewMessageToChatHistory(message));
+
         }
 
 

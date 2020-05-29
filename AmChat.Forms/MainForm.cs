@@ -19,7 +19,7 @@ namespace AmChat.Forms
     {   
         private List<ChatControl> ChatsControls { get; set; }
 
-        private Chat ChosenChat { get; set; }
+        private ChatInfo ChosenChat { get; set; }
 
         private CommandSender CommandSender { get; set; }
 
@@ -73,7 +73,7 @@ namespace AmChat.Forms
         }
 
 
-        private void AddChatToContactPanel(Chat chat)
+        private void AddChatToContactPanel(ClientChat chat)
         {
             var chatControl = new ChatControl(chat) { Dock = DockStyle.Top };
 
@@ -122,8 +122,7 @@ namespace AmChat.Forms
 
         private void GetLogin()
         {
-            var loginForm = new LoginForm();
-            loginForm.Owner = this;
+            var loginForm = new LoginForm() { Owner = this };
             loginForm.LoginDataIsEntered += CommandSender.Login;
 
             loginForm.ShowDialog();
@@ -141,6 +140,8 @@ namespace AmChat.Forms
 
                 loginForm.CloseForm();
             }
+
+            Text = $"AmChat: {Messenger.User.Login}";
 
             CommandSender.GetChats();
         }
@@ -161,7 +162,7 @@ namespace AmChat.Forms
             InputMessage_textBox.Clear();
         }
 
-        private void ShowNewMessage(ChatMessage message, Chat chat)
+        private void ShowNewMessage(ChatMessage message, ClientChat chat)
         {
             if (message.FromUser.Equals(Messenger.User))
             {

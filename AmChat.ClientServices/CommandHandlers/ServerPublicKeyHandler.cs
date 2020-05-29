@@ -23,7 +23,7 @@ namespace AmChat.ClientServices.CommandHandlers
         {
             var rsaXml = messenger.Encryptor.Rsa.ToXmlString(false);
 
-            var commandJson = CommandExtentions.GetCommandJson<ClientPublicKey, string>(rsaXml, true);
+            var commandJson = CommandMaker.GetCommandJson<ClientPublicKey, string>(rsaXml, true);
 
             messenger.SendMessage(commandJson);
 

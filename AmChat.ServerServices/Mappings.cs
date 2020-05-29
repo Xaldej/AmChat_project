@@ -17,7 +17,7 @@ namespace AmChat.ServerServices
             return new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<DBUser, UserInfo>();
-                cfg.CreateMap<DBChat, Chat>()
+                cfg.CreateMap<DBChat, ServerChat>()
                     .AfterMap((src, dest) =>
                     {
                         var usersInChat = new ObservableCollection<UserInfo>();
@@ -27,19 +27,18 @@ namespace AmChat.ServerServices
             });
         }
 
-        public static MapperConfiguration GetLoginHandlerConfig()
-        {
-            return new MapperConfiguration(cfg => cfg.CreateMap<DBUser, UserInfo>());
-        }
-
         public static MapperConfiguration GetGetChatsHandlerConfig()
         {
             return new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<DBUser, UserInfo>();
-                cfg.CreateMap<Chat, ChatInfo>();
-                cfg.CreateMap<DBChat, Chat>();
+                cfg.CreateMap<DBChat, ServerChat>();
             });
+        }
+
+        public static MapperConfiguration GetLoginHandlerConfig()
+        {
+            return new MapperConfiguration(cfg => cfg.CreateMap<DBUser, UserInfo>());
         }
     }
 }

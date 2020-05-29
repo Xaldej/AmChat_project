@@ -20,7 +20,7 @@ namespace AmChat.ClientServices
 
         public UserInfo User { get; set; }
 
-        public ObservableCollection<Chat> UserChats { get; set; }
+        public ObservableCollection<ChatInfo> UserChats { get; set; }
 
 
         private TcpClient TcpClient { get; set; }
@@ -36,7 +36,7 @@ namespace AmChat.ClientServices
 
             User = new UserInfo();
 
-            UserChats = new ObservableCollection<Chat>();
+            UserChats = new ObservableCollection<ChatInfo>();
         }
 
 
