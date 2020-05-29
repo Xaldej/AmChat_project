@@ -38,8 +38,10 @@ namespace AmChat.ServerServices
             {
                 command = JsonParser<BaseCommand>.JsonToOneObject(message);
             }
-            catch
+            catch(Exception e)
             {
+                Logger.Log.Error(e.Message);
+
                 return;
             }
 

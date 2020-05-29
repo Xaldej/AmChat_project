@@ -34,8 +34,10 @@ namespace AmChat.ServerServices.CommandHandlers
             {
                 chats = GetChatsFromDb(messenger.User);
             }
-            catch
+            catch (Exception e)
             {
+                Logger.Log.Error(e.Message);
+
                 SendErrorMessage(messenger);
             }
 

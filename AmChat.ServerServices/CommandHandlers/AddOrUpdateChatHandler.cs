@@ -48,8 +48,10 @@ namespace AmChat.ServerServices.CommandHandlers
             {
                 ProcessNewChatInfo(messenger);
             }
-            catch
+            catch(Exception e)
             {
+                Logger.Log.Error(e.Message);
+
                 var error = new ServerError() { Data = "Error adding chat try again" };
                 var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
                 

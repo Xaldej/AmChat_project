@@ -59,9 +59,9 @@ namespace AmChat.ClientServices
 
                 handler.Execute(this.messenger, command.Data);
             }
-            catch
+            catch (Exception e)
             {
-                //to do: log error about incorrect command
+                Logger.Log.Error(e.Message);
             }
         }
 

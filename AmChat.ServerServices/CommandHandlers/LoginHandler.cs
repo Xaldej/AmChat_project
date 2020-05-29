@@ -19,7 +19,7 @@ namespace AmChat.ServerServices.CommandHandlers
 
 
         public LoginHandler()
-        {
+        {   
             var mapperConfig = Mappings.GetLoginHandlerConfig();
 
             mapper = new Mapper(mapperConfig);
@@ -35,8 +35,10 @@ namespace AmChat.ServerServices.CommandHandlers
             {
                 dbUser = GetUserFromDB(loginData);
             }
-            catch
+            catch (Exception e)
             {
+                Logger.Log.Error(e.Message);
+
                 Console.WriteLine("User is not logged in");
                 SendErrorToClient(messenger);
 

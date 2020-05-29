@@ -62,11 +62,6 @@ namespace AmChat.Forms
             LoginDataIsEntered(loginData);
         }
 
-        public void ShowIncorrectLoginMessage()
-        {
-            MessageBox.Show("Check login and password and try again", "Incorrect login");
-        }
-
         public void CloseForm()
         {
             isClosedByUser = false;

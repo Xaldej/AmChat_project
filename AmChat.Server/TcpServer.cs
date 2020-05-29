@@ -24,6 +24,8 @@ namespace AmChat.Server
 
         public TcpServer()
         {
+            Logger.InitLogger();
+
             ConnectedClients = new List<IMessengerService>();
 
             ActiveChats = new List<Chat>();
@@ -56,6 +58,7 @@ namespace AmChat.Server
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                Logger.Log.Error(e.Message);
             }
             finally
             {

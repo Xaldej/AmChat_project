@@ -21,8 +21,6 @@ namespace AmChat.Forms
 
         private Chat ChosenChat { get; set; }
 
-        private LoginForm LoginForm { get; set; }
-
         private CommandSender CommandSender { get; set; }
 
         private IMessengerService Messenger { get; set; }
@@ -32,9 +30,9 @@ namespace AmChat.Forms
         {
             InitializeComponent();
 
-            ChatsControls = new List<ChatControl>();
+            Logger.InitLogger();
 
-            LoginForm = new LoginForm();
+            ChatsControls = new List<ChatControl>();
         }
 
         private void AM_Chat_Load(object sender, EventArgs e)
@@ -68,38 +66,10 @@ namespace AmChat.Forms
             commandHandler.ChatAdded += AddChatToContactPanel;
             commandHandler.ErrorIsGotten += ShowErrorToUser;
             commandHandler.CorrectLoginData += OnCorrectLogin;
-            commandHandler.IncorrectLoginData += LoginForm.ShowIncorrectLoginMessage;
+            commandHandler.IncorrectLoginData += ShowIncorrectLoginMessage;
             commandHandler.NewMessageInChat += ShowNewMessage;
 
             Messenger.CommandHandler = commandHandler;
-        }
-
-        private void ShowNewMessage(ChatMessage message, Chat chat)
-        {
-            if (message.FromUser.Equals(Messenger.User))
-            {
-                ShowMessageToOtherUser(message.Text);
-            }
-            else
-            {
-                if (ChosenChat == null || chat.Id != ChosenChat.Id)
-                {
-                    var chatToShowMessage = Messenger.UserChats.Where(c => c.Id == message.ToChatId).FirstOrDefault();
-                    ShowUnreadMessages(message);
-                }
-                else
-                {
-                    var messageToShow = message.FromUser.Login + ":\n" + message.Text;
-                    ShowMessageFromOtherUser(messageToShow);
-                }
-            }
-        }
-
-        private void GetLogin()
-        {
-            LoginForm.LoginDataIsEntered += CommandSender.Login;
-
-            LoginForm.ShowDialog();
         }
 
 
@@ -150,10 +120,34 @@ namespace AmChat.Forms
             return tcpConnectionService.Connect();
         }
 
+        private void GetLogin()
+        {
+            var loginForm = new LoginForm();
+            loginForm.Owner = this;
+            loginForm.LoginDataIsEntered += CommandSender.Login;
+
+            loginForm.ShowDialog();
+        }
+
         private void OnCorrectLogin()
         {
-            LoginForm.CloseForm();
+            
+            foreach (var form in this.OwnedForms)
+            {   
+                if (!(form is LoginForm loginForm))
+                {
+                    return;
+                }
+
+                loginForm.CloseForm();
+            }
+
             CommandSender.GetChats();
+        }
+
+        private void ShowIncorrectLoginMessage()
+        {
+            MessageBox.Show("Check login and password and try again", "Incorrect login");
         }
 
         private void ShowMessageFromOtherUser(string message)
@@ -165,6 +159,27 @@ namespace AmChat.Forms
         {
             AddMessageToChat(message, HorizontalAlignment.Right);
             InputMessage_textBox.Clear();
+        }
+
+        private void ShowNewMessage(ChatMessage message, Chat chat)
+        {
+            if (message.FromUser.Equals(Messenger.User))
+            {
+                ShowMessageToOtherUser(message.Text);
+            }
+            else
+            {
+                if (ChosenChat == null || chat.Id != ChosenChat.Id)
+                {
+                    var chatToShowMessage = Messenger.UserChats.Where(c => c.Id == message.ToChatId).FirstOrDefault();
+                    ShowUnreadMessages(message);
+                }
+                else
+                {
+                    var messageToShow = message.FromUser.Login + ":\n" + message.Text;
+                    ShowMessageFromOtherUser(messageToShow);
+                }
+            }
         }
 
         private void ShowUnreadMessages(ChatMessage messageToShow)

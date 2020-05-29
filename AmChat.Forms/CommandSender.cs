@@ -39,7 +39,7 @@ namespace AmChat.Forms
             messenger.SendMessage(commandJson);
         }
 
-        public void CloseConnection()
+        public void CloseConnection(int attemptAmount = 0)
         {
             try
             {
@@ -49,7 +49,15 @@ namespace AmChat.Forms
             }
             catch
             {
-
+                if(attemptAmount<3)
+                {
+                    Task.Delay(1000);
+                    CloseConnection(attemptAmount + 1);
+                }
+                else
+                {
+                    return;
+                }
             }
         }
 
