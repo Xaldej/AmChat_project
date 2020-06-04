@@ -124,7 +124,7 @@ namespace AmChat.ServerServices.CommandHandlers
             foreach (var user in users)
             {
                 chat.UsersInChat.Add(user);
-                await Task.Delay(1000);
+                await Task.Delay(500);
             }
         }
 

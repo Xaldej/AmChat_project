@@ -18,9 +18,10 @@ namespace AmChat.ClientServices
 {
     public class ClientCommandHandlerService : ICommandHandlerService
     {
-        private Dictionary<string, ICommandHandler> CommandHandlers { get; set; }
+        public ICollection<MessageToProcess> MessagesToProcess { get; set; }
 
-        private readonly IMessengerService messenger;
+
+        private Dictionary<string, ICommandHandler> CommandHandlers { get; set; }
 
 
         public Action<ClientChat> ChatAdded;
@@ -31,33 +32,34 @@ namespace AmChat.ClientServices
 
         public Action IncorrectLoginData;
 
-        public Action<ChatMessage, ClientChat> NewMessageInChat;
+        public Action<ChatMessage, ChatInfo> NewMessageInChat;
 
 
-        public ClientCommandHandlerService(IMessengerService messenger)
+        public ClientCommandHandlerService()
         {
-            this.messenger = messenger;
-            
-            this.messenger.UserChats.CollectionChanged += OnUserChatsChanged;
+            var messagesToProcess = new ObservableCollection<MessageToProcess>();
+            messagesToProcess.CollectionChanged += OnNewMessageToProcess;
+
+            MessagesToProcess = messagesToProcess;
 
             InitializeCommandsHandlers();
         }
 
 
-        public void ProcessMessage(IMessengerService messenger, string message)
+        public void ProcessMessage(MessageToProcess message)
         {
-            if(message == string.Empty)
+            if(message.Message == string.Empty)
             {
                 return;
             }
 
             try
             {
-                var command = JsonParser<BaseCommand>.JsonToOneObject(message);
+                var command = JsonParser<BaseCommand>.JsonToOneObject(message.Message);
 
                 var handler = CommandHandlers[command.Name];
 
-                handler.Execute(this.messenger, command.Data);
+                handler.Execute(message.Messenger, command.Data);
             }
             catch (Exception e)
             {
@@ -90,7 +92,7 @@ namespace AmChat.ClientServices
             CommandHandlers.Add(nameof(ServerError).ToLower(),          serverErrorHandler);
         }
 
-        private void OnChatMessagesChanged(ChatMessage message, ClientChat chat)
+        private void OnChatMessagesChanged(ChatMessage message, ChatInfo chat)
         {
             NewMessageInChat(message, chat);
         }
@@ -100,14 +102,19 @@ namespace AmChat.ClientServices
             IncorrectLoginData();
         }
 
-        private void OnUserChatsChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnNewMessageToProcess(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (!(e.NewItems[0] is ClientChat newChat))
+            if (e.Action != NotifyCollectionChangedAction.Add)
             {
                 return;
             }
 
-            newChat.NewMessageInChat += OnChatMessagesChanged;
+            if (!(e.NewItems[0] is MessageToProcess message))
+            {
+                return;
+            }
+
+            ProcessMessage(message);
         }
 
         private void OnUserIsLoggedIn()

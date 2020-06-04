@@ -6,6 +6,8 @@ using AmChat.Infrastructure.Interfaces;
 using AmChat.ServerServices.CommandHandlers;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,6 +17,9 @@ namespace AmChat.ServerServices
 {
     public class ServerCommandHandlerService : ICommandHandlerService
     {
+        public ICollection<MessageToProcess> MessagesToProcess { get; set; }
+
+
         private Dictionary<string, ICommandHandler> CommandHandlers { get; set; }
 
         public Action<IMessengerService> ClientDisconnected;
@@ -22,13 +27,19 @@ namespace AmChat.ServerServices
 
         public ServerCommandHandlerService()
         {
+            var messagesToProcess = new ObservableCollection<MessageToProcess>();
+            messagesToProcess.CollectionChanged += OnNewMessageToProcess;
+
+            MessagesToProcess = messagesToProcess;
+
             InitializeCommandHandlers();
         }
 
 
-        public void ProcessMessage(IMessengerService messenger, string message)
-        {
-            if (message == string.Empty)
+
+        public void ProcessMessage(MessageToProcess message)
+        {   
+            if (message.Message == string.Empty)
             {
                 return;
             }
@@ -36,7 +47,7 @@ namespace AmChat.ServerServices
             BaseCommand command;
             try
             {
-                command = JsonParser<BaseCommand>.JsonToOneObject(message);
+                command = JsonParser<BaseCommand>.JsonToOneObject(message.Message);
             }
             catch(Exception e)
             {
@@ -55,12 +66,12 @@ namespace AmChat.ServerServices
                 };
                 var errorJson = JsonParser<ServerError>.OneObjectToJson(error);
 
-                messenger.SendMessage(errorJson);
+                message.Messenger.SendMessage(errorJson);
 
                 return;
             }
 
-            handler.Execute(messenger, command.Data);
+            handler.Execute(message.Messenger, command.Data);
         }
 
 
@@ -83,6 +94,21 @@ namespace AmChat.ServerServices
             CommandHandlers.Add(nameof(GetKey).ToLower(),               new GetKeyHandler());
             CommandHandlers.Add(nameof(Login).ToLower(),                new LoginHandler());
             CommandHandlers.Add(nameof(SendMessageToChat).ToLower(),    new SendMessageToChatHandler());
+        }
+
+        private void OnNewMessageToProcess(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action != NotifyCollectionChangedAction.Add)
+            {
+                return;
+            }
+
+            if (!(e.NewItems[0] is MessageToProcess message))
+            {
+                return;
+            }
+
+            ProcessMessage(message);
         }
 
     }

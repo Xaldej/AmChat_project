@@ -58,7 +58,7 @@ namespace AmChat.ClientServices
                 var message = new ServerError() { Data = errorMessage };
                 var messageJson = JsonParser<ServerError>.OneObjectToJson(message);
 
-                CommandHandler.ProcessMessage(this, messageJson);
+                CommandHandler.MessagesToProcess.Add(new MessageToProcess(this, messageJson));
             }
            
         }
@@ -92,7 +92,7 @@ namespace AmChat.ClientServices
 
             var message = builder.ToString();
 
-            CommandHandler.ProcessMessage(this, message);
+            CommandHandler.MessagesToProcess.Add(new MessageToProcess(this, message));
         }
     }
 }

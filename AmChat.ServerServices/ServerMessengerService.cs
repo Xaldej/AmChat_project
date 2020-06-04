@@ -58,7 +58,7 @@ namespace AmChat.ServerServices
             {
                 var message = new CloseConnection() { Data = "ConnectionLost"};
                 var messageJson = JsonParser<CloseConnection>.OneObjectToJson(message);
-                CommandHandler.ProcessMessage(this, messageJson);
+                CommandHandler.MessagesToProcess.Add(new MessageToProcess(this, messageJson));
             }
         }
 
@@ -90,7 +90,7 @@ namespace AmChat.ServerServices
 
             var message = builder.ToString();
 
-            CommandHandler.ProcessMessage(this, message);
+            CommandHandler.MessagesToProcess.Add(new MessageToProcess(this, message));
         }
     }
 }

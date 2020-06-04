@@ -8,6 +8,8 @@ namespace AmChat.Infrastructure.Interfaces
 {
     public interface ICommandHandlerService
     {
-        void ProcessMessage(IMessengerService messenger, string message);
+        ICollection<MessageToProcess> MessagesToProcess { get; set; }
+
+        void ProcessMessage(MessageToProcess message);
     }
 }

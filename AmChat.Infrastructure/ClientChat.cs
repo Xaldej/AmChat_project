@@ -10,7 +10,7 @@ namespace AmChat.Infrastructure
 {
     public class ClientChat : ChatInfo
     {
-        public Action<ChatMessage, ClientChat> NewMessageInChat;
+        public Action<ChatMessage, ChatInfo> NewMessageInChat;
 
 
         public virtual void OnNewMessageInChat(object sender, NotifyCollectionChangedEventArgs e)

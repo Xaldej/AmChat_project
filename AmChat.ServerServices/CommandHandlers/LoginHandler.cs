@@ -39,7 +39,7 @@ namespace AmChat.ServerServices.CommandHandlers
             {
                 Logger.Log.Error(e.Message);
 
-                Console.WriteLine("User is not logged in");
+                //Console.WriteLine("User is not logged in");
                 SendErrorToClient(messenger);
 
                 return;
@@ -51,7 +51,7 @@ namespace AmChat.ServerServices.CommandHandlers
 
                 SendCorrectLoginMessage(messenger, userInfo);
 
-                Console.WriteLine("User is got from DB");
+                //Console.WriteLine("User is got from DB");
             }
             else
             {

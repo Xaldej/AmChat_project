@@ -16,11 +16,13 @@ namespace AmChat.Server
         private List<IMessengerService> ConnectedClients { get; set; }
 
         private List<ChatInfo> ActiveChats { get; set; }
-        
+
         private IChatMaintenanceService ChatMaintenanceService { get; set; }
-        
+
         private IServerSenderService ServerSender { get; set; }
 
+
+        private static int UsersAmount { get; set; } = 0; // for perfomance test
 
         public TcpServer()
         {
@@ -85,7 +87,8 @@ namespace AmChat.Server
             var thread = new Thread(new ThreadStart(client.ListenMessages));
             thread.Start();
 
-            Console.WriteLine("client is connected");
+            
+            Console.WriteLine($"{++UsersAmount}\tis connected");
         }
 
         private void RemoveClient(IMessengerService client)

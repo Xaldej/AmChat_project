@@ -132,7 +132,7 @@ namespace AmChat.Forms
 
         private void CreateCommandHandler()
         {
-            var commandHandler = new ClientCommandHandlerService(Messenger);
+            var commandHandler = new ClientCommandHandlerService();
 
             commandHandler.ErrorIsGotten += OnErrorIsGotten;
             commandHandler.CorrectLoginData += OnCorrectLogin;

@@ -73,11 +73,12 @@ namespace AmChat.Forms
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                if (!(e.NewItems[0] is ChatInfo chat))
+                if (!(e.NewItems[0] is ClientChat chat))
                 {
                     return;
                 }
 
+                chat.NewMessageInChat += OnNewMessageInChat;
                 NewChatIsAdded(chat);
             }
         }
