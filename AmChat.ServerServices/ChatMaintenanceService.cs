@@ -21,14 +21,18 @@ namespace AmChat.ServerServices
 
         private Dictionary<Guid, int> ChatListenersAmount { get; set; }
 
+        private readonly List<IMessengerService> connectedClients;
+
         private readonly IChatHistoryService chatHistoryService;
 
         private readonly IServerSenderService serverSender;
 
 
-        public ChatMaintenanceService(List<ChatInfo> activeChats, IServerSenderService serverSender)
+        public ChatMaintenanceService(List<ChatInfo> activeChats, List<IMessengerService> connectedClients, IServerSenderService serverSender)
         {
             ActiveChats = activeChats;
+
+            this.connectedClients = connectedClients;
 
             this.serverSender = serverSender;
 
@@ -56,7 +60,7 @@ namespace AmChat.ServerServices
             }
         }
 
-        public void ProcessChatChange(object sender, NotifyCollectionChangedEventArgs e)
+        public void ProcessChatsChange(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -78,7 +82,7 @@ namespace AmChat.ServerServices
                 return;
             }
 
-            var existingChat = ActiveChats.Where(c => c.Equals(chat)).FirstOrDefault();
+            var existingChat = ActiveChats.Where(c => c.Id == chat.Id).FirstOrDefault();
             if (existingChat != null)
             {
                 if (!(sender is ObservableCollection<ChatInfo> chatsCollection))
@@ -106,7 +110,9 @@ namespace AmChat.ServerServices
 
         private void AddChatToClientAndServer(UserInfo newUser, ChatInfo chat)
         {
+            AddChatToServer(newUser, chat);
             AddChatToClient(newUser, chat);
+            
 
             string notification = $"{newUser.Login} is added";
             serverSender.SendNotificationToChat(chat, notification);
@@ -125,6 +131,22 @@ namespace AmChat.ServerServices
             var commandJson = CommandMaker.GetCommandJson<ChatIsAdded, ChatInfo>(chatToSend);
 
             serverSender.SendCommandToCertainUser(newUser, commandJson);
+        }
+
+        private void AddChatToServer(UserInfo user, ChatInfo chat)
+        {
+            var serverChat = connectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
+
+            if (serverChat == null)
+            {
+                return;
+            }
+
+            var isChatAlreadyInUserChats = serverChat.UserChats.Contains(chat);
+            if (!isChatAlreadyInUserChats)
+            {
+                serverChat.UserChats.Add(chat);
+            }
         }
 
         private void RemoveInactiveChat(ChatInfo chat)

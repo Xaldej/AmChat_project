@@ -108,7 +108,6 @@ namespace AmChat.ClientServices
             }
 
             newChat.NewMessageInChat += OnChatMessagesChanged;
-            ChatAdded(newChat);
         }
 
         private void OnUserIsLoggedIn()

@@ -24,5 +24,25 @@ namespace AmChat.Infrastructure
                 NewMessageInChat(newMessage, this);
             }
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            if (!(obj is ChatInfo chatToCompare))
+            {
+                return false;
+            }
+
+            return Id == chatToCompare.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

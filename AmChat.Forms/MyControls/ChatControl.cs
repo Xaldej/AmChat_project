@@ -13,13 +13,13 @@ namespace AmChat.Forms.MyControls
     {
         public ChatInfoWindow ChatInfoWindow { get; set; }
 
-        public ClientChat Chat { get; set; }
+        public ChatInfo Chat { get; set; }
 
         public Action<ChatControl> ChatChosen;
 
-        public Action<ClientChat, List<string>> NewChatLoginsEntered;
+        public Action<ChatInfo, List<string>> NewChatLoginsEntered;
 
-        public ChatControl(ClientChat chat)
+        public ChatControl(ChatInfo chat)
         {
             Chat = chat;
 

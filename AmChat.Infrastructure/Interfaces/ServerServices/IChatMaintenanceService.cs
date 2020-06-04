@@ -11,6 +11,6 @@ namespace AmChat.Infrastructure.Interfaces.ServerServices
     {
         void ChangeChatListenersAmount(IMessengerService client);
 
-        void ProcessChatChange(object sender, NotifyCollectionChangedEventArgs e);
+        void ProcessChatsChange(object sender, NotifyCollectionChangedEventArgs e);
     }
 }

@@ -32,7 +32,7 @@ namespace AmChat.Server
 
             ServerSender = new ServerSenderService(ConnectedClients);
 
-            ChatMaintenanceService = new ChatMaintenanceService(ActiveChats, ServerSender);
+            ChatMaintenanceService = new ChatMaintenanceService(ActiveChats, ConnectedClients, ServerSender);
         }
 
 
@@ -73,7 +73,7 @@ namespace AmChat.Server
         private void AddClient(TcpClient tcpClient)
         {
             IMessengerService client = new ServerMessengerService(tcpClient);
-            client.UserChats.CollectionChanged += ChatMaintenanceService.ProcessChatChange;
+            client.UserChats.CollectionChanged += ChatMaintenanceService.ProcessChatsChange;
 
             var commandHandler = new ServerCommandHandlerService();
             commandHandler.ClientDisconnected += RemoveClient;
@@ -90,11 +90,18 @@ namespace AmChat.Server
 
         private void RemoveClient(IMessengerService client)
         {
-            if(client != null)
+            try
             {
-                ConnectedClients.Remove(client);
+                if (ConnectedClients.Contains(client))
+                {
+                    ConnectedClients.Remove(client);
 
-                ChatMaintenanceService.ChangeChatListenersAmount(client);
+                    ChatMaintenanceService.ChangeChatListenersAmount(client);
+                }   
+            }
+            catch (Exception e)
+            {
+                Logger.Log.Error(e.Message);
             }
         }
     }
