@@ -115,6 +115,7 @@ namespace AmChat.ClientServices
             }
 
             ProcessMessage(message);
+            MessagesToProcess.Remove(message);
         }
 
         private void OnUserIsLoggedIn()

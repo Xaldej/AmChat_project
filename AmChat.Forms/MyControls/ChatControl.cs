@@ -39,7 +39,7 @@ namespace AmChat.Forms.MyControls
         private void ContactControl_Click(object sender, EventArgs e)
         {
             ChatChosen(this);
-            BackColor = Color.Silver;
+            BackColor = Color.White;
             ContactLogin_label.Font = new Font(FontFamily.GenericSansSerif, 12, FontStyle.Regular);
         }
 
@@ -51,7 +51,7 @@ namespace AmChat.Forms.MyControls
         private void ChatInfo_button_Click(object sender, EventArgs e)
         {
             ChatInfoWindow.UpdateInfo();
-            ChatInfoWindow.ShowDialog();
+            ChatInfoWindow.Show();
         }
     }
 }

@@ -107,7 +107,7 @@ namespace AmChat.ServerServices.CommandHandlers
 
                     context.SaveChanges();
 
-                    Console.WriteLine("User added to DB");
+                    //Console.WriteLine("User added to DB");
                 }
             }
             return user;

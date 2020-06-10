@@ -168,7 +168,7 @@ namespace AmChat.Forms
 
         private void Login(LoginData loginData)
         {
-            var commandJson = CommandMaker.GetCommandJson<Login, LoginData>(loginData);
+            var commandJson = CommandMaker.GetCommandJson<Infrastructure.Commands.FromClienToServer.Login, LoginData>(loginData);
 
             Messenger.SendMessage(commandJson);
         }

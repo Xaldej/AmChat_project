@@ -45,23 +45,24 @@
             // 
             // ChatInfo_button
             // 
+            this.ChatInfo_button.BackColor = System.Drawing.Color.White;
             this.ChatInfo_button.Location = new System.Drawing.Point(113, 14);
             this.ChatInfo_button.Name = "ChatInfo_button";
             this.ChatInfo_button.Size = new System.Drawing.Size(37, 23);
             this.ChatInfo_button.TabIndex = 1;
-            this.ChatInfo_button.Text = "info";
-            this.ChatInfo_button.UseVisualStyleBackColor = true;
+            this.ChatInfo_button.Text = " info";
+            this.ChatInfo_button.UseVisualStyleBackColor = false;
             this.ChatInfo_button.Click += new System.EventHandler(this.ChatInfo_button_Click);
             // 
-            // ContactControl
+            // ChatControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.Gainsboro;
+            this.BackColor = System.Drawing.Color.Gray;
             this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Controls.Add(this.ChatInfo_button);
             this.Controls.Add(this.ContactLogin_label);
-            this.Name = "ContactControl";
+            this.Name = "ChatControl";
             this.Size = new System.Drawing.Size(153, 48);
             this.Click += new System.EventHandler(this.ContactControl_Click);
             this.ResumeLayout(false);

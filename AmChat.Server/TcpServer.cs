@@ -22,8 +22,6 @@ namespace AmChat.Server
         private IServerSenderService ServerSender { get; set; }
 
 
-        private static int UsersAmount { get; set; } = 0; // for perfomance test
-
         public TcpServer()
         {
             Logger.InitLogger();
@@ -86,9 +84,8 @@ namespace AmChat.Server
 
             var thread = new Thread(new ThreadStart(client.ListenMessages));
             thread.Start();
-
             
-            Console.WriteLine($"{++UsersAmount}\tis connected");
+            Console.WriteLine("User is connected");
         }
 
         private void RemoveClient(IMessengerService client)

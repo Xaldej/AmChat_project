@@ -14,6 +14,12 @@ namespace AmChat.Forms
     {
         public Action<string, List<string>> NewChatInfoEntered;
 
+
+        private bool isDragging = false;
+
+        private Point oldPos;
+
+
         public AddChatAndUsersForm()
         {
             InitializeComponent();
@@ -89,6 +95,40 @@ namespace AmChat.Forms
             }
 
             ListOfLoginsToAdd_panel.Controls.Add(loginToAdd);
+        }
+
+        private void CloseWindow_button_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void MinimizeWindow_button_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+        private void NavigationPanel_MouseDown(object sender, MouseEventArgs e)
+        {
+            this.isDragging = true;
+            this.oldPos = new Point();
+            this.oldPos.X = e.X;
+            this.oldPos.Y = e.Y;
+        }
+
+        private void NavigationPanel_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (this.isDragging)
+            {
+                Point tmp = new Point(this.Location.X, this.Location.Y);
+                tmp.X += e.X - this.oldPos.X;
+                tmp.Y += e.Y - this.oldPos.Y;
+                this.Location = tmp;
+            }
+        }
+
+        private void NavigationPanel_MouseUp(object sender, MouseEventArgs e)
+        {
+            this.isDragging = false;
         }
     }
 }

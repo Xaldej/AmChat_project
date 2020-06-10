@@ -51,7 +51,7 @@ namespace AmChat.ServerServices
             }
             catch(Exception e)
             {
-                Logger.Log.Error(e.Message);
+                Logger.Log.Error(e.Message + message.Message);
 
                 return;
             }
@@ -109,6 +109,7 @@ namespace AmChat.ServerServices
             }
 
             ProcessMessage(message);
+            MessagesToProcess.Remove(message);
         }
 
     }

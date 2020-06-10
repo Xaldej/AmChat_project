@@ -19,7 +19,7 @@ namespace AmChat.Server
 
             var tcpSettings = new TcpSettings(ip, port);
 
-            var thread = new Thread(()=>tcpServer.StartServer(tcpSettings));
+            var thread = new Thread(() => tcpServer.StartServer(tcpSettings));
             thread.Start();
         }
     }

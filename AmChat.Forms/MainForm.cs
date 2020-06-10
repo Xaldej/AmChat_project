@@ -23,6 +23,10 @@ namespace AmChat.Forms
 
         private ViewModel ViewModel { get; set; }
 
+        private Point oldPos;
+
+        private bool isDragging = false;
+
 
 
         public MainForm()
@@ -66,11 +70,11 @@ namespace AmChat.Forms
 
         private void ChangeChat(ChatControl chatControl)
         {
-            var previousChosenControls = Chats_panel.Controls.OfType<ChatControl>().Where(c => c.BackColor == Color.Silver);
+            var previousChosenControls = Chats_panel.Controls.OfType<ChatControl>().Where(c => c.BackColor == Color.White);
 
             foreach (var control in previousChosenControls)
             {
-                control.BackColor = Color.Gainsboro;
+                control.BackColor = Color.Gray;
             }
 
             Chat_panel.Enabled = true;
@@ -157,6 +161,8 @@ namespace AmChat.Forms
         private void UpdateWindowText(string userLogin)
         {
             Invoke(new Action(() => Text = $"AmChat: {userLogin}"));
+            Invoke(new Action(() => WindowsName_label.Text = $"AmChat: {userLogin}"));
+            
         }
 
         private bool ValidateUserInput(string inputMessage)
@@ -178,7 +184,12 @@ namespace AmChat.Forms
 
             addChatForm.NewChatInfoEntered += ViewModel.AddChat;
 
-            addChatForm.ShowDialog();
+            addChatForm.Show();
+        }
+
+        private void CloseWindow_button_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
         private void InputMessage_textBox_KeyDown(object sender, KeyEventArgs e)
@@ -192,6 +203,35 @@ namespace AmChat.Forms
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             ViewModel.CloseConnection();
+        }
+
+        private void MinimizeWindow_button_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+        private void NavigationPanel_MouseDown(object sender, MouseEventArgs e)
+        {
+            this.isDragging = true;
+            this.oldPos = new Point();
+            this.oldPos.X = e.X;
+            this.oldPos.Y = e.Y;
+        }
+
+        private void NavigationPanel_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (this.isDragging)
+            {
+                Point tmp = new Point(this.Location.X, this.Location.Y);
+                tmp.X += e.X - this.oldPos.X;
+                tmp.Y += e.Y - this.oldPos.Y;
+                this.Location = tmp;
+            }
+        }
+
+        private void NavigationPanel_MouseUp(object sender, MouseEventArgs e)
+        {
+            this.isDragging = false;
         }
 
         private void Send_button_Click(object sender, EventArgs e)

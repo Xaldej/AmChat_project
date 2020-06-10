@@ -59,7 +59,6 @@
     <Compile Include="ChatInfoWindow.Designer.cs">
       <DependentUpon>ChatInfoWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="CommandSender.cs" />
     <Compile Include="LoginForm.cs">
       <SubType>Form</SubType>
     </Compile>
