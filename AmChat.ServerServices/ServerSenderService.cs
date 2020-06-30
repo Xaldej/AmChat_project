@@ -35,23 +35,28 @@ namespace AmChat.ServerServices
 
         public void SendCommandToCertainUser(UserInfo user, string command)
         {
-            var clientToSend = ConnectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
+            var clientsToSend = ConnectedClients.Where(c => c.User.Equals(user));
 
-            if (clientToSend != null)
+            if (clientsToSend != null && clientsToSend.Any())
             {
-                clientToSend.SendMessage(command);
+                foreach (var client in clientsToSend)
+                {
+                    client.SendMessage(command);
+                }
             }
         }
 
         public void SendMessageToCertainUser(UserInfo user, ChatMessage message)
         {
-            var clientToSend = ConnectedClients.Where(c => c.User.Equals(user)).FirstOrDefault();
+            var clientsToSend = ConnectedClients.Where(c => c.User.Equals(user));
 
-            if (clientToSend != null)
-            {   
+            if (clientsToSend != null && clientsToSend.Any())
+            {
                 var commandJson = CommandMaker.GetCommandJson<MessageToCertainChat, ChatMessage>(message);
-
-                clientToSend.SendMessage(commandJson);
+                foreach (var client in clientsToSend)
+                {
+                    client.SendMessage(commandJson);
+                }
             }
         }
 
